@@ -8,6 +8,14 @@ import (
 
 type Config struct {
 	Id string `json:"id"`
+
+	Root  string   `json:"root"`
+	Paths []string `json:"paths"`
+	Build string   `json:"build"`
+
+	ClosureLibrary   string `json:"closure-library"`
+	ClosureCompiler  string `json:"closure-compiler"`
+	ClosureTemplates string `json:"closure-templates"`
 }
 
 var conf = new(Config)

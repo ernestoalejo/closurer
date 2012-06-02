@@ -30,4 +30,5 @@ func main() {
 
 func addHandlers(r *mux.Router) {
 	r.Handle("/", Handler(HomeHandler))
+	r.Handle("/compile", Handler(CompileHandler))
 }
