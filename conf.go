@@ -16,6 +16,13 @@ type Config struct {
 	ClosureLibrary   string `json:"closure-library"`
 	ClosureCompiler  string `json:"closure-compiler"`
 	ClosureTemplates string `json:"closure-templates"`
+
+	Mode string `json:"mode"`
+
+	Inputs []string `json:"inputs"`
+
+	Checks map[string]string `json:"checks"`
+	Define map[string]string `json:"define"`
 }
 
 var conf = new(Config)

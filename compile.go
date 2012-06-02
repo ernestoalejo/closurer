@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,35 +15,17 @@ func CompileHandler(r *Request) error {
 		return err
 	}
 
-	if err := GenerateDeps(r); err != nil {
+	if err := CompileCode(r); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func GenerateDeps(r *Request) error {
-	depswriter := path.Join(conf.ClosureLibrary, "closure", "bin", "build", "depswriter.py")
-	output_file := path.Join(conf.Build, "deps.js")
-	soyutils := path.Join(conf.ClosureTemplates, "javascript", "soyutils_usegoog.js")
-	templates := path.Join(conf.Build, "templates")
-
-	roots := []string{PrepareRoot(conf.Root), PrepareRoot(templates)}
-	for _, root := range conf.Paths {
-		roots = append(roots, PrepareRoot(root))
-	}
-
-	cmd := exec.Command("python", depswriter, "--output_file="+output_file)
-	cmd.Args = append(cmd.Args, roots...)
-	cmd.Args = append(cmd.Args, soyutils)
-
-	log.Println("Writing dependencies in build/deps.js")
-
-	output, err := cmd.CombinedOutput()
+	f, err := os.Open(path.Join(conf.Build, "compiled.js"))
 	if err != nil {
-		fmt.Fprintf(r.W, "%s\n", output)
-		return InternalErr(err, "cannot generate the dependencies")
+		return err
 	}
+	defer f.Close()
+
+	io.Copy(r.W, f)
 
 	return nil
 }
@@ -109,6 +92,55 @@ func CompileTemplate(r *Request, filepath string) error {
 	if err != nil {
 		fmt.Fprintf(r.W, "%s\n", output)
 		return InternalErr(err, fmt.Sprintf("cannot compile the template %s", filepath))
+	}
+
+	return nil
+}
+
+func CompileCode(r *Request) error {
+	closurebuilder := path.Join(conf.ClosureLibrary, "closure", "bin", "build",
+		"closurebuilder.py")
+	output_file := path.Join(conf.Build, "compiled.js")
+	soyutils := path.Join(conf.ClosureTemplates, "javascript")
+	templates := path.Join(conf.Build, "templates")
+	closure_library := path.Join(conf.ClosureLibrary)
+
+	roots := []string{
+		PrepareRoot(templates), PrepareRoot(conf.Root),
+		PrepareRoot(closure_library), PrepareRoot(soyutils),
+	}
+	for _, root := range conf.Paths {
+		roots = append(roots, PrepareRoot(root))
+	}
+
+	inputs := []string{}
+	for _, input := range conf.Inputs {
+		inputs = append(inputs, "--input")
+		inputs = append(inputs, input)
+	}
+
+	cmd := exec.Command("python", closurebuilder, "--output_file="+output_file,
+		"--compiler_jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
+		"--output_mode", "compiled")
+	cmd.Args = append(cmd.Args, roots...)
+	cmd.Args = append(cmd.Args, inputs...)
+
+	if conf.Mode == "ADVANCED" {
+		cmd.Args = append(cmd.Args, "--compiler_flags")
+		cmd.Args = append(cmd.Args, "--compilation_level=ADVANCED_OPTIMIZATIONS")
+	} else if conf.Mode == "SIMPLE" {
+		cmd.Args = append(cmd.Args, "--compiler_flags")
+		cmd.Args = append(cmd.Args, "--compilation_level=SIMPLE_OPTIMIZATIONS")
+	} else {
+		return fmt.Errorf("compilation mode not recognized: %s", conf.Mode)
+	}
+
+	log.Println("Compiling code to build/compiled.js")
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Fprintf(r.W, "%s\n", output)
+		return InternalErr(err, "cannot compile the code")
 	}
 
 	return nil
