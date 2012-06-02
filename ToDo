@@ -2,12 +2,11 @@
 To Do:
 ~~~~~~
 
- * Don't recompile templates if they haven't changed: use inotify when opened, and dates
-   diff when loading the cache.
  * Don't recompile the code if the folders haven't changed: use inotify, recompile the first
    time.
  * Send the checks and define contents to the compiler.
  * Read production settings (inherits).
  * Option to build the app.
  * Closure stylesheets.
+ * Testing facilities.
 

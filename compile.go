@@ -8,7 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"time"
 )
+
+var timesCache = map[string]time.Time{}
 
 func CompileHandler(r *Request) error {
 	if err := CompileTemplates(r); err != nil {
@@ -78,6 +81,18 @@ func CompileTemplate(r *Request, filepath string) error {
 	soytojs := path.Join(conf.ClosureTemplates, "build", "SoyToJsSrcCompiler.jar")
 	out := path.Join(conf.Build, "templates", filepath+".js")
 
+	otime, ok := timesCache[filepath]
+	if ok {
+		info, err := os.Lstat(out)
+		if err != nil && !os.IsNotExist(err) {
+			return InternalErr(err, fmt.Sprintf("cannot check the file info: %s", out))
+		}
+
+		if info.ModTime() == otime {
+			return nil
+		}
+	}
+
 	if err := os.MkdirAll(path.Base(out), 0755); err != nil {
 		return InternalErr(err, fmt.Sprintf("cannot create the build tree: %s", out))
 	}
@@ -93,6 +108,12 @@ func CompileTemplate(r *Request, filepath string) error {
 		fmt.Fprintf(r.W, "%s\n", output)
 		return InternalErr(err, fmt.Sprintf("cannot compile the template %s", filepath))
 	}
+
+	info, err := os.Lstat(out)
+	if err != nil && !os.IsNotExist(err) {
+		return InternalErr(err, fmt.Sprintf("cannot check the file info: %s", out))
+	}
+	timesCache[filepath] = info.ModTime()
 
 	return nil
 }
