@@ -17,7 +17,8 @@ type Config struct {
 	ClosureCompiler  string `json:"closure-compiler"`
 	ClosureTemplates string `json:"closure-templates"`
 
-	Mode string `json:"mode"`
+	Mode  string `json:"mode"`
+	Level string `json:"level"`
 
 	Inputs []string `json:"inputs"`
 

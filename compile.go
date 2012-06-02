@@ -140,20 +140,39 @@ func CompileCode(r *Request) error {
 		inputs = append(inputs, input)
 	}
 
+	defines := []string{}
+	for k, define := range conf.Define {
+		if define != "true" && define != "false" {
+			define = "\"" + define + "\""
+		}
+		defines = append(defines, "--compiler_flags")
+		defines = append(defines, "--define="+k+"="+define)
+	}
+
 	cmd := exec.Command("python", closurebuilder, "--output_file="+output_file,
 		"--compiler_jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
 		"--output_mode", "compiled")
+
 	cmd.Args = append(cmd.Args, roots...)
 	cmd.Args = append(cmd.Args, inputs...)
+	cmd.Args = append(cmd.Args, defines...)
 
+	cmd.Args = append(cmd.Args, "--compiler_flags")
 	if conf.Mode == "ADVANCED" {
-		cmd.Args = append(cmd.Args, "--compiler_flags")
 		cmd.Args = append(cmd.Args, "--compilation_level=ADVANCED_OPTIMIZATIONS")
 	} else if conf.Mode == "SIMPLE" {
-		cmd.Args = append(cmd.Args, "--compiler_flags")
 		cmd.Args = append(cmd.Args, "--compilation_level=SIMPLE_OPTIMIZATIONS")
+	} else if conf.Mode == "WHITESPACE" {
+		cmd.Args = append(cmd.Args, "--compilation_level=WHITESPACE_ONLY")
 	} else {
 		return fmt.Errorf("compilation mode not recognized: %s", conf.Mode)
+	}
+
+	if conf.Level == "QUIET" || conf.Level == "DEFAULT" || conf.Level == "VERBOSE" {
+		cmd.Args = append(cmd.Args, "--compiler_flags")
+		cmd.Args = append(cmd.Args, "--warning_level="+conf.Level)
+	} else {
+		return fmt.Errorf("warnings level not recognized: %s", conf.Level)
 	}
 
 	log.Println("Compiling code to build/compiled.js")

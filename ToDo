@@ -4,7 +4,7 @@ To Do:
 
  * Don't recompile the code if the folders haven't changed: use inotify, recompile the first
    time.
- * Send the checks and define contents to the compiler.
+ * Send the checks to the compiler.
  * Read production settings (inherits).
  * Option to build the app.
  * Closure stylesheets.
