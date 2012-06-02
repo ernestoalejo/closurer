@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,21 +13,41 @@ import (
 var timesCache = map[string]time.Time{}
 
 func CompileHandler(r *Request) error {
+	start := time.Now()
+
+	// Compile the .soy files
 	if err := CompileTemplates(r); err != nil {
 		return err
 	}
 
-	if err := CompileCode(r); err != nil {
-		return err
-	}
-
-	f, err := os.Open(path.Join(conf.Build, "compiled.js"))
+	// Build the dependency tree between the JS files
+	depstree, err := BuildDepsTree(r)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	io.Copy(r.W, f)
+	// Calculate all the input namespaces
+	namespaces := []string{}
+	for _, input := range conf.Inputs {
+		ns, err := depstree.GetProvides(input)
+		if err != nil {
+			return err
+		}
+		namespaces = append(namespaces, ns...)
+	}
+
+	// Calculate the list of files to compile
+	deps, err := depstree.GetDependencies(namespaces)
+	if err != nil {
+		return err
+	}
+
+	// Send them to the compiler
+	if err := CompileCode(r, deps); err != nil {
+		return err
+	}
+
+	log.Println("Done compiling! Elapsed:", time.Since(start))
 
 	return nil
 }
@@ -118,70 +137,46 @@ func CompileTemplate(r *Request, filepath string) error {
 	return nil
 }
 
-func CompileCode(r *Request) error {
-	closurebuilder := path.Join(conf.ClosureLibrary, "closure", "bin", "build",
-		"closurebuilder.py")
-	output_file := path.Join(conf.Build, "compiled.js")
-	soyutils := path.Join(conf.ClosureTemplates, "javascript")
-	templates := path.Join(conf.Build, "templates")
-	closure_library := path.Join(conf.ClosureLibrary)
+func CompileCode(r *Request, deps []*Source) error {
+	args := []string{"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar")}
 
-	roots := []string{
-		PrepareRoot(templates), PrepareRoot(conf.Root),
-		PrepareRoot(closure_library), PrepareRoot(soyutils),
-	}
-	for _, root := range conf.Paths {
-		roots = append(roots, PrepareRoot(root))
+	for _, dep := range deps {
+		args = append(args, "--js", dep.filename)
 	}
 
-	inputs := []string{}
-	for _, input := range conf.Inputs {
-		inputs = append(inputs, "--input")
-		inputs = append(inputs, input)
-	}
-
-	defines := []string{}
 	for k, define := range conf.Define {
 		if define != "true" && define != "false" {
 			define = "\"" + define + "\""
 		}
-		defines = append(defines, "--compiler_flags")
-		defines = append(defines, "--define="+k+"="+define)
+		args = append(args, "--define", k+"="+define)
 	}
 
-	cmd := exec.Command("python", closurebuilder, "--output_file="+output_file,
-		"--compiler_jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
-		"--output_mode", "compiled")
-
-	cmd.Args = append(cmd.Args, roots...)
-	cmd.Args = append(cmd.Args, inputs...)
-	cmd.Args = append(cmd.Args, defines...)
-
-	cmd.Args = append(cmd.Args, "--compiler_flags")
 	if conf.Mode == "ADVANCED" {
-		cmd.Args = append(cmd.Args, "--compilation_level=ADVANCED_OPTIMIZATIONS")
+		args = append(args, "--compilation_level", "ADVANCED_OPTIMIZATIONS")
 	} else if conf.Mode == "SIMPLE" {
-		cmd.Args = append(cmd.Args, "--compilation_level=SIMPLE_OPTIMIZATIONS")
+		args = append(args, "--compilation_level", "SIMPLE_OPTIMIZATIONS")
 	} else if conf.Mode == "WHITESPACE" {
-		cmd.Args = append(cmd.Args, "--compilation_level=WHITESPACE_ONLY")
+		args = append(args, "--compilation_level", "WHITESPACE_ONLY")
 	} else {
 		return fmt.Errorf("compilation mode not recognized: %s", conf.Mode)
 	}
 
 	if conf.Level == "QUIET" || conf.Level == "DEFAULT" || conf.Level == "VERBOSE" {
-		cmd.Args = append(cmd.Args, "--compiler_flags")
-		cmd.Args = append(cmd.Args, "--warning_level="+conf.Level)
+		args = append(args, "--warning_level", conf.Level)
 	} else {
 		return fmt.Errorf("warnings level not recognized: %s", conf.Level)
 	}
 
 	log.Println("Compiling code to build/compiled.js")
 
+	cmd := exec.Command("java", args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Fprintf(r.W, "%s\n", output)
 		return InternalErr(err, "cannot compile the code")
 	}
+
+	fmt.Fprintf(r.W, "%s\n", output)
 
 	return nil
 }

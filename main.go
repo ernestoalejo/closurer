@@ -24,7 +24,7 @@ func main() {
 	http.Handle("/", r)
 	addHandlers(r)
 
-	log.Printf("Started closure server on http://localhost%s/\n", *port)
+	log.Printf("Started closurer server on http://localhost%s/\n", *port)
 	log.Fatal(http.ListenAndServe(*port, nil))
 }
 
