@@ -19,6 +19,16 @@ func CompileHandler(r *Request) error {
 		return err
 	}
 
+	// Compile the .gss files
+	gss, err := ScanGss(conf.Root)
+	if err != nil {
+		return InternalErr(err, "cannot scan the root directory")
+	}
+
+	if err := CompileGss(r, gss); err != nil {
+		return err
+	}
+
 	// Compile the .soy files
 	if err := CompileTemplates(r); err != nil {
 		return err
@@ -71,6 +81,7 @@ func CompileCode(r *Request, deps []*Source) error {
 	args := []string{
 		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
 		"--js_output_file", path.Join(conf.Build, "compiled.js"),
+		"--js", path.Join(conf.Build, "renaming-map.js"),
 	}
 
 	// Add the dependencies in order
