@@ -108,9 +108,9 @@ func NewSource(filename string) (*Source, bool, error) {
 
 // Store the info of a dependencies tree
 type DepsTree struct {
-	sources  map[string]*Source
-	provides map[string]*Source
-	base     *Source
+	sources     map[string]*Source
+	provides    map[string]*Source
+	base        *Source
 	mustCompile bool
 }
 
@@ -246,10 +246,10 @@ func (tree *DepsTree) ResolveDependencies(ns string, info *TraversalInfo) error 
 func BuildDepsTree(r *Request) (*DepsTree, error) {
 	// Roots directories
 	roots := append([]string{
+		conf.Root,
+		conf.ClosureLibrary,
 		path.Join(conf.ClosureTemplates, "javascript"),
 		path.Join(conf.Build, "templates"),
-		conf.ClosureLibrary,
-		conf.Root,
 	}, conf.Paths...)
 
 	// Build the deps tree scanning each root directory recursively

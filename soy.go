@@ -1,13 +1,13 @@
 package main
 
 import (
-	"io/ioutil"
-	"path"
-	"os"
 	"fmt"
-	"os/exec"
-	"time"
+	"io/ioutil"
 	"log"
+	"os"
+	"os/exec"
+	"path"
+	"time"
 )
 
 var timesCache = map[string]time.Time{}

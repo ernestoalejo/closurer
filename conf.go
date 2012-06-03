@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -27,9 +28,20 @@ type Config struct {
 }
 
 var conf = new(Config)
+var confModified time.Time
 
-func ReadConf(filename string) error {
-	f, err := os.Open(filename)
+func ReadConf() error {
+	info, err := os.Lstat(*confArg)
+	if err != nil {
+		return err
+	}
+
+	if !confModified.IsZero() && info.ModTime() == confModified {
+		return nil
+	}
+	confModified = info.ModTime()
+
+	f, err := os.Open(*confArg)
 	if err != nil {
 		return err
 	}
@@ -41,6 +53,10 @@ func ReadConf(filename string) error {
 	}
 
 	log.Println("Read app config: ", conf.Id)
+
+	// Invalid caches
+	sourcesCache = map[string]*Source{}
+	timesCache = map[string]time.Time{}
 
 	return nil
 }

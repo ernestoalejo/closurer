@@ -9,14 +9,15 @@ import (
 )
 
 var (
-	port    = flag.String("port", ":9810", "the port where the server will be listening")
-	confArg = flag.String("conf", "", "the config file")
+	port      = flag.String("port", ":9810", "the port where the server will be listening")
+	confArg   = flag.String("conf", "", "the config file")
+	outputCmd = flag.Bool("output-cmd", false, "output compiler command to a file")
 )
 
 func main() {
 	flag.Parse()
 
-	if err := ReadConf(*confArg); err != nil {
+	if err := ReadConf(); err != nil {
 		log.Fatal(err)
 	}
 
