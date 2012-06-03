@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"regexp"
@@ -285,7 +284,6 @@ func ScanSources(depstree *DepsTree, filepath string) error {
 
 		if entry.IsDir() {
 			if IsValidDir(entry.Name()) {
-				log.Println("valid: ", entry.Name())
 				// Scan directories recursively
 				if err := ScanSources(depstree, fullpath); err != nil {
 					return err

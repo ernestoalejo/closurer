@@ -4,59 +4,156 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"path"
 	"time"
 )
 
 type Config struct {
 	Id string `json:"id"`
 
-	Root  string   `json:"root"`
+	// Root folder where the code can be found
+	Root string `json:"root"`
+
+	// Paths where the code will be found
 	Paths []string `json:"paths"`
-	Build string   `json:"build"`
 
-	ClosureLibrary   string `json:"closure-library"`
-	ClosureCompiler  string `json:"closure-compiler"`
-	ClosureTemplates string `json:"closure-templates"`
+	// Temporary build directory
+	Build string `json:"build"`
 
-	Mode  string `json:"mode"`
+	// Closure utilities paths
+	ClosureLibrary     string `json:"closure-library"`
+	ClosureCompiler    string `json:"closure-compiler"`
+	ClosureTemplates   string `json:"closure-templates"`
+	ClosureStylesheets string `json:"closure-stylesheets"`
+
+	// Compilation mode: SIMPLE, ADVANCE, WHITESPACE
+	Mode string `json:"mode"`
+
+	// Warnings level: QUIET, DEFAULT, VERBOSE
 	Level string `json:"level"`
 
+	// List of inputs (main files where the compilation starts)
 	Inputs []string `json:"inputs"`
 
+	// Defines if each check emits a WARNING, an ERROR or it's OFF.
 	Checks map[string]string `json:"checks"`
+
+	// Define additional values in the compilation
 	Define map[string]string `json:"define"`
+
+	// Inherits another configurations file
+	Inherits string
 }
 
 var conf = new(Config)
-var confModified time.Time
+var confs = map[string]*Config{}
+var confModified = map[string]time.Time{}
 
 func ReadConf() error {
-	info, err := os.Lstat(*confArg)
-	if err != nil {
+	if err := LoadConfFile(*confArg); err != nil {
 		return err
 	}
-
-	if !confModified.IsZero() && info.ModTime() == confModified {
-		return nil
-	}
-	confModified = info.ModTime()
-
-	f, err := os.Open(*confArg)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	dec := json.NewDecoder(f)
-	if err := dec.Decode(conf); err != nil {
-		return err
-	}
-
-	log.Println("Read app config: ", conf.Id)
-
-	// Invalid caches
-	sourcesCache = map[string]*Source{}
-	timesCache = map[string]time.Time{}
 
 	return nil
+}
+
+func LoadConfFile(filename string) error {
+	config, ok := confs[filename]
+	if !ok {
+		config = new(Config)
+	}
+
+	// Check the modified time
+	info, err := os.Lstat(filename)
+	if err != nil {
+		return err
+	}
+
+	modified, ok := confModified[filename]
+	if !ok || info.ModTime() != modified {
+		confModified[filename] = info.ModTime()
+
+		log.Println("Reading config file:", filename)
+
+		// Open the file
+		f, err := os.Open(filename)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		// Load the data
+		dec := json.NewDecoder(f)
+		if err := dec.Decode(config); err != nil {
+			return err
+		}
+
+		// Adjust the path if necessary
+		if config.Inherits != "" {
+			config.Inherits = path.Join(path.Dir(filename), config.Inherits)
+		}
+
+		confs[filename] = config
+
+		// Invalid caches
+		sourcesCache = map[string]*Source{}
+		timesCache = map[string]time.Time{}
+	}
+
+	if config.Inherits != "" {
+		if err := LoadConfFile(config.Inherits); err != nil {
+			return err
+		}
+	}
+
+	ApplyConf(config)
+
+	return nil
+}
+
+func ApplyConf(config *Config) {
+	if config.Id != "" {
+		conf.Id = config.Id
+	}
+
+	if config.Root != "" {
+		conf.Root = config.Root
+	}
+	if len(config.Paths) > 0 {
+		conf.Paths = config.Paths
+	}
+	if config.Build != "" {
+		conf.Build = config.Build
+	}
+
+	if config.ClosureLibrary != "" {
+		conf.ClosureLibrary = config.ClosureLibrary
+	}
+	if config.ClosureCompiler != "" {
+		conf.ClosureCompiler = config.ClosureCompiler
+	}
+	if config.ClosureTemplates != "" {
+		conf.ClosureTemplates = config.ClosureTemplates
+	}
+	if config.ClosureStylesheets != "" {
+		conf.ClosureStylesheets = config.ClosureStylesheets
+	}
+
+	if config.Mode != "" {
+		conf.Mode = config.Mode
+	}
+	if config.Level != "" {
+		conf.Level = config.Level
+	}
+
+	if len(config.Inputs) > 0 {
+		conf.Inputs = config.Inputs
+	}
+	if len(config.Checks) > 0 {
+		conf.Checks = config.Checks
+	}
+
+	if len(config.Define) > 0 {
+		conf.Define = config.Define
+	}
 }

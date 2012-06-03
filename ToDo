@@ -2,10 +2,9 @@
 To Do:
 ~~~~~~
 
- * Read production settings ("inherits" too). When check the files time, it must be
-   checked for all loaded files.
- * Option to build the app instead of serving it.
  * Closure stylesheets.
+ * Eliminar la necesidad de una ruta "root"; juntarla con path.
+ * Option to build the app instead of serving it.
  * Testing facilities.
 
  * Better concurrency when disk seeks are common.
