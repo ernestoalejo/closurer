@@ -14,7 +14,7 @@ var timesCache = map[string]time.Time{}
 
 // Compile all modified templates
 func CompileTemplates(r *Request) error {
-	templates, err := ScanTemplates(conf.Root)
+	templates, err := ScanTemplates(conf.RootSoy)
 	if err != nil {
 		return InternalErr(err, "cannot scan the root directory")
 	}
@@ -67,7 +67,7 @@ func CompileTemplate(r *Request, filepath string) error {
 	// Get the stat file info
 	info, err := os.Lstat(out)
 	if err != nil && !os.IsNotExist(err) {
-		return InternalErr(err, fmt.Sprintf("cannot check the file info: %s", out))
+		return fmt.Errorf("cannot check the file info: %s", out)
 	}
 
 	// Check if the cached version is still ok
@@ -80,7 +80,7 @@ func CompileTemplate(r *Request, filepath string) error {
 
 	// Creates all the necessary directories
 	if err := os.MkdirAll(path.Base(out), 0755); err != nil {
-		return InternalErr(err, fmt.Sprintf("cannot create the build tree: %s", out))
+		return fmt.Errorf("cannot create the build tree: %s", out)
 	}
 
 	log.Println("Compiling template:", filepath)
@@ -93,13 +93,13 @@ func CompileTemplate(r *Request, filepath string) error {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Fprintf(r.W, "%s\n", output)
-		return InternalErr(err, fmt.Sprintf("cannot compile the template %s", filepath))
+		return fmt.Errorf("cannot compile the template %s: %s", filepath, err)
 	}
 
 	// Cache the output
 	info, err = os.Lstat(out)
 	if err != nil && !os.IsNotExist(err) {
-		return InternalErr(err, fmt.Sprintf("cannot check the file info: %s", out))
+		return fmt.Errorf("cannot check the file info %s: %s", out, err)
 	}
 
 	timesCache[filepath] = info.ModTime()

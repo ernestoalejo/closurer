@@ -20,7 +20,7 @@ func CompileCssHandler(r *Request) error {
 	}
 
 	// Compile the .gss files
-	gss, err := ScanGss(conf.Root)
+	gss, err := ScanGss(conf.RootGss)
 	if err != nil {
 		return InternalErr(err, "cannot scan the root directory")
 	}
@@ -31,7 +31,7 @@ func CompileCssHandler(r *Request) error {
 
 	f, err := os.Open(path.Join(conf.Build, "compiled.css"))
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot read the compiled css: %s", err)
 	}
 	defer f.Close()
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -12,10 +13,9 @@ type Config struct {
 	Id string `json:"id"`
 
 	// Root folder where the code can be found
-	Root string `json:"root"`
-
-	// Paths where the code will be found
-	Paths []string `json:"paths"`
+	RootJs  string `json:"root-js"`
+	RootSoy string `json:"root-soy"`
+	RootGss string `json:"root-gss"`
 
 	// Temporary build directory
 	Build string `json:"build"`
@@ -78,7 +78,7 @@ func LoadConfFile(filename string) error {
 		// Open the file
 		f, err := os.Open(filename)
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot open the config file %s: %s", filename, err)
 		}
 		defer f.Close()
 
@@ -116,11 +116,14 @@ func ApplyConf(config *Config) {
 		conf.Id = config.Id
 	}
 
-	if config.Root != "" {
-		conf.Root = config.Root
+	if config.RootJs != "" {
+		conf.RootJs = config.RootJs
 	}
-	if len(config.Paths) > 0 {
-		conf.Paths = config.Paths
+	if config.RootGss != "" {
+		conf.RootGss = config.RootGss
+	}
+	if config.RootSoy != "" {
+		conf.RootSoy = config.RootSoy
 	}
 	if config.Build != "" {
 		conf.Build = config.Build

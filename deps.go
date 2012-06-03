@@ -55,7 +55,7 @@ func NewSource(filename string) (*Source, bool, error) {
 	// Open the file
 	f, err := os.Open(filename)
 	if err != nil {
-		return nil, false, err
+		return nil, false, fmt.Errorf("cannot open the source file %s: %s", filename, err)
 	}
 	defer f.Close()
 
@@ -245,12 +245,12 @@ func (tree *DepsTree) ResolveDependencies(ns string, info *TraversalInfo) error 
 // compilation
 func BuildDepsTree(r *Request) (*DepsTree, error) {
 	// Roots directories
-	roots := append([]string{
-		conf.Root,
+	roots := []string{
+		conf.RootJs,
 		conf.ClosureLibrary,
 		path.Join(conf.ClosureTemplates, "javascript"),
 		path.Join(conf.Build, "templates"),
-	}, conf.Paths...)
+	}
 
 	// Build the deps tree scanning each root directory recursively
 	depstree := &DepsTree{
@@ -275,7 +275,7 @@ func ScanSources(depstree *DepsTree, filepath string) error {
 	// Read the directory contents
 	ls, err := ioutil.ReadDir(filepath)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot scan the directory %s for js files: %s", filepath, err)
 	}
 
 	// Scan them

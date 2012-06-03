@@ -20,7 +20,7 @@ func CompileHandler(r *Request) error {
 	}
 
 	// Compile the .gss files
-	gss, err := ScanGss(conf.Root)
+	gss, err := ScanGss(conf.RootGss)
 	if err != nil {
 		return InternalErr(err, "cannot scan the root directory")
 	}
@@ -67,7 +67,7 @@ func CompileHandler(r *Request) error {
 
 	f, err := os.Open(path.Join(conf.Build, "compiled.js"))
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot read the compiled javascript: %s", err)
 	}
 	defer f.Close()
 
@@ -126,7 +126,7 @@ func CompileCode(r *Request, deps []*Source) error {
 	if *outputCmd {
 		f, err := os.Create(path.Join(conf.Build, "cmd"))
 		if err != nil {
-			return err
+			return fmt.Errorf("cannot create the output command file: %s", err)
 		}
 		fmt.Fprintln(f, args)
 		f.Close()
