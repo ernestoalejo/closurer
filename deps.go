@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"regexp"
@@ -283,9 +284,12 @@ func ScanSources(depstree *DepsTree, filepath string) error {
 		fullpath := path.Join(filepath, entry.Name())
 
 		if entry.IsDir() {
-			// Scan directories recursively
-			if err := ScanSources(depstree, fullpath); err != nil {
-				return err
+			if IsValidDir(entry.Name()) {
+				log.Println("valid: ", entry.Name())
+				// Scan directories recursively
+				if err := ScanSources(depstree, fullpath); err != nil {
+					return err
+				}
 			}
 		} else if path.Ext(entry.Name()) == ".js" {
 			// Add sources to the list

@@ -2,11 +2,12 @@
 To Do:
 ~~~~~~
 
- * Read production settings ("inherits" too).
- * Ignore .svn, .git and .hg folders when scanning.
+ * Read production settings ("inherits" too). When check the files time, it must be
+   checked for all loaded files.
  * Option to build the app instead of serving it.
  * Closure stylesheets.
  * Testing facilities.
+
  * Better concurrency when disk seeks are common.
  * Write the templates times cache to disk when exiting the program, and load it
    to improve startup compilation times.

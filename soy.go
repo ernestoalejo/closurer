@@ -42,12 +42,14 @@ func ScanTemplates(filepath string) ([]string, error) {
 		fullpath := path.Join(filepath, entry.Name())
 
 		if entry.IsDir() {
-			// Scan recursively the directories
-			t, err := ScanTemplates(fullpath)
-			if err != nil {
-				return nil, err
+			if IsValidDir(entry.Name()) {
+				// Scan recursively the directories
+				t, err := ScanTemplates(fullpath)
+				if err != nil {
+					return nil, err
+				}
+				templates = append(templates, t...)
 			}
-			templates = append(templates, t...)
 		} else if path.Ext(entry.Name()) == ".soy" {
 			// Add the templates to the list
 			templates = append(templates, fullpath)
