@@ -30,18 +30,18 @@ type Source struct {
 }
 
 // Creates a new source
-func NewSource(filename string) (*Source, error) {
+func NewSource(filename string) (*Source, bool, error) {
 	// Get the info of the file
 	info, err := os.Lstat(filename)
 	if err != nil {
-		return nil, fmt.Errorf("cannot stat file info: %s: %s", filename, err)
+		return nil, false, fmt.Errorf("cannot stat file info: %s: %s", filename, err)
 	}
 
 	// If it hasn't been modified, return in directly
 	src, ok := sourcesCache[filename]
 	if ok {
 		if info.ModTime() == src.modified {
-			return src, nil
+			return src, true, nil
 		}
 	}
 
@@ -55,7 +55,7 @@ func NewSource(filename string) (*Source, error) {
 	// Open the file
 	f, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	defer f.Close()
 
@@ -67,7 +67,7 @@ func NewSource(filename string) (*Source, error) {
 			if err == io.EOF {
 				break
 			}
-			return nil, err
+			return nil, false, err
 		}
 
 		// Find the goog.provide() calls
@@ -93,8 +93,8 @@ func NewSource(filename string) (*Source, error) {
 	// Validates the base file
 	if src.base {
 		if len(src.provides) > 0 || len(src.requires) > 0 {
-			return nil, fmt.Errorf("base files should not provide or require namespaces: %s",
-				filename)
+			return nil, false,
+				fmt.Errorf("base files should not provide or require namespaces: %s", filename)
 		}
 		src.provides = append(src.provides, "goog")
 	}
@@ -103,7 +103,7 @@ func NewSource(filename string) (*Source, error) {
 	src.modified = info.ModTime()
 	sourcesCache[filename] = src
 
-	return src, nil
+	return src, false, nil
 }
 
 // Store the info of a dependencies tree
@@ -111,12 +111,13 @@ type DepsTree struct {
 	sources  map[string]*Source
 	provides map[string]*Source
 	base     *Source
+	mustCompile bool
 }
 
 // Adds a new JS source file to the tree
 func (tree *DepsTree) AddSource(filename string) error {
 	// Build the source
-	src, err := NewSource(filename)
+	src, cached, err := NewSource(filename)
 	if err != nil {
 		return err
 	}
@@ -141,6 +142,7 @@ func (tree *DepsTree) AddSource(filename string) error {
 	}
 
 	tree.sources[filename] = src
+	tree.mustCompile = tree.mustCompile || !cached
 
 	return nil
 }
@@ -261,7 +263,7 @@ func BuildDepsTree(r *Request) (*DepsTree, error) {
 		}
 	}
 
-	// check the integrity of the tree
+	// Check the integrity of the tree
 	if err := depstree.Check(); err != nil {
 		return nil, err
 	}

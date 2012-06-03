@@ -2,7 +2,6 @@
 To Do:
 ~~~~~~
 
- * Don't recompile the code if the JS files haven't changed.
  * Send the checks to the compiler.
  * Read production settings ("inherits" too).
  * Option to build the app instead of serving it.
