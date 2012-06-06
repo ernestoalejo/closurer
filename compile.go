@@ -12,30 +12,42 @@ import (
 )
 
 func CompileHandler(r *Request) error {
-	start := time.Now()
-
 	// Reload the confs if they've changed
 	if err := ReadConf(); err != nil {
 		return err
 	}
 
-	// Compile the .gss files
-	gss, err := ScanGss(conf.RootGss)
-	if err != nil {
-		return InternalErr(err, "cannot scan the root directory")
+	// Compile the code
+	if err := CompileJs(r.W); err != nil {
+		return err
 	}
 
-	if err := CompileGss(r, gss); err != nil {
+	f, err := os.Open(path.Join(conf.Build, "compiled.js"))
+	if err != nil {
+		return fmt.Errorf("cannot read the compiled javascript: %s", err)
+	}
+	defer f.Close()
+
+	io.Copy(r.W, f)
+
+	return nil
+}
+
+func CompileJs(w io.Writer) error {
+	start := time.Now()
+
+	// Compile the .gss files
+	if err := CompileCss(w); err != nil {
 		return err
 	}
 
 	// Compile the .soy files
-	if err := CompileTemplates(r); err != nil {
+	if err := CompileSoy(w); err != nil {
 		return err
 	}
 
 	// Build the dependency tree between the JS files
-	depstree, err := BuildDepsTree(r)
+	depstree, err := BuildDepsTree()
 	if err != nil {
 		return err
 	}
@@ -58,29 +70,26 @@ func CompileHandler(r *Request) error {
 		}
 
 		// Send them to the compiler
-		if err := CompileCode(r, deps); err != nil {
+		if err := JsCompiler(w, deps); err != nil {
 			return err
 		}
 	}
 
 	log.Println("Done compiling! Elapsed:", time.Since(start))
 
-	f, err := os.Open(path.Join(conf.Build, "compiled.js"))
-	if err != nil {
-		return fmt.Errorf("cannot read the compiled javascript: %s", err)
-	}
-	defer f.Close()
-
-	io.Copy(r.W, f)
-
 	return nil
 }
 
-func CompileCode(r *Request, deps []*Source) error {
+func JsCompiler(w io.Writer, deps []*Source) error {
+	out := path.Join(conf.Build, "compiled.js")
+	if *build {
+		out = *jsOutput
+	}
+
 	// Prepare the call to the compiler
 	args := []string{
 		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
-		"--js_output_file", path.Join(conf.Build, "compiled.js"),
+		"--js_output_file", out,
 		"--js", path.Join(conf.Build, "renaming-map.js"),
 	}
 
@@ -139,7 +148,7 @@ func CompileCode(r *Request, deps []*Source) error {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("Output from compiler:\n", string(output))
-		fmt.Fprintf(r.W, "%s\n", output)
+		fmt.Fprintf(w, "%s\n", output)
 		return fmt.Errorf("cannot compile the code: %s", err)
 	}
 

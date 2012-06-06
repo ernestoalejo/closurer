@@ -42,7 +42,7 @@ type Config struct {
 	Define map[string]string `json:"define"`
 
 	// Inherits another configurations file
-	Inherits string
+	Inherits string `json:"inherits"`
 }
 
 var conf = new(Config)

@@ -243,7 +243,7 @@ func (tree *DepsTree) ResolveDependencies(ns string, info *TraversalInfo) error 
 
 // Build a dependency tree that allows the client to know the order of
 // compilation
-func BuildDepsTree(r *Request) (*DepsTree, error) {
+func BuildDepsTree() (*DepsTree, error) {
 	// Roots directories
 	roots := []string{
 		conf.RootJs,

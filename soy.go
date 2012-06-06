@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,14 +14,14 @@ import (
 var timesCache = map[string]time.Time{}
 
 // Compile all modified templates
-func CompileTemplates(r *Request) error {
+func CompileSoy(w io.Writer) error {
 	templates, err := ScanTemplates(conf.RootSoy)
 	if err != nil {
 		return InternalErr(err, "cannot scan the root directory")
 	}
 
 	for _, template := range templates {
-		if err := CompileTemplate(r, template); err != nil {
+		if err := SoyCompiler(w, template); err != nil {
 			return err
 		}
 	}
@@ -60,7 +61,7 @@ func ScanTemplates(filepath string) ([]string, error) {
 }
 
 // Compile a template if it has been modified
-func CompileTemplate(r *Request, filepath string) error {
+func SoyCompiler(w io.Writer, filepath string) error {
 	soytojs := path.Join(conf.ClosureTemplates, "build", "SoyToJsSrcCompiler.jar")
 	out := path.Join(conf.Build, "templates", filepath+".js")
 
@@ -92,7 +93,7 @@ func CompileTemplate(r *Request, filepath string) error {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Fprintf(r.W, "%s\n", output)
+		fmt.Fprintf(w, "%s\n", output)
 		return fmt.Errorf("cannot compile the template %s: %s", filepath, err)
 	}
 

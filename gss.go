@@ -20,12 +20,7 @@ func CompileCssHandler(r *Request) error {
 	}
 
 	// Compile the .gss files
-	gss, err := ScanGss(conf.RootGss)
-	if err != nil {
-		return InternalErr(err, "cannot scan the root directory")
-	}
-
-	if err := CompileGss(r, gss); err != nil {
+	if err := CompileCss(r.W); err != nil {
 		return err
 	}
 
@@ -38,6 +33,15 @@ func CompileCssHandler(r *Request) error {
 	io.Copy(r.W, f)
 
 	return nil
+}
+
+func CompileCss(w io.Writer) error {
+	gss, err := ScanGss(conf.RootGss)
+	if err != nil {
+		return InternalErr(err, "cannot scan the root directory")
+	}
+
+	return GssCompiler(w, gss)
 }
 
 // Scan a directory searching for .gss files
@@ -72,9 +76,13 @@ func ScanGss(filepath string) ([]string, error) {
 }
 
 // Compile the stylesheets if they have been modified
-func CompileGss(r *Request, gss []string) error {
+func GssCompiler(w io.Writer, gss []string) error {
 	compiler := path.Join(conf.ClosureStylesheets, "build", "closure-stylesheets.jar")
+
 	out := path.Join(conf.Build, "compiled.css")
+	if *build {
+		out = *cssOutput
+	}
 
 	// Check if the cached version is still ok
 	modified := false
@@ -108,7 +116,7 @@ func CompileGss(r *Request, gss []string) error {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Fprintf(r.W, "%s\n", output)
+		fmt.Fprintf(w, "%s\n", output)
 		return err
 	}
 

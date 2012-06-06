@@ -2,9 +2,8 @@
 To Do:
 ~~~~~~
 
- * Option to build the app instead of serving it.
  * Testing facilities: the same as plovr.
- * Build testing facilities to a folder.
+ * Build testing facilities to a folder in disk.
  * Validate settings before using them.
  * Remove the use of InternalError.
 
