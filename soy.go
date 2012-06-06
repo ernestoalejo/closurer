@@ -17,7 +17,7 @@ var timesCache = map[string]time.Time{}
 func CompileSoy(w io.Writer) error {
 	templates, err := ScanTemplates(conf.RootSoy)
 	if err != nil {
-		return InternalErr(err, "cannot scan the root directory")
+		return fmt.Errorf("cannot scan templates: %s", err)
 	}
 
 	for _, template := range templates {

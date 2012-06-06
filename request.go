@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"runtime/debug"
 
 	"code.google.com/p/gorilla/schema"
 )
@@ -83,10 +82,4 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		r.InternalServerError(err.Error())
 		log.Println(err)
 	}
-}
-
-// Creates a new Internal Server Error
-func InternalErr(err error, message string) error {
-	equals := "==================================="
-	return fmt.Errorf("%s: %v\n%s\n%s\n%s", message, err, equals, debug.Stack(), equals)
 }

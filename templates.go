@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 )
@@ -37,13 +38,13 @@ func RawExecuteTemplate(w io.Writer, names []string, data map[string]interface{}
 		var err error
 		t, err = template.New(cname).Funcs(templatesFuncs).ParseFiles(names...)
 		if err != nil {
-			return InternalErr(err, "cannot parse the template")
+			return fmt.Errorf("cannot parse the template: %s", err)
 		}
 		templatesCache[cname] = t
 	}
 
 	if err := t.ExecuteTemplate(w, "base", data); err != nil {
-		return InternalErr(err, "cannot execute the template")
+		return fmt.Errorf("cannot execute the template: %s", err)
 	}
 
 	return nil

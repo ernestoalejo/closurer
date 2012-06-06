@@ -5,7 +5,6 @@ To Do:
  * Testing facilities: the same as plovr.
  * Build testing facilities to a folder in disk.
  * Validate settings before using them.
- * Remove the use of InternalError.
 
  * Better concurrency when disk seeks are common.
  * Write the templates times cache to disk when exiting the program, and load it

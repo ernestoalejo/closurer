@@ -38,7 +38,7 @@ func CompileCssHandler(r *Request) error {
 func CompileCss(w io.Writer) error {
 	gss, err := ScanGss(conf.RootGss)
 	if err != nil {
-		return InternalErr(err, "cannot scan the root directory")
+		return fmt.Errorf("cannot scan the root directory: %s", err)
 	}
 
 	return GssCompiler(w, gss)
