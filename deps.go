@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"regexp"
@@ -308,7 +309,8 @@ func ScanSources(depstree *DepsTree, filepath string) error {
 }
 
 func ReadDepsCache() error {
-	f, err := os.Open(path.Join(conf.Build, "deps"))
+	name := path.Join(conf.Build, "deps-cache")
+	f, err := os.Open(name)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -317,17 +319,27 @@ func ReadDepsCache() error {
 	}
 	defer f.Close()
 
+	log.Println("Reading deps cache:", name)
+
 	d := gob.NewDecoder(f)
-	return d.Decode(&sourcesCache)
+	if err := d.Decode(&sourcesCache); err != nil {
+		return fmt.Errorf("cannot decode the deps cache: %s", err)
+	}
+
+	return nil
 }
 
 func WriteDepsCache() error {
-	f, err := os.Create(path.Join(conf.Build, "deps"))
+	f, err := os.Create(path.Join(conf.Build, "deps-cache"))
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
 	e := gob.NewEncoder(f)
-	return e.Encode(&sourcesCache)
+	if err := e.Encode(&sourcesCache); err != nil {
+		return fmt.Errorf("cannot encode the deps cache: %s", err)
+	}
+
+	return nil
 }

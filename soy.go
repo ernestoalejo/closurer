@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,7 +13,7 @@ import (
 	"time"
 )
 
-var timesCache = map[string]time.Time{}
+var soyCache = map[string]time.Time{}
 
 // Compile all modified templates
 func CompileSoy(w io.Writer) error {
@@ -25,6 +26,10 @@ func CompileSoy(w io.Writer) error {
 		if err := SoyCompiler(w, template); err != nil {
 			return err
 		}
+	}
+
+	if err := WriteSoyCache(); err != nil {
+		return err
 	}
 
 	return nil
@@ -78,7 +83,7 @@ func SoyCompiler(w io.Writer, p string) error {
 	}
 
 	// Check if the cached version is still ok
-	otime, ok := timesCache[p]
+	otime, ok := soyCache[p]
 	if ok {
 		if info.ModTime() == otime {
 			return nil
@@ -104,7 +109,43 @@ func SoyCompiler(w io.Writer, p string) error {
 	}
 
 	// Cache the output
-	timesCache[p] = info.ModTime()
+	soyCache[p] = info.ModTime()
+
+	return nil
+}
+
+func ReadSoyCache() error {
+	name := path.Join(conf.Build, "soy-cache")
+	f, err := os.Open(name)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	defer f.Close()
+
+	log.Println("Reading soy cache:", name)
+
+	d := gob.NewDecoder(f)
+	if err := d.Decode(&soyCache); err != nil {
+		return fmt.Errorf("cannot decode the deps cache: %s", err)
+	}
+
+	return nil
+}
+
+func WriteSoyCache() error {
+	f, err := os.Create(path.Join(conf.Build, "soy-cache"))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	e := gob.NewEncoder(f)
+	if err := e.Encode(&soyCache); err != nil {
+		return fmt.Errorf("cannot encode the deps cache: %s", err)
+	}
 
 	return nil
 }

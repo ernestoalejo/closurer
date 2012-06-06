@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var cssTimesCache = map[string]time.Time{}
+var gssCache = map[string]time.Time{}
 
 func CompileCssHandler(r *Request) error {
 	// Reload the confs if they've changed
@@ -92,9 +92,9 @@ func GssCompiler(w io.Writer, gss []string) error {
 			return err
 		}
 
-		t, ok := timesCache[filepath]
+		t, ok := gssCache[filepath]
 		if !ok || t != info.ModTime() {
-			timesCache[filepath] = info.ModTime()
+			gssCache[filepath] = info.ModTime()
 			modified = true
 		}
 	}

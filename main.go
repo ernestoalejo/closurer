@@ -19,15 +19,20 @@ var (
 func main() {
 	flag.Parse()
 
+	// Read configuration
 	if err := ReadConf(); err != nil {
 		log.Fatal(err)
 	}
 
-	// Read the sources cache to disk for quicker startups
+	// Read caches
 	if err := ReadDepsCache(); err != nil {
 		log.Fatal(err)
 	}
+	if err := ReadSoyCache(); err != nil {
+		log.Fatal(err)
+	}
 
+	// Start the correct mode
 	if *build {
 		Build()
 	} else {

@@ -97,7 +97,8 @@ func LoadConfFile(filename string) error {
 
 		// Invalid caches
 		sourcesCache = map[string]*Source{}
-		timesCache = map[string]time.Time{}
+		soyCache = map[string]time.Time{}
+		gssCache = map[string]time.Time{}
 	}
 
 	if config.Inherits != "" {
