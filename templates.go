@@ -49,6 +49,10 @@ func RawExecuteTemplate(w io.Writer, content string, data map[string]interface{}
 }
 
 func CommonData(r *Request, data map[string]interface{}) map[string]interface{} {
+	if data == nil {
+		data = map[string]interface{}{}
+	}
+
 	data["R"] = r
 
 	return data

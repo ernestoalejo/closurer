@@ -52,7 +52,25 @@ func CompileJs(w io.Writer) error {
 		return err
 	}
 
-	if depstree.mustCompile {
+	mustCompile := false
+
+	out := path.Join(conf.Build, "compiled.js")
+	if *build {
+		out = *jsOutput
+		mustCompile = true
+	}
+
+	if !mustCompile {
+		if _, err = os.Lstat(out); err != nil {
+			if os.IsNotExist(err) {
+				mustCompile = true
+			} else {
+				return err
+			}
+		}
+	}
+
+	if mustCompile || depstree.mustCompile {
 		// Calculate all the input namespaces
 		namespaces := []string{}
 		for _, input := range conf.Inputs {
