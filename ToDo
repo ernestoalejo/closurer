@@ -2,11 +2,11 @@
 To Do:
 ~~~~~~
 
- * Testing facilities: the same as plovr.
- * Build testing facilities to a folder in disk.
+ * Cache deps tree.
+ * Individual tests.
+ * Global tests.
  * Validate settings before using them.
+ * Cache templates modified times.
 
+ * Build testing facilities to a folder in disk.
  * Better concurrency when disk seeks are common.
- * Write the templates times cache to disk when exiting the program, and load it
-   to improve startup compilation times.
-

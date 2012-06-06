@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"code.google.com/p/gorilla/mux"
 )
 
 var (
@@ -33,18 +31,13 @@ func main() {
 }
 
 func Serve() {
-	r := mux.NewRouter().StrictSlash(true)
-	http.Handle("/", r)
-	addHandlers(r)
+	http.Handle("/", Handler(HomeHandler))
+	http.Handle("/compile", Handler(CompileHandler))
+	http.Handle("/css", Handler(CompileCssHandler))
+	http.Handle("/input/", Handler(InputHandler))
 
 	log.Printf("Started closurer server on http://localhost%s/\n", *port)
 	log.Fatal(http.ListenAndServe(*port, nil))
-}
-
-func addHandlers(r *mux.Router) {
-	r.Handle("/", Handler(HomeHandler))
-	r.Handle("/compile", Handler(CompileHandler))
-	r.Handle("/css", Handler(CompileCssHandler))
 }
 
 func Build() {

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -61,18 +62,23 @@ func ScanTemplates(filepath string) ([]string, error) {
 }
 
 // Compile a template if it has been modified
-func SoyCompiler(w io.Writer, filepath string) error {
+func SoyCompiler(w io.Writer, p string) error {
+	prel, err := filepath.Rel(conf.RootSoy, p)
+	if err != nil {
+		return fmt.Errorf("cannot relativize the path to %s: %s", p, err)
+	}
+
 	soytojs := path.Join(conf.ClosureTemplates, "build", "SoyToJsSrcCompiler.jar")
-	out := path.Join(conf.Build, "templates", filepath+".js")
+	out := path.Join(conf.Build, "templates", prel+".js")
 
 	// Get the stat file info
-	info, err := os.Lstat(out)
+	info, err := os.Lstat(p)
 	if err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("cannot check the file info: %s", out)
+		return fmt.Errorf("cannot check the file info: %s", p)
 	}
 
 	// Check if the cached version is still ok
-	otime, ok := timesCache[filepath]
+	otime, ok := timesCache[p]
 	if ok {
 		if info.ModTime() == otime {
 			return nil
@@ -84,26 +90,21 @@ func SoyCompiler(w io.Writer, filepath string) error {
 		return fmt.Errorf("cannot create the build tree: %s", out)
 	}
 
-	log.Println("Compiling template:", filepath)
+	log.Println("Compiling template:", p)
 
 	// Compile the template
 	cmd := exec.Command("java", "-jar", soytojs, "--outputPathFormat", out,
 		"--shouldGenerateJsdoc", "--shouldProvideRequireSoyNamespaces",
-		"--cssHandlingScheme", "goog", filepath)
+		"--cssHandlingScheme", "goog", p)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Fprintf(w, "%s\n", output)
-		return fmt.Errorf("cannot compile the template %s: %s", filepath, err)
+		return fmt.Errorf("cannot compile the template %s: %s", p, err)
 	}
 
 	// Cache the output
-	info, err = os.Lstat(out)
-	if err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("cannot check the file info %s: %s", out, err)
-	}
-
-	timesCache[filepath] = info.ModTime()
+	timesCache[p] = info.ModTime()
 
 	return nil
 }
