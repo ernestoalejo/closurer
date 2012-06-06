@@ -4,39 +4,37 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"strconv"
 )
 
-var templatesCache = map[string]*template.Template{}
-var templatesFuncs = template.FuncMap{
-	"int_eq": func(a, b int) bool { return a == b },
-	"str_eq": func(a, b string) bool { return a == b },
-	"bhtml":  func(a []byte) template.HTML { return template.HTML(a) },
-	"add":    func(a, b int) int { return a + b },
-}
+var (
+	globalCname    = -1
+	templatesCache = map[string]*template.Template{}
+	templatesFuncs = template.FuncMap{
+		"int_eq": func(a, b int) bool { return a == b },
+		"str_eq": func(a, b string) bool { return a == b },
+		"bhtml":  func(a []byte) template.HTML { return template.HTML(a) },
+		"add":    func(a, b int) int { return a + b },
+	}
+)
 
-func (r *Request) ExecuteTemplate(names []string, data map[string]interface{}) error {
+func (r *Request) ExecuteTemplate(content string, data map[string]interface{}) error {
 	// Insert common data
 	data = CommonData(r, data)
 
-	// Insert the base template in the list
-	names = append(names, "base")
-
 	// Parse the template & execute it
-	return RawExecuteTemplate(r.W, names, data)
+	return RawExecuteTemplate(r.W, content, data)
 }
 
-func RawExecuteTemplate(w io.Writer, names []string, data map[string]interface{}) error {
-	// Build the key for this template
-	cname := ""
-	for i, name := range names {
-		names[i] = "templates/" + name + ".html"
-		cname += name
-	}
+func RawExecuteTemplate(w io.Writer, content string, data map[string]interface{}) error {
+	globalCname += 1
+	cname := strconv.Itoa(globalCname)
 
+	// Build the key for this template
 	t, ok := templatesCache[cname]
 	if !ok {
 		var err error
-		t, err = template.New(cname).Funcs(templatesFuncs).ParseFiles(names...)
+		t, err = template.New(cname).Funcs(templatesFuncs).Parse(content)
 		if err != nil {
 			return fmt.Errorf("cannot parse the template: %s", err)
 		}

@@ -84,6 +84,8 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 		namespaces = append(namespaces, ns...)
 	}
 
+	namespaces = append(namespaces, "goog.testing.jsunit")
+
 	// Calculate the list of files to compile
 	deps, err := depstree.GetDependencies(namespaces)
 	if err != nil {
@@ -100,13 +102,19 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 		// Accumulates the provides
 		provides := ""
 		for _, provide := range src.Provides {
-			provides += "'" + provide + "' "
+			provides += "'" + provide + "', "
+		}
+		if provides != "" {
+			provides = provides[:len(provides)-2]
 		}
 
 		// Accumulates the requires
 		requires := ""
 		for _, require := range src.Requires {
-			requires += "'" + require + "' "
+			requires += "'" + require + "', "
+		}
+		if requires != "" {
+			requires = requires[:len(requires)-2]
 		}
 
 		// Search the base path to the file, and put the path

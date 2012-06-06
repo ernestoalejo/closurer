@@ -45,6 +45,7 @@ func Serve() {
 	http.Handle("/compile", Handler(CompileHandler))
 	http.Handle("/css", Handler(CompileCssHandler))
 	http.Handle("/input/", Handler(InputHandler))
+	http.Handle("/test/", Handler(TestHandler))
 
 	log.Printf("Started closurer server on http://localhost%s/\n", *port)
 	log.Fatal(http.ListenAndServe(*port, nil))
