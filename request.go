@@ -60,9 +60,6 @@ type Handler func(r *Request) error
 
 // Serves a http request
 func (fn Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	// Ask for chrome frame if we're in MSIE
-	w.Header().Set("X-UA-Compatible", "chrome=1")
-
 	// Create the request
 	r := &Request{
 		Req: req,

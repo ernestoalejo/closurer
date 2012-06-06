@@ -2,7 +2,6 @@
 To Do:
 ~~~~~~
 
- * Global tests.
  * Validate settings before using them.
 
  * Build testing facilities to a folder in disk.
