@@ -95,7 +95,7 @@ func JsCompiler(w io.Writer, deps []*Source) error {
 
 	// Add the dependencies in order
 	for _, dep := range deps {
-		args = append(args, "--js", dep.filename)
+		args = append(args, "--js", dep.Filename)
 	}
 
 	// Add the defines

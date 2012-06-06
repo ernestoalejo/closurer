@@ -23,6 +23,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Read the sources cache to disk for quicker startups
+	if err := ReadDepsCache(); err != nil {
+		log.Fatal(err)
+	}
+
 	if *build {
 		Build()
 	} else {

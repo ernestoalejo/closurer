@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/gob"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -22,11 +23,11 @@ var sourcesCache = map[string]*Source{}
 // Saves the list of goog.provide() and goog.require() calls
 // for each JS source.
 type Source struct {
-	provides []string
-	requires []string
-	base     bool
-	modified time.Time
-	filename string
+	Provides []string
+	Requires []string
+	Base     bool
+	Modified time.Time
+	Filename string
 }
 
 // Creates a new source
@@ -40,16 +41,16 @@ func NewSource(filename string) (*Source, bool, error) {
 	// If it hasn't been modified, return in directly
 	src, ok := sourcesCache[filename]
 	if ok {
-		if info.ModTime() == src.modified {
+		if info.ModTime() == src.Modified {
 			return src, true, nil
 		}
 	}
 
 	src = &Source{
-		provides: []string{},
-		requires: []string{},
-		base:     false,
-		filename: filename,
+		Provides: []string{},
+		Requires: []string{},
+		Base:     false,
+		Filename: filename,
 	}
 
 	// Open the file
@@ -73,34 +74,34 @@ func NewSource(filename string) (*Source, bool, error) {
 		// Find the goog.provide() calls
 		matchs := provideRe.FindSubmatch(line)
 		if matchs != nil {
-			src.provides = append(src.provides, string(matchs[1]))
+			src.Provides = append(src.Provides, string(matchs[1]))
 			continue
 		}
 
 		// Find the goog.require() calls
 		matchs = requiresRe.FindSubmatch(line)
 		if matchs != nil {
-			src.requires = append(src.requires, string(matchs[1]))
+			src.Requires = append(src.Requires, string(matchs[1]))
 			continue
 		}
 
 		// Recognize the base file
 		if string(line) == base {
-			src.base = true
+			src.Base = true
 		}
 	}
 
 	// Validates the base file
-	if src.base {
-		if len(src.provides) > 0 || len(src.requires) > 0 {
+	if src.Base {
+		if len(src.Provides) > 0 || len(src.Requires) > 0 {
 			return nil, false,
 				fmt.Errorf("base files should not provide or require namespaces: %s", filename)
 		}
-		src.provides = append(src.provides, "goog")
+		src.Provides = append(src.Provides, "goog")
 	}
 
 	// Save the file info in cache
-	src.modified = info.ModTime()
+	src.Modified = info.ModTime()
 	sourcesCache[filename] = src
 
 	return src, false, nil
@@ -122,22 +123,22 @@ func (tree *DepsTree) AddSource(filename string) error {
 		return err
 	}
 
-	if src.base {
+	if src.Base {
 		tree.base = src
 	}
 
 	// Scan all the previous sources searching for repeated
 	// namespaces
 	for k, source := range tree.sources {
-		for _, provide := range source.provides {
-			if In(src.provides, provide) {
+		for _, provide := range source.Provides {
+			if In(src.Provides, provide) {
 				return fmt.Errorf("multiple provide %s: %s and %s", provide, k, filename)
 			}
 		}
 	}
 
 	// Add all the provides to the list
-	for _, provide := range src.provides {
+	for _, provide := range src.Provides {
 		tree.provides[provide] = src
 	}
 
@@ -151,7 +152,7 @@ func (tree *DepsTree) AddSource(filename string) error {
 // scanned files
 func (tree *DepsTree) Check() error {
 	for k, source := range tree.sources {
-		for _, require := range source.requires {
+		for _, require := range source.Requires {
 			_, ok := tree.provides[require]
 			if !ok {
 				return fmt.Errorf("namespace not found %s: %s", require, k)
@@ -170,7 +171,7 @@ func (tree *DepsTree) GetProvides(filename string) ([]string, error) {
 		return nil, fmt.Errorf("input not present in the sources: %s", filename)
 	}
 
-	return src.provides, nil
+	return src.Provides, nil
 }
 
 // Struct to store the info of a dependencies tree traversal
@@ -227,7 +228,7 @@ func (tree *DepsTree) ResolveDependencies(ns string, info *TraversalInfo) error 
 		info.traversal = append(info.traversal, ns)
 
 		// Compile first all dependencies
-		for _, require := range src.requires {
+		for _, require := range src.Requires {
 			tree.ResolveDependencies(require, info)
 		}
 
@@ -268,6 +269,12 @@ func BuildDepsTree() (*DepsTree, error) {
 		return nil, err
 	}
 
+	if depstree.mustCompile {
+		if err := WriteDepsCache(); err != nil {
+			return nil, err
+		}
+	}
+
 	return depstree, nil
 }
 
@@ -298,4 +305,29 @@ func ScanSources(depstree *DepsTree, filepath string) error {
 	}
 
 	return nil
+}
+
+func ReadDepsCache() error {
+	f, err := os.Open(path.Join(conf.Build, "deps"))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	defer f.Close()
+
+	d := gob.NewDecoder(f)
+	return d.Decode(&sourcesCache)
+}
+
+func WriteDepsCache() error {
+	f, err := os.Create(path.Join(conf.Build, "deps"))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	e := gob.NewEncoder(f)
+	return e.Encode(&sourcesCache)
 }

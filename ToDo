@@ -2,11 +2,10 @@
 To Do:
 ~~~~~~
 
- * Cache deps tree.
+ * Cache templates modified times.
  * Individual tests.
  * Global tests.
  * Validate settings before using them.
- * Cache templates modified times.
 
  * Build testing facilities to a folder in disk.
  * Better concurrency when disk seeks are common.

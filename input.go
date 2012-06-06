@@ -19,7 +19,7 @@ func (lst SourcesList) Len() int {
 }
 
 func (lst SourcesList) Less(i, j int) bool {
-	return lst[i].filename < lst[j].filename
+	return lst[i].Filename < lst[j].Filename
 }
 
 func (lst SourcesList) Swap(i, j int) {
@@ -99,13 +99,13 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 	for _, src := range sorted_deps {
 		// Accumulates the provides
 		provides := ""
-		for _, provide := range src.provides {
+		for _, provide := range src.Provides {
 			provides += "'" + provide + "' "
 		}
 
 		// Accumulates the requires
 		requires := ""
-		for _, require := range src.requires {
+		for _, require := range src.Requires {
 			requires += "'" + require + "' "
 		}
 
@@ -113,13 +113,13 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 		// relative to it
 		var n string
 		for _, p := range paths {
-			n, err = filepath.Rel(p, src.filename)
+			n, err = filepath.Rel(p, src.Filename)
 			if err == nil && !strings.Contains(n, "..") {
 				break
 			}
 		}
 		if n == "" {
-			return fmt.Errorf("cannot generate the relative filename for %s", src.filename)
+			return fmt.Errorf("cannot generate the relative filename for %s", src.Filename)
 		}
 
 		// Write the line to the output of the deps.js file request
