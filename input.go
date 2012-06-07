@@ -29,6 +29,11 @@ func (lst SourcesList) Swap(i, j int) {
 func InputHandler(r *Request) error {
 	r.W.Header().Set("Content-Type", "text/javascript")
 
+	// Reload the confs if they've changed
+	if err := ReadConf(); err != nil {
+		return err
+	}
+
 	// Filename
 	name := r.Req.URL.Path[7:]
 
@@ -85,9 +90,6 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 		}
 		namespaces = append(namespaces, ns...)
 	}
-
-	namespaces = append(namespaces, "goog.testing.jsunit", "goog.userAgent.product",
-		"goog.testing.MultiTestRunner")
 
 	// Calculate the list of files to compile
 	deps, err := depstree.GetDependencies(namespaces)
