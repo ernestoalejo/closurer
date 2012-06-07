@@ -27,6 +27,8 @@ func (lst SourcesList) Swap(i, j int) {
 }
 
 func InputHandler(r *Request) error {
+	r.W.Header().Set("Content-Type", "text/javascript")
+
 	// Filename
 	name := r.Req.URL.Path[7:]
 
