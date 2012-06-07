@@ -91,6 +91,8 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 		namespaces = append(namespaces, ns...)
 	}
 
+	namespaces = append(namespaces, "goog.userAgent.product", "goog.testing.MultiTestRunner")
+
 	// Calculate the list of files to compile
 	deps, err := depstree.GetDependencies(namespaces)
 	if err != nil {
