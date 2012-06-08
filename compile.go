@@ -150,6 +150,11 @@ func JsCompiler(w io.Writer, deps []*Source) error {
 		return fmt.Errorf("warnings level not recognized: %s", conf.Level)
 	}
 
+	// Add the externs
+	for _, extern := range conf.Externs {
+		args = append(args, "--extern", extern)
+	}
+
 	if *outputCmd {
 		f, err := os.Create(path.Join(conf.Build, "cmd"))
 		if err != nil {
@@ -165,7 +170,7 @@ func JsCompiler(w io.Writer, deps []*Source) error {
 	cmd := exec.Command("java", args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println("Output from compiler:\n", string(output))
+		//log.Println("Output from compiler:\n", string(output))
 		fmt.Fprintf(w, "%s\n", output)
 		return fmt.Errorf("cannot compile the code: %s", err)
 	}

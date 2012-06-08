@@ -17,6 +17,9 @@ type Config struct {
 	RootSoy string `json:"root-soy"`
 	RootGss string `json:"root-gss"`
 
+	// Extern scripts folder
+	Externs []string `json:"externs"`
+
 	// Temporary build directory
 	Build string `json:"build"`
 
@@ -125,6 +128,9 @@ func ApplyConf(config *Config) {
 	}
 	if config.RootSoy != "" {
 		conf.RootSoy = config.RootSoy
+	}
+	if len(config.Externs) != 0 {
+		conf.Externs = config.Externs
 	}
 	if config.Build != "" {
 		conf.Build = config.Build

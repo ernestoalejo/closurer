@@ -309,9 +309,6 @@ const GLOBAL_TEST_TEMPLATE = `
 		  
 		  goog.events.listen(filterInput, 'keyup', setFilterFunction);
 		  setFilterFunction();
-
-		  // Automatically start the test runner.
-		  testRunner.start();
 		})();
 
 	</script>
