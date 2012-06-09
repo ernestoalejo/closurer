@@ -113,7 +113,9 @@ func JsCompiler(w io.Writer, deps []*Source) error {
 
 	// Add the dependencies in order
 	for _, dep := range deps {
-		args = append(args, "--js", dep.Filename)
+		if !strings.Contains(dep.Filename, "_test.js") {
+			args = append(args, "--js", dep.Filename)
+		}
 	}
 
 	// Add the defines
@@ -152,7 +154,7 @@ func JsCompiler(w io.Writer, deps []*Source) error {
 
 	// Add the externs
 	for _, extern := range conf.Externs {
-		args = append(args, "--extern", extern)
+		args = append(args, "--externs", extern)
 	}
 
 	if *outputCmd {

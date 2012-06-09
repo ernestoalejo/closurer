@@ -129,7 +129,7 @@ func ApplyConf(config *Config) {
 	if config.RootSoy != "" {
 		conf.RootSoy = config.RootSoy
 	}
-	if len(config.Externs) != 0 {
+	if len(config.Externs) > 0 {
 		conf.Externs = config.Externs
 	}
 	if config.Build != "" {
