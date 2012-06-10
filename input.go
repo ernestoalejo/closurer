@@ -6,9 +6,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
-	"sort"
-	"strings"
 	"time"
 )
 
@@ -101,44 +98,8 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 
 	log.Println("Done generating deps.js! Elapsed:", time.Since(start))
 
-	// Sort the list of dependencies (the order doesn't mind)
-	sorted_deps := SourcesList(deps)
-	sort.Sort(sorted_deps)
-
-	for _, src := range sorted_deps {
-		// Accumulates the provides
-		provides := ""
-		for _, provide := range src.Provides {
-			provides += "'" + provide + "', "
-		}
-		if provides != "" {
-			provides = provides[:len(provides)-2]
-		}
-
-		// Accumulates the requires
-		requires := ""
-		for _, require := range src.Requires {
-			requires += "'" + require + "', "
-		}
-		if requires != "" {
-			requires = requires[:len(requires)-2]
-		}
-
-		// Search the base path to the file, and put the path
-		// relative to it
-		var n string
-		for _, p := range paths {
-			n, err = filepath.Rel(p, src.Filename)
-			if err == nil && !strings.Contains(n, "..") {
-				break
-			}
-		}
-		if n == "" {
-			return fmt.Errorf("cannot generate the relative filename for %s", src.Filename)
-		}
-
-		// Write the line to the output of the deps.js file request
-		fmt.Fprintf(r.W, "goog.addDependency('%s', [%s], [%s]);\n", n, provides, requires)
+	if err := WriteDeps(r.W, deps, paths); err != nil {
+		return err
 	}
 
 	return nil

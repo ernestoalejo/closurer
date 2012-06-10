@@ -9,7 +9,10 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
+	"sort"
+	"strings"
 	"time"
 )
 
@@ -339,6 +342,51 @@ func WriteDepsCache() error {
 	e := gob.NewEncoder(f)
 	if err := e.Encode(&sourcesCache); err != nil {
 		return fmt.Errorf("cannot encode the deps cache: %s", err)
+	}
+
+	return nil
+}
+
+func WriteDeps(w io.Writer, deps []*Source, paths []string) error {
+	// Sort the list of dependencies (the order doesn't mind)
+	sorted_deps := SourcesList(deps)
+	sort.Sort(sorted_deps)
+
+	for _, src := range sorted_deps {
+		// Accumulates the provides
+		provides := ""
+		for _, provide := range src.Provides {
+			provides += "'" + provide + "', "
+		}
+		if provides != "" {
+			provides = provides[:len(provides)-2]
+		}
+
+		// Accumulates the requires
+		requires := ""
+		for _, require := range src.Requires {
+			requires += "'" + require + "', "
+		}
+		if requires != "" {
+			requires = requires[:len(requires)-2]
+		}
+
+		// Search the base path to the file, and put the path
+		// relative to it
+		var n string
+		for _, p := range paths {
+			var err error
+			n, err = filepath.Rel(p, src.Filename)
+			if err == nil && !strings.Contains(n, "..") {
+				break
+			}
+		}
+		if n == "" {
+			return fmt.Errorf("cannot generate the relative filename for %s", src.Filename)
+		}
+
+		// Write the line to the output of the deps.js file request
+		fmt.Fprintf(w, "goog.addDependency('%s', [%s], [%s]);\n", n, provides, requires)
 	}
 
 	return nil

@@ -87,6 +87,25 @@ func CompileJs(w io.Writer) error {
 			return err
 		}
 
+		f, err := os.Create(path.Join(conf.Build, "deps.js"))
+		if err != nil {
+			return fmt.Errorf("cannot create deps file: %s", err)
+		}
+		defer f.Close()
+
+		// Base paths, all routes to a JS must start from these
+		paths := []string{
+			path.Join(conf.ClosureLibrary, "closure", "goog"),
+			conf.RootJs,
+			path.Join(conf.Build, "templates"),
+			conf.RootSoy,
+			path.Join(conf.ClosureTemplates, "javascript"),
+		}
+
+		if err := WriteDeps(f, deps, paths); err != nil {
+			return err
+		}
+
 		// Send them to the compiler
 		if err := JsCompiler(w, deps); err != nil {
 			return err
@@ -109,6 +128,8 @@ func JsCompiler(w io.Writer, deps []*Source) error {
 		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
 		"--js_output_file", out,
 		"--js", path.Join(conf.Build, "renaming-map.js"),
+		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "deps.js"),
+		"--js", path.Join(conf.Build, "deps.js"),
 	}
 
 	// Add the dependencies in order
