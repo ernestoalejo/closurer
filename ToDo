@@ -5,6 +5,8 @@ To Do:
  * List of files that will be compiled.
  * List of unit tests.
  * Validate settings before using them.
+ * Avoid rescanning closure library folders continously.
+ * Reuse deps.js instead of building a new one in /input/deps.js.
 
  * Build testing facilities to a folder in disk.
  * Better concurrency when disk seeks are common.

@@ -24,8 +24,6 @@ func (lst SourcesList) Swap(i, j int) {
 }
 
 func InputHandler(r *Request) error {
-	r.W.Header().Set("Content-Type", "text/javascript")
-
 	// Reload the confs if they've changed
 	if err := ReadConf(); err != nil {
 		return err
@@ -55,7 +53,10 @@ func InputHandler(r *Request) error {
 			return fmt.Errorf("cannot open the file: %s", err)
 		} else if !os.IsNotExist(err) {
 			defer f.Close()
+
+			r.W.Header().Set("Content-Type", "text/javascript")
 			io.Copy(r.W, f)
+
 			return nil
 		}
 	}
@@ -98,6 +99,7 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 
 	log.Println("Done generating deps.js! Elapsed:", time.Since(start))
 
+	r.W.Header().Set("Content-Type", "text/javascript")
 	if err := WriteDeps(r.W, deps, paths); err != nil {
 		return err
 	}

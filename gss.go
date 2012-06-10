@@ -30,6 +30,7 @@ func CompileCssHandler(r *Request) error {
 	}
 	defer f.Close()
 
+	r.W.Header().Set("Content-Type", "text/css")
 	io.Copy(r.W, f)
 
 	return nil

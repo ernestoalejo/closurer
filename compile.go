@@ -28,6 +28,7 @@ func CompileHandler(r *Request) error {
 	}
 	defer f.Close()
 
+	r.W.Header().Set("Content-Type", "text/javascript")
 	io.Copy(r.W, f)
 
 	return nil
@@ -74,6 +75,10 @@ func CompileJs(w io.Writer) error {
 		// Calculate all the input namespaces
 		namespaces := []string{}
 		for _, input := range conf.Inputs {
+			if strings.Contains(input, "_test") {
+				continue
+			}
+
 			ns, err := depstree.GetProvides(input)
 			if err != nil {
 				return err
