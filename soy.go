@@ -91,7 +91,7 @@ func SoyCompiler(w io.Writer, p string) error {
 	}
 
 	// Creates all the necessary directories
-	if err := os.MkdirAll(path.Base(out), 0755); err != nil {
+	if err := os.MkdirAll(path.Dir(out), 0755); err != nil {
 		return fmt.Errorf("cannot create the build tree: %s", out)
 	}
 
