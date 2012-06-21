@@ -48,9 +48,11 @@ type Config struct {
 	Inherits string `json:"inherits"`
 }
 
-var conf = new(Config)
-var confs = map[string]*Config{}
-var confModified = map[string]time.Time{}
+var (
+	conf = new(Config)
+	confs = map[string]*Config{}
+	confModified = map[string]time.Time{}
+)
 
 func ReadConf() error {
 	if err := LoadConfFile(*confArg); err != nil {
@@ -86,12 +88,11 @@ func LoadConfFile(filename string) error {
 		defer f.Close()
 
 		// Load the data
-		dec := json.NewDecoder(f)
-		if err := dec.Decode(config); err != nil {
+		if err := json.NewDecoder(f).Decode(config); err != nil {
 			return err
 		}
 
-		// Adjust the path if necessary
+		// Adjust the inherits path
 		if config.Inherits != "" {
 			config.Inherits = path.Join(path.Dir(filename), config.Inherits)
 		}
@@ -102,6 +103,7 @@ func LoadConfFile(filename string) error {
 		sourcesCache = map[string]*Source{}
 		soyCache = map[string]time.Time{}
 		gssCache = map[string]time.Time{}
+		libraryScanned = false
 	}
 
 	if config.Inherits != "" {
