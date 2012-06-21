@@ -24,7 +24,6 @@ var (
 	// Whether the closure library folder has been checked for changes
 	// (once for each start up or each time config changes)
 	libraryScanned = false
-	libraryFiles   = []string{}
 
 	sourcesCache = map[string]*Source{}
 )
@@ -124,13 +123,6 @@ type DepsTree struct {
 	mustCompile bool
 }
 
-func (tree *DepsTree) AddLibrary() {
-	log.Println("Adding closure library:", len(libraryFiles), "files")
-	for _, f := range libraryFiles {
-		tree.AddSource(f)
-	}
-}
-
 // Adds a new JS source file to the tree
 func (tree *DepsTree) AddSource(filename string) error {
 	// Build the source
@@ -160,10 +152,6 @@ func (tree *DepsTree) AddSource(filename string) error {
 
 	tree.sources[filename] = src
 	tree.mustCompile = tree.mustCompile || !cached
-
-	if !libraryScanned && strings.Contains(filename, conf.ClosureLibrary) {
-		libraryFiles = append(libraryFiles, filename)
-	}
 
 	return nil
 }
@@ -280,17 +268,16 @@ func BuildDepsTree() (*DepsTree, error) {
 	}
 	for _, root := range roots {
 		// Scan the Closure Library once only
-		if root == conf.ClosureLibrary && libraryScanned {
-			depstree.AddLibrary()
-			continue
+		if root == conf.ClosureLibrary {
+			if libraryScanned {
+				continue
+			} else {
+				libraryScanned = true
+			}
 		}
 
 		if err := ScanSources(depstree, root); err != nil {
 			return nil, err
-		}
-
-		if root == conf.ClosureLibrary && !libraryScanned {
-			libraryScanned = true
 		}
 	}
 
