@@ -49,8 +49,8 @@ type Config struct {
 }
 
 var (
-	conf = new(Config)
-	confs = map[string]*Config{}
+	conf         = new(Config)
+	confs        = map[string]*Config{}
 	confModified = map[string]time.Time{}
 )
 
@@ -104,6 +104,7 @@ func LoadConfFile(filename string) error {
 		soyCache = map[string]time.Time{}
 		gssCache = map[string]time.Time{}
 		libraryScanned = false
+		libraryFiles = []string{}
 	}
 
 	if config.Inherits != "" {
