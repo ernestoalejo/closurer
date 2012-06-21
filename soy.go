@@ -127,7 +127,8 @@ func ReadSoyCache() error {
 
 	log.Println("Reading soy cache:", name)
 
-	if err := gob.NewDecoder(f).Decode(&soyCache); err != nil {
+	d := gob.NewDecoder(f)
+	if err := d.Decode(&soyCache); err != nil {
 		return fmt.Errorf("cannot decode the deps cache: %s", err)
 	}
 
@@ -141,7 +142,8 @@ func WriteSoyCache() error {
 	}
 	defer f.Close()
 
-	if err := gob.NewEncoder(f).Encode(&soyCache); err != nil {
+	e := gob.NewEncoder(f)
+	if err := e.Encode(&soyCache); err != nil {
 		return fmt.Errorf("cannot encode the deps cache: %s", err)
 	}
 

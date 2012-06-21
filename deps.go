@@ -20,13 +20,9 @@ var (
 	provideRe  = regexp.MustCompile(`^\s*goog\.provide\(\s*[\'"](.+)[\'"]\s*\)`)
 	requiresRe = regexp.MustCompile(`^\s*goog\.require\(\s*[\'"](.+)[\'"]\s*\)`)
 	base       = "var goog = goog || {}; // Identifies this file as the Closure base."
-
-	// Whether the closure library folder has been checked for changes
-	// (once for each start up or each time config changes)
-	libraryScanned = false
-
-	sourcesCache = map[string]*Source{}
 )
+
+var sourcesCache = map[string]*Source{}
 
 // Saves the list of goog.provide() and goog.require() calls
 // for each JS source.
@@ -267,15 +263,6 @@ func BuildDepsTree() (*DepsTree, error) {
 		provides: map[string]*Source{},
 	}
 	for _, root := range roots {
-		// Scan the Closure Library once only
-		if root == conf.ClosureLibrary {
-			if libraryScanned {
-				continue
-			} else {
-				libraryScanned = true
-			}
-		}
-
 		if err := ScanSources(depstree, root); err != nil {
 			return nil, err
 		}

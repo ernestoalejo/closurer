@@ -2,7 +2,6 @@
 To Do:
 ~~~~~~
 
- * Use reflect to copy the configs.
  * List of files that will be compiled.
  * List of unit tests.
  * Validate settings before using them.
