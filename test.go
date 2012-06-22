@@ -49,7 +49,7 @@ func ScanTests(filename string) ([]string, error) {
 		if entry.IsDir() {
 			if IsValidDir(entry.Name()) {
 				// Scan recursively the directories
-				t, err := ScanTemplates(fullpath)
+				t, err := ScanTests(fullpath)
 				if err != nil {
 					return nil, err
 				}
