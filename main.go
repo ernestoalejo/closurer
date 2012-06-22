@@ -18,6 +18,7 @@ var (
 	jsOutput   = flag.String("js-output", "compiled.js", "the js file that will be built")
 	bench      = flag.Bool("bench", false, "enables internal circuits for benchmarks")
 	cpuProfile = flag.String("cpu-profile", "", "write cpu profile to file")
+	memProfile = flag.String("mem-profile", "", "write memory profile to file")
 	noCache    = flag.Bool("no-cache", false, "disables the files cache")
 )
 
@@ -84,30 +85,46 @@ func Bench() error {
 		defer pprof.StopCPUProfile()
 	}
 
-	// Build the deps tree
-	depstree, err := BuildDepsTree()
-	if err != nil {
-		return err
-	}
+	for i := 0; i < 10; i += 1 {
+		log.Println("Loop:", i)
 
-	// Calculate all the input namespaces
-	namespaces := []string{}
-	for _, input := range conf.Inputs {
-		if strings.Contains(input, "_test") {
-			continue
-		}
-
-		ns, err := depstree.GetProvides(input)
+		// Build the deps tree
+		depstree, err := BuildDepsTree()
 		if err != nil {
 			return err
 		}
-		namespaces = append(namespaces, ns...)
-	}
 
-	// Calculate the list of files to compile
-	_, err = depstree.GetDependencies(namespaces)
-	if err != nil {
-		return err
+		// Calculate all the input namespaces
+		namespaces := []string{}
+		for _, input := range conf.Inputs {
+			if strings.Contains(input, "_test") {
+				continue
+			}
+
+			ns, err := depstree.GetProvides(input)
+			if err != nil {
+				return err
+			}
+			namespaces = append(namespaces, ns...)
+		}
+
+		// Calculate the list of files to compile
+		_, err = depstree.GetDependencies(namespaces)
+		if err != nil {
+			return err
+		}
+
+		if *memProfile != "" {
+			f, err := os.Create(*memProfile)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			pprof.WriteHeapProfile(f)
+
+			return nil
+		}
 	}
 
 	return nil

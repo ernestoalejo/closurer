@@ -35,7 +35,7 @@ type Source struct {
 }
 
 // Creates a new source
-func NewSource(filename string) (*Source, bool, error) {
+func NewSource(filename string, base bool) (*Source, bool, error) {
 	// Get the info of the file
 	info, err := os.Lstat(filename)
 	if err != nil {
@@ -53,7 +53,7 @@ func NewSource(filename string) (*Source, bool, error) {
 	src = &Source{
 		Provides: []string{},
 		Requires: []string{},
-		Base:     false,
+		Base:     base,
 		Filename: filename,
 	}
 
@@ -92,11 +92,6 @@ func NewSource(filename string) (*Source, bool, error) {
 				continue
 			}
 		}
-
-		// Recognize the base file
-		if string(line) == base {
-			src.Base = true
-		}
 	}
 
 	// Validates the base file
@@ -120,13 +115,14 @@ type DepsTree struct {
 	sources     map[string]*Source
 	provides    map[string]*Source
 	base        *Source
+	basePath    string
 	mustCompile bool
 }
 
 // Adds a new JS source file to the tree
 func (tree *DepsTree) AddSource(filename string) error {
 	// Build the source
-	src, cached, err := NewSource(filename)
+	src, cached, err := NewSource(filename, filename == tree.basePath)
 	if err != nil {
 		return err
 	}
@@ -136,11 +132,14 @@ func (tree *DepsTree) AddSource(filename string) error {
 	}
 
 	// Scan all the previous sources searching for repeated
-	// namespaces
-	for k, source := range tree.sources {
-		for _, provide := range source.Provides {
-			if In(src.Provides, provide) {
-				return fmt.Errorf("multiple provide %s: %s and %s", provide, k, filename)
+	// namespaces. We ignore closure library files because they're
+	// supposed to be correct and tested by other methods
+	if !strings.HasPrefix(filename, conf.ClosureLibrary) {
+		for k, source := range tree.sources {
+			for _, provide := range source.Provides {
+				if In(src.Provides, provide) {
+					return fmt.Errorf("multiple provide %s: %s and %s", provide, k, filename)
+				}
 			}
 		}
 	}
@@ -265,6 +264,7 @@ func BuildDepsTree() (*DepsTree, error) {
 	depstree := &DepsTree{
 		sources:  map[string]*Source{},
 		provides: map[string]*Source{},
+		basePath: path.Join(conf.ClosureLibrary, "goog", "closure", "goog"),
 	}
 	for _, root := range roots {
 		if err := ScanSources(depstree, root); err != nil {
