@@ -76,17 +76,21 @@ func NewSource(filename string) (*Source, bool, error) {
 		}
 
 		// Find the goog.provide() calls
-		matchs := provideRe.FindSubmatch(line)
-		if matchs != nil {
-			src.Provides = append(src.Provides, string(matchs[1]))
-			continue
+		if strings.Contains(string(line), "goog.provide") {
+			matchs := provideRe.FindSubmatch(line)
+			if matchs != nil {
+				src.Provides = append(src.Provides, string(matchs[1]))
+				continue
+			}
 		}
 
 		// Find the goog.require() calls
-		matchs = requiresRe.FindSubmatch(line)
-		if matchs != nil {
-			src.Requires = append(src.Requires, string(matchs[1]))
-			continue
+		if strings.Contains(string(line), "goog.require") {
+			matchs := requiresRe.FindSubmatch(line)
+			if matchs != nil {
+				src.Requires = append(src.Requires, string(matchs[1]))
+				continue
+			}
 		}
 
 		// Recognize the base file

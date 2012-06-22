@@ -5,15 +5,20 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/pprof"
+	"strings"
 )
 
 var (
-	port      = flag.String("port", ":9810", "the port where the server will be listening")
-	confArg   = flag.String("conf", "", "the config file")
-	outputCmd = flag.Bool("output-cmd", false, "output compiler command to a file")
-	build     = flag.Bool("build", false, "build the compiled files only and exit")
-	cssOutput = flag.String("css-output", "compiled.css", "the css file that will be built")
-	jsOutput  = flag.String("js-output", "compiled.js", "the js file that will be built")
+	port       = flag.String("port", ":9810", "the port where the server will be listening")
+	confArg    = flag.String("conf", "", "the config file")
+	outputCmd  = flag.Bool("output-cmd", false, "output compiler command to a file")
+	build      = flag.Bool("build", false, "build the compiled files only and exit")
+	cssOutput  = flag.String("css-output", "compiled.css", "the css file that will be built")
+	jsOutput   = flag.String("js-output", "compiled.js", "the js file that will be built")
+	bench      = flag.Bool("bench", false, "enables internal circuits for benchmarks")
+	cpuProfile = flag.String("cpu-profile", "", "write cpu profile to file")
+	noCache    = flag.Bool("no-cache", false, "disables the files cache")
 )
 
 func main() {
@@ -25,11 +30,21 @@ func main() {
 	}
 
 	// Read caches
-	if err := ReadDepsCache(); err != nil {
-		log.Fatal(err)
+	if !*noCache {
+		if err := ReadDepsCache(); err != nil {
+			log.Fatal(err)
+		}
+		if err := ReadSoyCache(); err != nil {
+			log.Fatal(err)
+		}
 	}
-	if err := ReadSoyCache(); err != nil {
-		log.Fatal(err)
+
+	// Performs the benchmarks
+	if *bench {
+		if err := Bench(); err != nil {
+			log.Fatal(err)
+		}
+		return
 	}
 
 	// Start the correct mode
@@ -56,4 +71,44 @@ func Build() {
 	if err := CompileJs(os.Stdout); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func Bench() error {
+	if *cpuProfile != "" {
+		f, err := os.Create(*cpuProfile)
+		if err != nil {
+			return err
+		}
+
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
+
+	// Build the deps tree
+	depstree, err := BuildDepsTree()
+	if err != nil {
+		return err
+	}
+
+	// Calculate all the input namespaces
+	namespaces := []string{}
+	for _, input := range conf.Inputs {
+		if strings.Contains(input, "_test") {
+			continue
+		}
+
+		ns, err := depstree.GetProvides(input)
+		if err != nil {
+			return err
+		}
+		namespaces = append(namespaces, ns...)
+	}
+
+	// Calculate the list of files to compile
+	_, err = depstree.GetDependencies(namespaces)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
