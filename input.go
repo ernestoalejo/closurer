@@ -9,20 +9,6 @@ import (
 	"time"
 )
 
-type SourcesList []*Source
-
-func (lst SourcesList) Len() int {
-	return len(lst)
-}
-
-func (lst SourcesList) Less(i, j int) bool {
-	return lst[i].Filename < lst[j].Filename
-}
-
-func (lst SourcesList) Swap(i, j int) {
-	lst[i], lst[j] = lst[j], lst[i]
-}
-
 func InputHandler(r *Request) error {
 	// Reload the confs if they've changed
 	if err := ReadConf(); err != nil {

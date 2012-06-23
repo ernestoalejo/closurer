@@ -11,7 +11,6 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 )
@@ -35,7 +34,7 @@ type Source struct {
 }
 
 // Creates a new source
-func NewSource(filename string, base bool) (*Source, bool, error) {
+func NewSource(filename string, base string) (*Source, bool, error) {
 	// Get the info of the file
 	info, err := os.Lstat(filename)
 	if err != nil {
@@ -53,7 +52,7 @@ func NewSource(filename string, base bool) (*Source, bool, error) {
 	src = &Source{
 		Provides: []string{},
 		Requires: []string{},
-		Base:     base,
+		Base:     filename == base,
 		Filename: filename,
 	}
 
@@ -122,7 +121,7 @@ type DepsTree struct {
 // Adds a new JS source file to the tree
 func (tree *DepsTree) AddSource(filename string) error {
 	// Build the source
-	src, cached, err := NewSource(filename, filename == tree.basePath)
+	src, cached, err := NewSource(filename, tree.basePath)
 	if err != nil {
 		return err
 	}
@@ -264,7 +263,7 @@ func BuildDepsTree() (*DepsTree, error) {
 	depstree := &DepsTree{
 		sources:  map[string]*Source{},
 		provides: map[string]*Source{},
-		basePath: path.Join(conf.ClosureLibrary, "goog", "closure", "goog"),
+		basePath: path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
 	}
 	for _, root := range roots {
 		if err := ScanSources(depstree, root); err != nil {
@@ -352,11 +351,7 @@ func WriteDepsCache() error {
 }
 
 func WriteDeps(w io.Writer, deps []*Source, paths []string) error {
-	// Sort the list of dependencies (the order doesn't mind)
-	sorted_deps := SourcesList(deps)
-	sort.Sort(sorted_deps)
-
-	for _, src := range sorted_deps {
+	for _, src := range deps {
 		// Accumulates the provides
 		provides := ""
 		for _, provide := range src.Provides {
