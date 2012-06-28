@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 	"time"
 )
 
@@ -137,16 +138,16 @@ func ApplyConf(config *Config) {
 	}
 
 	if config.ClosureLibrary != "" {
-		conf.ClosureLibrary = config.ClosureLibrary
+		conf.ClosureLibrary = fixPath(config.ClosureLibrary)
 	}
 	if config.ClosureCompiler != "" {
-		conf.ClosureCompiler = config.ClosureCompiler
+		conf.ClosureCompiler = fixPath(config.ClosureCompiler)
 	}
 	if config.ClosureTemplates != "" {
-		conf.ClosureTemplates = config.ClosureTemplates
+		conf.ClosureTemplates = fixPath(config.ClosureTemplates)
 	}
 	if config.ClosureStylesheets != "" {
-		conf.ClosureStylesheets = config.ClosureStylesheets
+		conf.ClosureStylesheets = fixPath(config.ClosureStylesheets)
 	}
 
 	if config.Mode != "" {
@@ -166,4 +167,21 @@ func ApplyConf(config *Config) {
 	if len(config.Define) > 0 {
 		conf.Define = config.Define
 	}
+}
+
+// Replace the ~ with the correct folder path
+func fixPath(p string) string {
+	if !strings.Contains(p, "~") {
+		return p
+	}
+
+	user := os.Getenv("USER")
+	if user == "" {
+		user = os.Getenv("USERNAME")
+	}
+	if user == "" {
+		log.Fatal("found ~ in a path, but USER nor USERNAME are setted in the env")
+	}
+
+	return strings.Replace(p, "~", "/home/"+user, -1)
 }
