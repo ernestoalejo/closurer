@@ -35,9 +35,9 @@ func main() {
 		if err := ReadDepsCache(); err != nil {
 			log.Fatal(err)
 		}
-		if err := ReadSoyCache(); err != nil {
+		/*if err := ReadSoyCache(); err != nil {
 			log.Fatal(err)
-		}
+		}*/
 	}
 
 	// Performs the benchmarks

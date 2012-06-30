@@ -1,150 +1,63 @@
 package main
 
 import (
-	"encoding/gob"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
-	"time"
 )
 
-var soyCache = map[string]time.Time{}
-
 // Compile all modified templates
-func CompileSoy(w io.Writer) error {
-	templates, err := ScanTemplates(conf.RootSoy)
+func CompileSoy() error {
+	// Search the templates
+	soy, err := Scan(conf.RootSoy, ".soy")
 	if err != nil {
-		return fmt.Errorf("cannot scan templates: %s", err)
+		return err
 	}
 
-	for _, template := range templates {
-		if err := SoyCompiler(w, template); err != nil {
+	// No results, no compiling
+	if len(soy) == 0 {
+		return nil
+	}
+
+	for _, t := range soy {
+		// Checks if the cached version is ok
+		if modified, err := CacheModified(t); err != nil {
 			return err
+		} else if !modified {
+			continue
 		}
-	}
 
-	if err := WriteSoyCache(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Scan a directory searching for .soy files
-func ScanTemplates(filepath string) ([]string, error) {
-	templates := []string{}
-
-	// Get the list of entries
-	ls, err := ioutil.ReadDir(filepath)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, entry := range ls {
-		fullpath := path.Join(filepath, entry.Name())
-
-		if entry.IsDir() {
-			if IsValidDir(entry.Name()) {
-				// Scan recursively the directories
-				t, err := ScanTemplates(fullpath)
-				if err != nil {
-					return nil, err
-				}
-				templates = append(templates, t...)
-			}
-		} else if path.Ext(entry.Name()) == ".soy" {
-			// Add the templates to the list
-			templates = append(templates, fullpath)
+		// Relativize the path
+		prel, err := filepath.Rel(conf.RootSoy, t)
+		if err != nil {
+			return fmt.Errorf("cannot put relative the path %s: %s", t, err)
 		}
-	}
 
-	return templates, nil
-}
-
-// Compile a template if it has been modified
-func SoyCompiler(w io.Writer, p string) error {
-	prel, err := filepath.Rel(conf.RootSoy, p)
-	if err != nil {
-		return fmt.Errorf("cannot relativize the path to %s: %s", p, err)
-	}
-
-	soytojs := path.Join(conf.ClosureTemplates, "build", "SoyToJsSrcCompiler.jar")
-	out := path.Join(conf.Build, "templates", prel+".js")
-
-	// Get the stat file info
-	info, err := os.Lstat(p)
-	if err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("cannot check the file info: %s", p)
-	}
-
-	// Check if the cached version is still ok
-	otime, ok := soyCache[p]
-	if ok {
-		if info.ModTime() == otime {
-			return nil
+		// Creates all the necessary directories
+		out := path.Join(conf.Build, "templates", prel+".js")
+		if err := os.MkdirAll(path.Dir(out), 0755); err != nil {
+			return fmt.Errorf("cannot create the build tree: %s", out)
 		}
-	}
 
-	// Creates all the necessary directories
-	if err := os.MkdirAll(path.Dir(out), 0755); err != nil {
-		return fmt.Errorf("cannot create the build tree: %s", out)
-	}
+		log.Println("Compiling template:", t)
 
-	log.Println("Compiling template:", p)
+		// Run the compiler command
+		cmd := exec.Command(
+			"java",
+			"-jar", path.Join(conf.ClosureTemplates, "build", "SoyToJsSrcCompiler.jar"),
+			"--outputPathFormat", out,
+			"--shouldGenerateJsdoc",
+			"--shouldProvideRequireSoyNamespaces",
+			"--cssHandlingScheme", "goog",
+			t)
 
-	// Compile the template
-	cmd := exec.Command("java", "-jar", soytojs, "--outputPathFormat", out,
-		"--shouldGenerateJsdoc", "--shouldProvideRequireSoyNamespaces",
-		"--cssHandlingScheme", "goog", p)
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Fprintf(w, "%s\n", output)
-		return fmt.Errorf("cannot compile the template %s: %s", p, err)
-	}
-
-	// Cache the output
-	soyCache[p] = info.ModTime()
-
-	return nil
-}
-
-func ReadSoyCache() error {
-	name := path.Join(conf.Build, "soy-cache")
-	f, err := os.Open(name)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("soy compiler error for file %s: %s\n%s", t, err, output)
 		}
-		return err
-	}
-	defer f.Close()
-
-	log.Println("Reading soy cache:", name)
-
-	d := gob.NewDecoder(f)
-	if err := d.Decode(&soyCache); err != nil {
-		return fmt.Errorf("cannot decode the deps cache: %s", err)
-	}
-
-	return nil
-}
-
-func WriteSoyCache() error {
-	f, err := os.Create(path.Join(conf.Build, "soy-cache"))
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	e := gob.NewEncoder(f)
-	if err := e.Encode(&soyCache); err != nil {
-		return fmt.Errorf("cannot encode the deps cache: %s", err)
 	}
 
 	return nil

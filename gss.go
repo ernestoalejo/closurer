@@ -42,7 +42,7 @@ func CompileGss() error {
 		return err
 	}
 
-	// No result, no compiling
+	// No results, no compiling
 	if len(gss) == 0 {
 		return nil
 	}
@@ -64,9 +64,7 @@ func CompileGss() error {
 
 	log.Println("Compiling gss")
 
-	// Compute some paths
-	compiler := path.Join(conf.ClosureStylesheets, "build", "closure-stylesheets.jar")
-
+	// Compute the output path
 	out := path.Join(conf.Build, "compiled.css")
 	if *build {
 		out = *cssOutput
@@ -74,7 +72,8 @@ func CompileGss() error {
 
 	// Run the soy compiler
 	cmd := exec.Command(
-		"java", "-jar", compiler,
+		"java",
+		"-jar", path.Join(conf.ClosureStylesheets, "build", "closure-stylesheets.jar"),
 		"--output-file", out,
 		"--output-renaming-map-format", "CLOSURE_COMPILED",
 		"--rename", "CLOSURE",
@@ -83,7 +82,7 @@ func CompileGss() error {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("gss compiler error:\n%s", output)
+		return fmt.Errorf("gss compiler error: %s\n%s", err, output)
 	}
 
 	return nil

@@ -43,7 +43,7 @@ func CompileJs(w io.Writer) error {
 	}
 
 	// Compile the .soy files
-	if err := CompileSoy(w); err != nil {
+	if err := CompileSoy(); err != nil {
 		return err
 	}
 

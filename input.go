@@ -52,7 +52,7 @@ func InputHandler(r *Request) error {
 
 func GenerateDeps(r *Request, name string, paths []string) error {
 	// Compile all the modified templates
-	if err := CompileSoy(r.W); err != nil {
+	if err := CompileSoy(); err != nil {
 		return err
 	}
 
