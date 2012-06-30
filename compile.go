@@ -38,7 +38,7 @@ func CompileJs(w io.Writer) error {
 	start := time.Now()
 
 	// Compile the .gss files
-	if err := CompileGss(w); err != nil {
+	if err := CompileGss(); err != nil {
 		return err
 	}
 

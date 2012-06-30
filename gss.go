@@ -17,7 +17,7 @@ func CompileGssHandler(r *Request) error {
 	}
 
 	// Compile the .gss files
-	if err := CompileGss(r.W); err != nil {
+	if err := CompileGss(); err != nil {
 		return err
 	}
 
@@ -35,7 +35,7 @@ func CompileGssHandler(r *Request) error {
 }
 
 // Compiles the .gss files
-func CompileGss(w io.Writer) error {
+func CompileGss() error {
 	// Search the .gss files
 	gss, err := Scan(conf.RootGss, ".gss")
 	if err != nil {
@@ -64,7 +64,7 @@ func CompileGss(w io.Writer) error {
 
 	log.Println("Compiling gss")
 
-	// Compile the template if some file changed
+	// Compute some paths
 	compiler := path.Join(conf.ClosureStylesheets, "build", "closure-stylesheets.jar")
 
 	out := path.Join(conf.Build, "compiled.css")
@@ -72,6 +72,7 @@ func CompileGss(w io.Writer) error {
 		out = *cssOutput
 	}
 
+	// Run the soy compiler
 	cmd := exec.Command(
 		"java", "-jar", compiler,
 		"--output-file", out,
@@ -82,8 +83,7 @@ func CompileGss(w io.Writer) error {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Fprintf(w, "%s\n", output)
-		return err
+		return fmt.Errorf("gss compiler error:\n%s", output)
 	}
 
 	return nil
