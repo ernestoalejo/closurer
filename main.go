@@ -59,7 +59,7 @@ func main() {
 func Serve() {
 	http.Handle("/", Handler(HomeHandler))
 	http.Handle("/compile", Handler(CompileHandler))
-	http.Handle("/css", Handler(CompileCssHandler))
+	http.Handle("/css", Handler(CompileGssHandler))
 	http.Handle("/input/", Handler(InputHandler))
 	http.Handle("/test/", Handler(TestHandler))
 	http.Handle("/test/all", Handler(TestAllHandler))
