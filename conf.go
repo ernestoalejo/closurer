@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 )
 
 type Config struct {
@@ -18,7 +17,7 @@ type Config struct {
 	RootSoy string `json:"root-soy"`
 	RootGss string `json:"root-gss"`
 
-	// Extern scripts folder
+	// Extern scripts folders
 	Externs []string `json:"externs"`
 
 	// Temporary build directory
@@ -49,34 +48,31 @@ type Config struct {
 	Inherits string `json:"inherits"`
 }
 
+// Global configuration.
 var conf = new(Config)
+
+// Other confs loaded (through inheritation).
 var confs = map[string]*Config{}
-var confModified = map[string]time.Time{}
 
+// Load the config file that was passed as an argument.
 func ReadConf() error {
-	if err := LoadConfFile(*confArg); err != nil {
-		return err
-	}
-
-	return nil
+	return loadConfFile(*confArg)
 }
 
-func LoadConfFile(filename string) error {
+// Load a config file recursively (inheritation) and apply
+// the settings to the global object.
+func loadConfFile(filename string) error {
+	// Retrieve/Create a new entry in the configs map
 	config, ok := confs[filename]
 	if !ok {
-		config = new(Config)
+		confs[filename] = new(Config)
+		config = confs[filename]
 	}
 
 	// Check the modified time
-	info, err := os.Lstat(filename)
-	if err != nil {
+	if modified, err := CacheModified(filename); err != nil {
 		return err
-	}
-
-	modified, ok := confModified[filename]
-	if !ok || info.ModTime() != modified {
-		confModified[filename] = info.ModTime()
-
+	} else if modified {
 		log.Println("Reading config file:", filename)
 
 		// Open the file
@@ -87,36 +83,33 @@ func LoadConfFile(filename string) error {
 		defer f.Close()
 
 		// Load the data
-		dec := json.NewDecoder(f)
-		if err := dec.Decode(config); err != nil {
+		if err := json.NewDecoder(f).Decode(config); err != nil {
 			return err
 		}
 
-		// Adjust the path if necessary
-		if config.Inherits != "" {
-			config.Inherits = path.Join(path.Dir(filename), config.Inherits)
-		}
-
-		confs[filename] = config
-
-		// Invalid caches
-		sourcesCache = map[string]*Source{}
-		soyCache = map[string]time.Time{}
-		gssCache = map[string]time.Time{}
+		// Adjust the paths
+		config.ClosureLibrary = fixPath(config.ClosureLibrary)
+		config.ClosureCompiler = fixPath(config.ClosureCompiler)
+		config.ClosureTemplates = fixPath(config.ClosureTemplates)
+		config.ClosureStylesheets = fixPath(config.ClosureStylesheets)
+		config.Inherits = fixInheritsPath(filename, config.Inherits)
 	}
 
+	// Recursively scan inherited files
 	if config.Inherits != "" {
-		if err := LoadConfFile(config.Inherits); err != nil {
+		if err := loadConfFile(config.Inherits); err != nil {
 			return err
 		}
 	}
 
-	ApplyConf(config)
+	applyConf(config)
 
 	return nil
 }
 
-func ApplyConf(config *Config) {
+// Copy the non-zero settings from config to the global
+// conf object.
+func applyConf(config *Config) {
 	if config.Id != "" {
 		conf.Id = config.Id
 	}
@@ -138,16 +131,16 @@ func ApplyConf(config *Config) {
 	}
 
 	if config.ClosureLibrary != "" {
-		conf.ClosureLibrary = fixPath(config.ClosureLibrary)
+		conf.ClosureLibrary = config.ClosureLibrary
 	}
 	if config.ClosureCompiler != "" {
-		conf.ClosureCompiler = fixPath(config.ClosureCompiler)
+		conf.ClosureCompiler = config.ClosureCompiler
 	}
 	if config.ClosureTemplates != "" {
-		conf.ClosureTemplates = fixPath(config.ClosureTemplates)
+		conf.ClosureTemplates = config.ClosureTemplates
 	}
 	if config.ClosureStylesheets != "" {
-		conf.ClosureStylesheets = fixPath(config.ClosureStylesheets)
+		conf.ClosureStylesheets = config.ClosureStylesheets
 	}
 
 	if config.Mode != "" {
@@ -184,4 +177,13 @@ func fixPath(p string) string {
 	}
 
 	return strings.Replace(p, "~", "/home/"+user, -1)
+}
+
+// Converts a relative path to current, to an absolute path
+// if needed.
+func fixInheritsPath(current string, p string) string {
+	if p != "" && !path.IsAbs(p) {
+		p = path.Join(path.Dir(current), p)
+	}
+	return p
 }
