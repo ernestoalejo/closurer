@@ -10,34 +10,26 @@ import (
 )
 
 func InputHandler(r *Request) error {
-	// Reload the confs if they've changed
-	if err := ReadConf(); err != nil {
+	// Execute the pre-compile actions
+	if err := PreCompileActions(); err != nil {
 		return err
 	}
 
-	// Filename
+	// Requested filename
 	name := r.Req.URL.Path[7:]
-
-	// Base paths, all routes to a JS must start from these
-	paths := []string{
-		path.Join(conf.ClosureLibrary, "closure", "goog"),
-		conf.RootJs,
-		path.Join(conf.Build, "templates"),
-		conf.RootSoy,
-		path.Join(conf.ClosureTemplates, "javascript"),
-	}
 
 	// Re-calculate deps and compile templates if needed
 	if name == "deps.js" {
-		return GenerateDeps(r, name, paths)
+		return GenerateDeps(r)
 	}
 
 	// Otherwise serve the file if it can be found
+	paths := BaseJSPaths()
 	for _, p := range paths {
 		f, err := os.Open(path.Join(p, name))
 		if err != nil && !os.IsNotExist(err) {
 			return fmt.Errorf("cannot open the file: %s", err)
-		} else if !os.IsNotExist(err) {
+		} else if err == nil {
 			defer f.Close()
 
 			r.W.Header().Set("Content-Type", "text/javascript")
@@ -50,7 +42,7 @@ func InputHandler(r *Request) error {
 	return fmt.Errorf("file not found: %s", name)
 }
 
-func GenerateDeps(r *Request, name string, paths []string) error {
+func GenerateDeps(r *Request) error {
 	// Compile all the modified templates
 	if err := CompileSoy(); err != nil {
 		return err
@@ -75,9 +67,11 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 		namespaces = append(namespaces, ns...)
 	}
 
-	namespaces = append(namespaces, "goog.userAgent.product", "goog.testing.MultiTestRunner")
+	// Add some special namespaces for easier testing
+	namespaces = append(namespaces, "goog.userAgent.product",
+		"goog.testing.MultiTestRunner")
 
-	// Calculate the list of files to compile
+	// Calculate the list of dependencies
 	deps, err := depstree.GetDependencies(namespaces)
 	if err != nil {
 		return err
@@ -85,6 +79,7 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 
 	log.Println("Done generating deps.js! Elapsed:", time.Since(start))
 
+	// Output the list correctly formatted
 	r.W.Header().Set("Content-Type", "text/javascript")
 	if err := WriteDeps(deps); err != nil {
 		return err

@@ -358,17 +358,7 @@ func WriteDeps(deps []*Source) error {
 	}
 	defer f.Close()
 
-	// Base paths, all routes to a JS must start from one
-	// of these ones.
-	// The order is important, the paths will be scanned as
-	// they've been written.
-	paths := []string{
-		path.Join(conf.ClosureLibrary, "closure", "goog"),
-		conf.RootJs,
-		path.Join(conf.Build, "templates"),
-		path.Join(conf.ClosureTemplates, "javascript"),
-	}
-
+	paths := BaseJSPaths()
 	for _, src := range deps {
 		// Accumulates the provides & requires of the source
 		provides := "'" + strings.Join(src.Provides, "', '") + "'"
@@ -393,4 +383,17 @@ func WriteDeps(deps []*Source) error {
 	}
 
 	return nil
+}
+
+// Base paths, all routes to a JS must start from one
+// of these ones.
+// The order is important, the paths will be scanned as
+// they've been written.
+func BaseJSPaths() []string {
+	return []string{
+		path.Join(conf.ClosureLibrary, "closure", "goog"),
+		conf.RootJs,
+		path.Join(conf.Build, "templates"),
+		path.Join(conf.ClosureTemplates, "javascript"),
+	}
 }
