@@ -11,13 +11,18 @@ import (
 
 // Returns the compiled CSS.
 func CompileGssHandler(r *Request) error {
-	// Reload the confs if they've changed
-	if err := ReadConf(); err != nil {
+	// Execute the pre-compile actions
+	if err := PreCompileActions(); err != nil {
 		return err
 	}
 
 	// Compile the .gss files
 	if err := CompileGss(); err != nil {
+		return err
+	}
+
+	// Execute the post-compile actions
+	if err := PostCompileActions(); err != nil {
 		return err
 	}
 

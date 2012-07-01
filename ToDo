@@ -2,9 +2,6 @@
 To Do:
 ~~~~~~
 
- * Do a precompile actions and postcompile actions funcs to handle
-   confs, caches, ...
-
  * List of files that will be compiled.
  * List of unit tests.
  * Validate settings before using them.
