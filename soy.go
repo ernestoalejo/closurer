@@ -56,7 +56,8 @@ func CompileSoy() error {
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			return fmt.Errorf("soy compiler error for file %s: %s\n%s", t, err, output)
+			return fmt.Errorf("soy compiler error for file %s: %s\n%s", t,
+				err, string(output))
 		}
 	}
 

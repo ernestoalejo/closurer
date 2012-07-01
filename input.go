@@ -86,7 +86,7 @@ func GenerateDeps(r *Request, name string, paths []string) error {
 	log.Println("Done generating deps.js! Elapsed:", time.Since(start))
 
 	r.W.Header().Set("Content-Type", "text/javascript")
-	if err := WriteDeps(r.W, deps, paths); err != nil {
+	if err := WriteDeps(deps); err != nil {
 		return err
 	}
 

@@ -350,25 +350,29 @@ func WriteDepsCache() error {
 	return nil
 }
 
-func WriteDeps(w io.Writer, deps []*Source, paths []string) error {
-	for _, src := range deps {
-		// Accumulates the provides
-		provides := ""
-		for _, provide := range src.Provides {
-			provides += "'" + provide + "', "
-		}
-		if provides != "" {
-			provides = provides[:len(provides)-2]
-		}
+func WriteDeps(deps []*Source) error {
+	// Create the deps.js file for our project
+	f, err := os.Create(path.Join(conf.Build, "deps.js"))
+	if err != nil {
+		return fmt.Errorf("cannot create deps file: %s", err)
+	}
+	defer f.Close()
 
-		// Accumulates the requires
-		requires := ""
-		for _, require := range src.Requires {
-			requires += "'" + require + "', "
-		}
-		if requires != "" {
-			requires = requires[:len(requires)-2]
-		}
+	// Base paths, all routes to a JS must start from one
+	// of these ones.
+	// The order is important, the paths will be scanned as
+	// they've been written.
+	paths := []string{
+		path.Join(conf.ClosureLibrary, "closure", "goog"),
+		conf.RootJs,
+		path.Join(conf.Build, "templates"),
+		path.Join(conf.ClosureTemplates, "javascript"),
+	}
+
+	for _, src := range deps {
+		// Accumulates the provides & requires of the source
+		provides := "'" + strings.Join(src.Provides, "', '") + "'"
+		requires := "'" + strings.Join(src.Requires, "', '") + "'"
 
 		// Search the base path to the file, and put the path
 		// relative to it
@@ -385,7 +389,7 @@ func WriteDeps(w io.Writer, deps []*Source, paths []string) error {
 		}
 
 		// Write the line to the output of the deps.js file request
-		fmt.Fprintf(w, "goog.addDependency('%s', [%s], [%s]);\n", n, provides, requires)
+		fmt.Fprintf(f, "goog.addDependency('%s', [%s], [%s]);\n", n, provides, requires)
 	}
 
 	return nil

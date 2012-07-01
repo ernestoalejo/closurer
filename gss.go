@@ -87,7 +87,7 @@ func CompileGss() error {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("gss compiler error: %s\n%s", err, output)
+		return fmt.Errorf("gss compiler error: %s\n%s", err, string(output))
 	}
 
 	return nil

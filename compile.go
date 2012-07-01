@@ -12,8 +12,8 @@ import (
 )
 
 func CompileHandler(r *Request) error {
-	// Reload the confs if they've changed
-	if err := ReadConf(); err != nil {
+	// Execute the pre-compile actions
+	if err := PreCompileActions(); err != nil {
 		return err
 	}
 
@@ -22,6 +22,12 @@ func CompileHandler(r *Request) error {
 		return err
 	}
 
+	// Execute the post-compile actions
+	if err := PostCompileActions(); err != nil {
+		return err
+	}
+
+	// Copy the file to the output
 	f, err := os.Open(path.Join(conf.Build, "compiled.js"))
 	if err != nil {
 		return fmt.Errorf("cannot read the compiled javascript: %s", err)
@@ -53,8 +59,10 @@ func CompileJs(w io.Writer) error {
 		return err
 	}
 
+	// Whether we must recompile or the old file is correct
 	mustCompile := false
 
+	// Build the out path
 	out := path.Join(conf.Build, "compiled.js")
 	if *build {
 		out = *jsOutput
@@ -62,12 +70,11 @@ func CompileJs(w io.Writer) error {
 	}
 
 	if !mustCompile {
-		if _, err = os.Lstat(out); err != nil {
-			if os.IsNotExist(err) {
-				mustCompile = true
-			} else {
-				return err
-			}
+		// Check if the cache file exists, to use it
+		if _, err = os.Lstat(out); err != nil && os.IsNotExist(err) {
+			mustCompile = true
+		} else if err != nil {
+			return err
 		}
 	}
 
@@ -75,6 +82,7 @@ func CompileJs(w io.Writer) error {
 		// Calculate all the input namespaces
 		namespaces := []string{}
 		for _, input := range conf.Inputs {
+			// Ignore _test files
 			if strings.Contains(input, "_test") {
 				continue
 			}
@@ -92,27 +100,13 @@ func CompileJs(w io.Writer) error {
 			return err
 		}
 
-		f, err := os.Create(path.Join(conf.Build, "deps.js"))
-		if err != nil {
-			return fmt.Errorf("cannot create deps file: %s", err)
-		}
-		defer f.Close()
-
-		// Base paths, all routes to a JS must start from these
-		paths := []string{
-			path.Join(conf.ClosureLibrary, "closure", "goog"),
-			conf.RootJs,
-			path.Join(conf.Build, "templates"),
-			conf.RootSoy,
-			path.Join(conf.ClosureTemplates, "javascript"),
-		}
-
-		if err := WriteDeps(f, deps, paths); err != nil {
+		// Write the deps file
+		if err := WriteDeps(deps); err != nil {
 			return err
 		}
 
-		// Send them to the compiler
-		if err := JsCompiler(w, deps); err != nil {
+		// Compile the javascript
+		if err := JsCompiler(out, deps); err != nil {
 			return err
 		}
 	}
@@ -122,12 +116,7 @@ func CompileJs(w io.Writer) error {
 	return nil
 }
 
-func JsCompiler(w io.Writer, deps []*Source) error {
-	out := path.Join(conf.Build, "compiled.js")
-	if *build {
-		out = *jsOutput
-	}
-
+func JsCompiler(out string, deps []*Source) error {
 	// Prepare the call to the compiler
 	args := []string{
 		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
@@ -183,6 +172,7 @@ func JsCompiler(w io.Writer, deps []*Source) error {
 		args = append(args, "--externs", extern)
 	}
 
+	// Output the command that we'll run.
 	if *outputCmd {
 		f, err := os.Create(path.Join(conf.Build, "cmd"))
 		if err != nil {
@@ -198,11 +188,11 @@ func JsCompiler(w io.Writer, deps []*Source) error {
 	cmd := exec.Command("java", args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		//log.Println("Output from compiler:\n", string(output))
-		fmt.Fprintf(w, "%s\n", output)
-		return fmt.Errorf("cannot compile the code: %s", err)
+		return fmt.Errorf("cannot compile the code: %s\n%s", err, string(output))
 	}
 
+	// If the compiler outputs something, send it to the console
+	// for logging (so don't clubber the JS output of the handler).
 	if len(output) > 0 {
 		log.Println("Output from compiler:\n", string(output))
 	}
