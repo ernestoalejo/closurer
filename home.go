@@ -21,6 +21,7 @@ const HOME_TEMPLATE = `
 	<h1>Actions</h1>
 	<ul>
 		<li><a href="/compile">Compiled output</a></li>
+		<li><a href="/test/list">List of tests</a></li>
 		<li><a href="/test/all">MultiTest runner</a></li>
 	</ul>
 

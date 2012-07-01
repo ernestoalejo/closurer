@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"path"
 	"strings"
 )
@@ -24,7 +25,9 @@ func (v *visitor) scan(filepath string, ext string) error {
 		if entry.IsDir() {
 			if v.validDir(entry.Name()) {
 				// Scan recursively the directories
-				return v.scan(fullpath, ext)
+				if err := v.scan(fullpath, ext); err != nil {
+					return err
+				}
 			}
 		} else if strings.HasSuffix(entry.Name(), ext) {
 			// Add the file to the list

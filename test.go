@@ -51,6 +51,20 @@ func ScanTests() ([]string, error) {
 	return tests, nil
 }
 
+func TestListHandler(r *Request) error {
+	r.W.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	tests, err := ScanTests()
+	if err != nil {
+		return err
+	}
+
+	data := map[string]interface{}{
+		"AllTests": tests,
+	}
+	return r.ExecuteTemplate(TEST_LIST_TEMPLATE, data)
+}
+
 const TEST_TEMPLATE = `
 {{define "base"}}
 <!DOCTYPE html>
@@ -295,6 +309,30 @@ const GLOBAL_TEST_TEMPLATE = `
 		})();
 
 	</script>
+
+</body>
+</html>
+{{end}}
+`
+const TEST_LIST_TEMPLATE = `
+{{define "base"}}
+<!DOCTYPE html>
+<html>
+<head>
+
+	<meta charset="utf-8">
+	<title>Unit Tests List</title>
+
+</head>
+<body>
+
+	<h1>All JsUnit Tests</h1>
+	
+	<ul>
+		{{range .AllTests}}
+			<li><a href="/test/{{.}}">{{.}}</a></li>
+		{{end}}
+	</ul>
 
 </body>
 </html>
