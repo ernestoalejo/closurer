@@ -2,10 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"path"
 	"path/filepath"
-	"strings"
 )
 
 func TestHandler(r *Request) error {
@@ -23,7 +20,7 @@ func TestHandler(r *Request) error {
 func TestAllHandler(r *Request) error {
 	r.W.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	tests, err := ScanTests(conf.RootJs)
+	tests, err := ScanTests()
 	if err != nil {
 		return err
 	}
@@ -34,35 +31,21 @@ func TestAllHandler(r *Request) error {
 	return r.ExecuteTemplate(GLOBAL_TEST_TEMPLATE, data)
 }
 
-func ScanTests(filename string) ([]string, error) {
-	tests := []string{}
-
-	// Get the list of entries
-	ls, err := ioutil.ReadDir(filename)
+// Search for "_test.js" files and relativize them to
+// the root directory. It replaces the .js ext with .html.
+func ScanTests() ([]string, error) {
+	tests, err := Scan(conf.RootJs, "_test.js")
 	if err != nil {
 		return nil, err
 	}
 
-	for _, entry := range ls {
-		fullpath := path.Join(filename, entry.Name())
-
-		if entry.IsDir() {
-			if IsValidDir(entry.Name()) {
-				// Scan recursively the directories
-				t, err := ScanTests(fullpath)
-				if err != nil {
-					return nil, err
-				}
-				tests = append(tests, t...)
-			}
-		} else if strings.Contains(entry.Name(), "_test.js") {
-			// Add the test to the list
-			p, err := filepath.Rel(conf.RootJs, fullpath[:len(fullpath)-2]+"html")
-			if err != nil {
-				return nil, fmt.Errorf("cannot relativize %s: %s", fullpath, err)
-			}
-			tests = append(tests, p)
+	for i, test := range tests {
+		// Relativize the path adding .html instead of .js
+		p, err := filepath.Rel(conf.RootJs, test[:len(test)-2]+"html")
+		if err != nil {
+			return nil, fmt.Errorf("cannot relativize %s: %s", test, err)
 		}
+		tests[i] = p
 	}
 
 	return tests, nil

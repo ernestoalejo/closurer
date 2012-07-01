@@ -1,7 +1,6 @@
 package main
 
-import (
-)
+import ()
 
 // Called before each compilation task. It load the caches
 // and reload the confs if needed.

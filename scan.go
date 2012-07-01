@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
+	"strings"
 )
 
 type visitor struct {
@@ -25,7 +26,7 @@ func (v *visitor) scan(filepath string, ext string) error {
 				// Scan recursively the directories
 				return v.scan(fullpath, ext)
 			}
-		} else if path.Ext(entry.Name()) == ext {
+		} else if strings.HasSuffix(entry.Name(), ext) {
 			// Add the file to the list
 			v.results = append(v.results, fullpath)
 		}
