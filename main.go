@@ -30,16 +30,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Read caches
-	if !*noCache {
-		if err := ReadDepsCache(); err != nil {
-			log.Fatal(err)
-		}
-		/*if err := ReadSoyCache(); err != nil {
-			log.Fatal(err)
-		}*/
-	}
-
 	// Performs the benchmarks
 	if *bench {
 		if err := Bench(); err != nil {
@@ -69,7 +59,15 @@ func Serve() {
 }
 
 func Build() {
+	if err := PreCompileActions(); err != nil {
+		log.Fatal(err)
+	}
+
 	if err := CompileJs(os.Stdout); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := PostCompileActions(); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -89,7 +87,7 @@ func Bench() error {
 		log.Println("Loop:", i)
 
 		// Build the deps tree
-		depstree, err := BuildDepsTree()
+		depstree, err := NewDepsTree()
 		if err != nil {
 			return err
 		}

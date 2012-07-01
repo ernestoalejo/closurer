@@ -2,59 +2,53 @@ package main
 
 import (
 	"bufio"
-	"encoding/gob"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 )
 
 var (
 	provideRe  = regexp.MustCompile(`^\s*goog\.provide\(\s*[\'"](.+)[\'"]\s*\)`)
 	requiresRe = regexp.MustCompile(`^\s*goog\.require\(\s*[\'"](.+)[\'"]\s*\)`)
-	base       = "var goog = goog || {}; // Identifies this file as the Closure base."
+	//base       = "var goog = goog || {}; // Identifies this file as the Closure base."
 )
 
-var sourcesCache = map[string]*Source{}
-
-// Saves the list of goog.provide() and goog.require() calls
-// for each JS source.
+// Represents a JS source
 type Source struct {
+	// List of namespaces this file provides.
 	Provides []string
+
+	// List of required namespaces for this file.
 	Requires []string
-	Base     bool
-	Modified time.Time
+
+	// Whether this is the base.js file of the Closure Library.
+	Base bool
+
+	// Name of the source file.
 	Filename string
 }
 
-// Creates a new source
+// Creates a new source. Returns the source, if it has been
+// loaded from cache or not, and an error.
 func NewSource(filename string, base string) (*Source, bool, error) {
-	// Get the info of the file
-	info, err := os.Lstat(filename)
-	if err != nil {
-		return nil, false, fmt.Errorf("cannot stat file info: %s: %s", filename, err)
+	src := CachedSource(filename)
+
+	// Return the file from cache if possible
+	if modified, err := CacheModified(filename); err != nil {
+		return nil, false, err
+	} else if !modified {
+		return src, true, nil
 	}
 
-	// If it hasn't been modified, return in directly
-	src, ok := sourcesCache[filename]
-	if ok {
-		if info.ModTime() == src.Modified {
-			return src, true, nil
-		}
-	}
-
-	src = &Source{
-		Provides: []string{},
-		Requires: []string{},
-		Base:     filename == base,
-		Filename: filename,
-	}
+	// Reset the source info
+	src.Provides = []string{}
+	src.Requires = []string{}
+	src.Base = (filename == base)
+	src.Filename = filename
 
 	// Open the file
 	f, err := os.Open(filename)
@@ -102,10 +96,6 @@ func NewSource(filename string, base string) (*Source, bool, error) {
 		src.Provides = append(src.Provides, "goog")
 	}
 
-	// Save the file info in cache
-	src.Modified = info.ModTime()
-	sourcesCache[filename] = src
-
 	return src, false, nil
 }
 
@@ -118,6 +108,41 @@ type DepsTree struct {
 	mustCompile bool
 }
 
+// Build a dependency tree that allows the client to know the order of
+// compilation
+func NewDepsTree() (*DepsTree, error) {
+	// Initialize the tree
+	depstree := &DepsTree{
+		sources:  map[string]*Source{},
+		provides: map[string]*Source{},
+		basePath: path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
+	}
+
+	// Build the deps tree scanning each root directory recursively
+	roots := BaseJSPaths()
+	for _, root := range roots {
+		// Scan the sources
+		src, err := Scan(root, ".js")
+		if err != nil {
+			return nil, err
+		}
+
+		// Add them to the tree
+		for _, s := range src {
+			if err := depstree.AddSource(s); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Check the integrity of the tree
+	if err := depstree.Check(); err != nil {
+		return nil, err
+	}
+
+	return depstree, nil
+}
+
 // Adds a new JS source file to the tree
 func (tree *DepsTree) AddSource(filename string) error {
 	// Build the source
@@ -126,6 +151,7 @@ func (tree *DepsTree) AddSource(filename string) error {
 		return err
 	}
 
+	// If it's the base file, save it
 	if src.Base {
 		tree.base = src
 	}
@@ -143,12 +169,15 @@ func (tree *DepsTree) AddSource(filename string) error {
 		}
 	}
 
-	// Add all the provides to the list
+	// Add all the provides to the map
 	for _, provide := range src.Provides {
 		tree.provides[provide] = src
 	}
 
+	// Save the source
 	tree.sources[filename] = src
+
+	// Update the mustCompile flag
 	tree.mustCompile = tree.mustCompile || !cached
 
 	return nil
@@ -189,29 +218,20 @@ type TraversalInfo struct {
 // Returns the list of files (in order) that must be compiled to finally
 // obtain all namespaces, including the base one.
 func (tree *DepsTree) GetDependencies(namespaces []string) ([]*Source, error) {
-	depsList := []*Source{tree.base}
+	// Prepare the info
+	info := &TraversalInfo{
+		deps:      []*Source{},
+		traversal: []string{},
+	}
 
 	for _, ns := range namespaces {
-		// Prepare the info
-		info := &TraversalInfo{
-			deps:      []*Source{},
-			traversal: []string{},
-		}
-
 		// Resolve all the needed dependencies
 		if err := tree.ResolveDependencies(ns, info); err != nil {
 			return nil, err
 		}
-
-		// Add it to the list if they're not there yet
-		for _, k := range info.deps {
-			if !InSource(depsList, k) {
-				depsList = append(depsList, k)
-			}
-		}
 	}
 
-	return depsList, nil
+	return info.deps, nil
 }
 
 // Adds to the traversal info the list of dependencies recursively.
@@ -243,108 +263,6 @@ func (tree *DepsTree) ResolveDependencies(ns string, info *TraversalInfo) error 
 
 		// Remove the namespace from the traversal
 		info.traversal = info.traversal[:len(info.traversal)-1]
-	}
-
-	return nil
-}
-
-// Build a dependency tree that allows the client to know the order of
-// compilation
-func BuildDepsTree() (*DepsTree, error) {
-	// Roots directories
-	roots := []string{
-		conf.RootJs,
-		conf.ClosureLibrary,
-		path.Join(conf.ClosureTemplates, "javascript"),
-		path.Join(conf.Build, "templates"),
-	}
-
-	// Build the deps tree scanning each root directory recursively
-	depstree := &DepsTree{
-		sources:  map[string]*Source{},
-		provides: map[string]*Source{},
-		basePath: path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
-	}
-	for _, root := range roots {
-		if err := ScanSources(depstree, root); err != nil {
-			return nil, err
-		}
-	}
-
-	// Check the integrity of the tree
-	if err := depstree.Check(); err != nil {
-		return nil, err
-	}
-
-	if depstree.mustCompile {
-		if err := WriteDepsCache(); err != nil {
-			return nil, err
-		}
-	}
-
-	return depstree, nil
-}
-
-func ScanSources(depstree *DepsTree, filepath string) error {
-	// Read the directory contents
-	ls, err := ioutil.ReadDir(filepath)
-	if err != nil {
-		return fmt.Errorf("cannot scan the directory %s for js files: %s", filepath, err)
-	}
-
-	// Scan them
-	for _, entry := range ls {
-		fullpath := path.Join(filepath, entry.Name())
-
-		if entry.IsDir() {
-			if IsValidDir(entry.Name()) {
-				// Scan directories recursively
-				if err := ScanSources(depstree, fullpath); err != nil {
-					return err
-				}
-			}
-		} else if path.Ext(entry.Name()) == ".js" {
-			// Add sources to the list
-			if err := depstree.AddSource(fullpath); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func ReadDepsCache() error {
-	name := path.Join(conf.Build, "deps-cache")
-	f, err := os.Open(name)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return err
-	}
-	defer f.Close()
-
-	log.Println("Reading deps cache:", name)
-
-	d := gob.NewDecoder(f)
-	if err := d.Decode(&sourcesCache); err != nil {
-		return fmt.Errorf("cannot decode the deps cache: %s", err)
-	}
-
-	return nil
-}
-
-func WriteDepsCache() error {
-	f, err := os.Create(path.Join(conf.Build, "deps-cache"))
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	e := gob.NewEncoder(f)
-	if err := e.Encode(&sourcesCache); err != nil {
-		return fmt.Errorf("cannot encode the deps cache: %s", err)
 	}
 
 	return nil

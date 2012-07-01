@@ -51,9 +51,6 @@ type Config struct {
 // Global configuration.
 var conf = new(Config)
 
-// Other confs loaded (through inheritation).
-var confs = map[string]*Config{}
-
 // Load the config file that was passed as an argument.
 func ReadConf() error {
 	return loadConfFile(*confArg)
@@ -62,12 +59,7 @@ func ReadConf() error {
 // Load a config file recursively (inheritation) and apply
 // the settings to the global object.
 func loadConfFile(filename string) error {
-	// Retrieve/Create a new entry in the configs map
-	config, ok := confs[filename]
-	if !ok {
-		confs[filename] = new(Config)
-		config = confs[filename]
-	}
+	config := CachedConf(filename)
 
 	// Check the modified time
 	if modified, err := CacheModified(filename); err != nil {

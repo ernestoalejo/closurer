@@ -54,7 +54,7 @@ func CompileJs(w io.Writer) error {
 	}
 
 	// Build the dependency tree between the JS files
-	depstree, err := BuildDepsTree()
+	depstree, err := NewDepsTree()
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func CompileJs(w io.Writer) error {
 	}
 
 	if !mustCompile {
-		// Check if the cache file exists, to use it
+		// Check if the cached file exists, to use it
 		if _, err = os.Lstat(out); err != nil && os.IsNotExist(err) {
 			mustCompile = true
 		} else if err != nil {

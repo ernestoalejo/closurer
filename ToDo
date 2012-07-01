@@ -2,14 +2,13 @@
 To Do:
 ~~~~~~
 
- * GenerateDeps() [input.go] should be refactored togethe with the js compiler
+ * Move the contents of templates.go and request.go to handler.go.
+ * GenerateDeps() [input.go] should be refactored together with the js compiler
    to always generate a file and serve it as a first step to the unification.
 
  * List of files that will be compiled.
  * List of unit tests.
+ * Move the tests and benchmarks to a x_test.go file
  * Validate settings before using them.
- * Avoid rescanning closure library folders continously.
- * Reuse deps.js instead of building a new one in /input/deps.js.
 
  * Build testing facilities to a folder in disk.
- * Better concurrency when disk seeks are common.
