@@ -249,7 +249,7 @@ const GLOBAL_TEST_TEMPLATE = `
 
 	<h1>All JsUnit Tests</h1>
 	<p id="header">
-		<a href="/list">List of Individual Tests</a> |
+		<a href="/test/list">List of Individual Tests</a> |
 		<a href="/">Home</a>
 	</p>
 
