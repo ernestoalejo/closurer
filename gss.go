@@ -63,7 +63,7 @@ func CompileGss() error {
 		}
 	}
 
-	if !modified {
+	if !modified && !*build {
 		return nil
 	}
 

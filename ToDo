@@ -2,6 +2,8 @@
 To Do:
 ~~~~~~
 
+ * Don't cache between input and compile modes.
+
  * Move the contents of templates.go and request.go to handler.go.
  * GenerateDeps() [input.go] should be refactored together with the js compiler
    to always generate a file and serve it as a first step to the unification.
