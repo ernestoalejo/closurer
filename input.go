@@ -10,11 +10,6 @@ import (
 )
 
 func InputHandler(r *Request) error {
-	// Execute the pre-compile actions
-	if err := PreCompileActions(); err != nil {
-		return err
-	}
-
 	// Requested filename
 	name := r.Req.URL.Path[7:]
 
@@ -24,7 +19,7 @@ func InputHandler(r *Request) error {
 	}
 
 	// Otherwise serve the file if it can be found
-	paths := BaseJSPaths()
+	paths := BaseJSPaths(true)
 	for _, p := range paths {
 		f, err := os.Open(path.Join(p, name))
 		if err != nil && !os.IsNotExist(err) {
@@ -43,6 +38,11 @@ func InputHandler(r *Request) error {
 }
 
 func GenerateDeps(r *Request) error {
+	// Execute the pre-compile actions
+	if err := PreCompileActions(); err != nil {
+		return err
+	}
+
 	// Compile all the modified templates
 	if err := CompileSoy(); err != nil {
 		return err
@@ -79,9 +79,14 @@ func GenerateDeps(r *Request) error {
 
 	log.Println("Done generating deps.js! Elapsed:", time.Since(start))
 
+	// Execute the post-compile actions
+	if err := PostCompileActions(); err != nil {
+		return err
+	}
+
 	// Output the list correctly formatted
 	r.W.Header().Set("Content-Type", "text/javascript")
-	if err := WriteDeps(deps); err != nil {
+	if err := WriteDeps(r.W, deps); err != nil {
 		return err
 	}
 

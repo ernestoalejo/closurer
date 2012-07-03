@@ -100,8 +100,15 @@ func CompileJs(w io.Writer) error {
 			return err
 		}
 
+		// Create the deps.js file for our project
+		f, err := os.Create(path.Join(conf.Build, "deps.js"))
+		if err != nil {
+			return fmt.Errorf("cannot create deps file: %s", err)
+		}
+		defer f.Close()
+
 		// Write the deps file
-		if err := WriteDeps(deps); err != nil {
+		if err := WriteDeps(f, deps); err != nil {
 			return err
 		}
 
