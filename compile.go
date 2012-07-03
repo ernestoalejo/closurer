@@ -129,6 +129,7 @@ func JsCompiler(out string, deps []*Source) error {
 		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
 		"--js_output_file", out,
 		"--js", path.Join(conf.Build, "renaming-map.js"),
+		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
 		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "deps.js"),
 		"--js", path.Join(conf.Build, "deps.js"),
 	}
