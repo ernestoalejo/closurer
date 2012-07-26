@@ -17,9 +17,15 @@ func CompileHandler(r *Request) error {
 		return err
 	}
 
-	// Compile the code
-	if err := CompileJs(r.W); err != nil {
-		return err
+	if conf.Mode == "RAW" {
+		if err := RawOutput(r); err != nil {
+			return err
+		}
+	} else {
+		// Compile the code
+		if err := CompileJs(r.W); err != nil {
+			return err
+		}
 	}
 
 	// Execute the post-compile actions
@@ -27,15 +33,17 @@ func CompileHandler(r *Request) error {
 		return err
 	}
 
-	// Copy the file to the output
-	f, err := os.Open(path.Join(conf.Build, "compiled.js"))
-	if err != nil {
-		return fmt.Errorf("cannot read the compiled javascript: %s", err)
-	}
-	defer f.Close()
+	if conf.Mode != "RAW" {
+		// Copy the file to the output
+		f, err := os.Open(path.Join(conf.Build, "compiled.js"))
+		if err != nil {
+			return fmt.Errorf("cannot read the compiled javascript: %s", err)
+		}
+		defer f.Close()
 
-	r.W.Header().Set("Content-Type", "text/javascript")
-	io.Copy(r.W, f)
+		r.W.Header().Set("Content-Type", "text/javascript")
+		io.Copy(r.W, f)
+	}
 
 	return nil
 }
