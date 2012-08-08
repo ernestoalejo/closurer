@@ -139,6 +139,7 @@ func JsCompiler(out string, deps []*Source) error {
 		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
 		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "deps.js"),
 		"--js", path.Join(conf.Build, "deps.js"),
+		"--output_wrapper", "(function(){%output%})();",
 	}
 
 	if conf.RootGss != "" {
