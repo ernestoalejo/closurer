@@ -51,7 +51,7 @@ func LoadCache() error {
 	if err != nil && os.IsNotExist(err) {
 		return nil
 	} else if err != nil {
-		return err
+		return fmt.Errorf("cannot open the cache file: %s", err)
 	}
 	defer f.Close()
 
@@ -82,7 +82,7 @@ func WriteCache() error {
 	// Create the cache file
 	f, err := os.Create(path.Join(conf.Build, "cache"))
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot create the cache file: %s", err)
 	}
 	defer f.Close()
 

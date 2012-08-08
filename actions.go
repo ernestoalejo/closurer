@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"sync"
 )
 
@@ -19,6 +21,11 @@ func PreCompileActions() error {
 	loadCacheOnce.Do(func() {
 		err = LoadCache()
 	})
+
+	// Create the build directory if it doesn't exists before
+	if err := os.MkdirAll(conf.Build, 0755); err != nil {
+		return fmt.Errorf("cannot create the build directory")
+	}
 
 	return err
 }

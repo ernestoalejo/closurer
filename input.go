@@ -13,6 +13,11 @@ func InputHandler(r *Request) error {
 	// Requested filename
 	name := r.Req.URL.Path[7:]
 
+	// Execute the pre-compile actions
+	if err := PreCompileActions(); err != nil {
+		return err
+	}
+
 	// Re-calculate deps and compile templates if needed
 	if name == "deps.js" {
 		return GenerateDeps(r)
@@ -29,6 +34,11 @@ func InputHandler(r *Request) error {
 
 			r.W.Header().Set("Content-Type", "text/javascript")
 			io.Copy(r.W, f)
+
+			// Execute the post-compile actions
+			if err := PostCompileActions(); err != nil {
+				return err
+			}
 
 			return nil
 		}

@@ -11,6 +11,11 @@ import (
 
 // Compile all modified templates
 func CompileSoy() error {
+	// Output early if there's no SOY files
+	if conf.RootSoy == "" {
+		return nil
+	}
+
 	// Search the templates
 	soy, err := Scan(conf.RootSoy, ".soy")
 	if err != nil {

@@ -11,6 +11,14 @@ import (
 
 // Returns the compiled CSS.
 func CompileGssHandler(r *Request) error {
+	r.W.Header().Set("Content-Type", "text/css")
+
+	// Output early if there's no GSS files
+	if conf.RootGss == "" {
+		fmt.Fprintln(r.W, "")
+		return nil
+	}
+
 	// Execute the pre-compile actions
 	if err := PreCompileActions(); err != nil {
 		return err
@@ -33,7 +41,6 @@ func CompileGssHandler(r *Request) error {
 	}
 	defer f.Close()
 
-	r.W.Header().Set("Content-Type", "text/css")
 	io.Copy(r.W, f)
 
 	return nil
@@ -41,6 +48,11 @@ func CompileGssHandler(r *Request) error {
 
 // Compiles the .gss files
 func CompileGss() error {
+	// Output early if there's no GSS files.
+	if conf.RootGss == "" {
+		return nil
+	}
+
 	// Search the .gss files
 	gss, err := Scan(conf.RootGss, ".gss")
 	if err != nil {

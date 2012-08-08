@@ -308,10 +308,15 @@ func BaseJSPaths(library bool) []string {
 		closureLibrary = path.Join(closureLibrary, "closure", "goog")
 	}
 
-	return []string{
+	p := []string{
 		closureLibrary,
 		conf.RootJs,
-		path.Join(conf.Build, "templates"),
 		path.Join(conf.ClosureTemplates, "javascript"),
 	}
+
+	if conf.RootSoy != "" {
+		p = append(p, path.Join(conf.Build, "templates"))
+	}
+
+	return p
 }
