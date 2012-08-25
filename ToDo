@@ -4,8 +4,8 @@ To Do:
 
  * Renaming a soy template after caching it, throws a multiple files providing X.
    The old JS file must be removed from the build directory.
- 
  * Don't cache between input and compile modes.
+ * Don't assume there's a renaming-map.js file in the build directory.
 
  * Move the contents of templates.go and request.go to handler.go.
  * GenerateDeps() [input.go] should be refactored together with the js compiler
