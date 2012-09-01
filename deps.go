@@ -119,7 +119,7 @@ func NewDepsTree() (*DepsTree, error) {
 	}
 
 	// Build the deps tree scanning each root directory recursively
-	roots := BaseJSPaths(false)
+	roots := BaseJSPaths()
 	for _, root := range roots {
 		// Scan the sources
 		src, err := Scan(root, ".js")
@@ -269,7 +269,7 @@ func (tree *DepsTree) ResolveDependencies(ns string, info *TraversalInfo) error 
 }
 
 func WriteDeps(f io.Writer, deps []*Source) error {
-	paths := BaseJSPaths(true)
+	paths := BaseJSPaths()
 	for _, src := range deps {
 		// Accumulates the provides & requires of the source
 		provides := "'" + strings.Join(src.Provides, "', '") + "'"
@@ -279,9 +279,9 @@ func WriteDeps(f io.Writer, deps []*Source) error {
 		// relative to it
 		var n string
 		for _, p := range paths {
-			var err error
-			n, err = filepath.Rel(p, src.Filename)
-			if err == nil && !strings.Contains(n, "..") {
+			tn, err := filepath.Rel(p, src.Filename)
+			if err == nil && !strings.Contains(tn, "..") {
+				n = tn
 				break
 			}
 		}
@@ -300,16 +300,10 @@ func WriteDeps(f io.Writer, deps []*Source) error {
 // of these ones.
 // The order is important, the paths will be scanned as
 // they've been written.
-// The param library adds the subdirectoy prefix to the Closure
-// Library path if it's true.
-func BaseJSPaths(library bool) []string {
-	closureLibrary := path.Join(conf.ClosureLibrary)
-	if library {
-		closureLibrary = path.Join(closureLibrary, "closure", "goog")
-	}
-
+func BaseJSPaths() []string {
 	p := []string{
-		closureLibrary,
+		path.Join(conf.ClosureLibrary, "closure", "goog"),
+		conf.ClosureLibrary,
 		conf.RootJs,
 		path.Join(conf.ClosureTemplates, "javascript"),
 	}

@@ -24,7 +24,7 @@ func InputHandler(r *Request) error {
 	}
 
 	// Otherwise serve the file if it can be found
-	paths := BaseJSPaths(true)
+	paths := BaseJSPaths()
 	for _, p := range paths {
 		f, err := os.Open(path.Join(p, name))
 		if err != nil && !os.IsNotExist(err) {
