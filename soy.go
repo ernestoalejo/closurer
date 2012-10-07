@@ -29,7 +29,7 @@ func CompileSoy() error {
 
 	for _, t := range soy {
 		// Checks if the cached version is ok
-		if modified, err := CacheModified(t); err != nil {
+		if modified, err := CacheModified("compile", t); err != nil {
 			return err
 		} else if !modified {
 			continue

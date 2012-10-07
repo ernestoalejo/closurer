@@ -18,7 +18,9 @@ var (
 // Checks if filename has been modified since the last time
 // it was scanned. It so, or if it's not present in the cache,
 // it returns true and stores the new time.
-func CacheModified(filename string) (bool, error) {
+func CacheModified(dest, filename string) (bool, error) {
+	name := dest + filename
+
 	if *noCache {
 		return true, nil
 	}
@@ -28,10 +30,10 @@ func CacheModified(filename string) (bool, error) {
 		return false, err
 	}
 
-	modified, ok := modificationCache[filename]
+	modified, ok := modificationCache[name]
 
 	if !ok || info.ModTime() != modified {
-		modificationCache[filename] = info.ModTime()
+		modificationCache[name] = info.ModTime()
 		return true, nil
 	}
 
@@ -113,11 +115,13 @@ func CachedConf(filename string) *Config {
 	return config
 }
 
-func CachedSource(filename string) *Source {
-	source, ok := sourcesCache[filename]
+func CachedSource(dest, filename string) *Source {
+	name := dest + filename
+
+	source, ok := sourcesCache[name]
 	if !ok || *noCache {
 		source = new(Source)
-		sourcesCache[filename] = source
+		sourcesCache[name] = source
 	}
 
 	return source

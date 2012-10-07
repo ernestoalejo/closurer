@@ -67,7 +67,7 @@ func CompileGss() error {
 	// Check if the cached version is still ok
 	modified := false
 	for _, filepath := range gss {
-		if m, err := CacheModified(filepath); err != nil {
+		if m, err := CacheModified("compile", filepath); err != nil {
 			return err
 		} else if m {
 			modified = true

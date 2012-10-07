@@ -62,7 +62,7 @@ func GenerateDeps(r *Request) error {
 	log.Println("Building dependency tree...")
 
 	// Build the dependency tree between the JS files
-	depstree, err := NewDepsTree()
+	depstree, err := NewDepsTree("input")
 	if err != nil {
 		return err
 	}

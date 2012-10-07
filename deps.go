@@ -34,11 +34,11 @@ type Source struct {
 
 // Creates a new source. Returns the source, if it has been
 // loaded from cache or not, and an error.
-func NewSource(filename string, base string) (*Source, bool, error) {
-	src := CachedSource(filename)
+func NewSource(dest, filename, base string) (*Source, bool, error) {
+	src := CachedSource(dest, filename)
 
 	// Return the file from cache if possible
-	if modified, err := CacheModified(filename); err != nil {
+	if modified, err := CacheModified(dest, filename); err != nil {
 		return nil, false, err
 	} else if !modified {
 		return src, true, nil
@@ -106,16 +106,19 @@ type DepsTree struct {
 	base        *Source
 	basePath    string
 	mustCompile bool
+	dest        string
 }
 
 // Build a dependency tree that allows the client to know the order of
 // compilation
-func NewDepsTree() (*DepsTree, error) {
+// Dest will be "compile" or "input" depending on the use.
+func NewDepsTree(dest string) (*DepsTree, error) {
 	// Initialize the tree
 	depstree := &DepsTree{
 		sources:  map[string]*Source{},
 		provides: map[string]*Source{},
 		basePath: path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
+		dest:     dest,
 	}
 
 	// Build the deps tree scanning each root directory recursively
@@ -146,7 +149,7 @@ func NewDepsTree() (*DepsTree, error) {
 // Adds a new JS source file to the tree
 func (tree *DepsTree) AddSource(filename string) error {
 	// Build the source
-	src, cached, err := NewSource(filename, tree.basePath)
+	src, cached, err := NewSource(tree.dest, filename, tree.basePath)
 	if err != nil {
 		return err
 	}

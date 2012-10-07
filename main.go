@@ -88,7 +88,7 @@ func Bench() error {
 		log.Println("Loop:", i)
 
 		// Build the deps tree
-		depstree, err := NewDepsTree()
+		depstree, err := NewDepsTree("bench")
 		if err != nil {
 			return err
 		}

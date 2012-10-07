@@ -62,7 +62,7 @@ func CompileJs(w io.Writer) error {
 	}
 
 	// Build the dependency tree between the JS files
-	depstree, err := NewDepsTree()
+	depstree, err := NewDepsTree("compile")
 	if err != nil {
 		return err
 	}

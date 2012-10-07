@@ -62,7 +62,7 @@ func loadConfFile(filename string) error {
 	config := CachedConf(filename)
 
 	// Check the modified time
-	if modified, err := CacheModified(filename); err != nil {
+	if modified, err := CacheModified("config", filename); err != nil {
 		return err
 	} else if modified {
 		log.Println("Reading config file:", filename)
