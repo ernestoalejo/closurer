@@ -2,13 +2,17 @@
 To Do:
 ~~~~~~
 
- * Stylesheets with images have the wrong URLs when using the /css handler.
+ * Separate packages for CSS, JS, SOY and server. Splitted from the config & main package.
+ * The server should use mux if possible.
+ * The server should use some facilities to run servers: templates, request and handler.
+   Keep them up to date in a different lib.
  * Compile CSS and JS in different runs.
+
+ * Stylesheets with images have the wrong URLs when using the /css handler.
 
  * Renaming a soy template after caching it, throws a multiple files providing X.
    The old JS file must be removed from the build directory.
 
- * Move the contents of templates.go and request.go to handler.go.
  * GenerateDeps() [input.go] should be refactored together with the js compiler
    to always generate a file and serve it as a first step to the unification.
 
