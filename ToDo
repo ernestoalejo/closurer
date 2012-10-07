@@ -2,8 +2,6 @@
 To Do:
 ~~~~~~
 
- * Don't assume there's a renaming-map.js file in the build directory.
-
  * Stylesheets with images have the wrong URLs when using the /css handler.
  * Compile CSS and JS in different runs.
 

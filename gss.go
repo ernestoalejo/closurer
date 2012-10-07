@@ -48,12 +48,19 @@ func CompileGssHandler(r *Request) error {
 
 // Compiles the .gss files
 func CompileGss() error {
+	// Create/Clean the renaming map file to avoid compilation errors (the JS
+	// compiler assumes there's a file with this name there).
+	f, err := os.Create(path.Join(conf.Build, "renaming-map.js"))
+	if err != nil {
+		return err
+	}
+	f.Close()
+
 	// Output early if there's no GSS files.
 	if conf.RootGss == "" {
 		return nil
 	}
 
-	// Search the .gss files
 	gss, err := Scan(conf.RootGss, ".gss")
 	if err != nil {
 		return err
