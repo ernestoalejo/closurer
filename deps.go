@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/ernestokarim/closurer/utils"
 )
 
 var (
@@ -125,7 +127,7 @@ func NewDepsTree(dest string) (*DepsTree, error) {
 	roots := BaseJSPaths()
 	for _, root := range roots {
 		// Scan the sources
-		src, err := Scan(root, ".js")
+		src, err := utils.Scan(root, ".js")
 		if err != nil {
 			return nil, err
 		}

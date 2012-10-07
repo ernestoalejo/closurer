@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+
+	"github.com/ernestokarim/closurer/utils"
 )
 
 // Compile all modified templates
@@ -17,7 +19,7 @@ func CompileSoy() error {
 	}
 
 	// Search the templates
-	soy, err := Scan(conf.RootSoy, ".soy")
+	soy, err := utils.Scan(conf.RootSoy, ".soy")
 	if err != nil {
 		return err
 	}

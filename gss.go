@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"path"
+
+	"github.com/ernestokarim/closurer/utils"
 )
 
 // Returns the compiled CSS.
@@ -61,7 +63,7 @@ func CompileGss() error {
 		return nil
 	}
 
-	gss, err := Scan(conf.RootGss, ".gss")
+	gss, err := utils.Scan(conf.RootGss, ".gss")
 	if err != nil {
 		return err
 	}

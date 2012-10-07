@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -12,7 +12,6 @@ type visitor struct {
 }
 
 func (v *visitor) scan(filepath string, ext string) error {
-	// Get the list of entries
 	ls, err := ioutil.ReadDir(filepath)
 	if err != nil {
 		return fmt.Errorf("cannot read the path %s: %s", filepath, err)
@@ -23,13 +22,11 @@ func (v *visitor) scan(filepath string, ext string) error {
 
 		if entry.IsDir() {
 			if v.validDir(entry.Name()) {
-				// Scan recursively the directories
 				if err := v.scan(fullpath, ext); err != nil {
 					return err
 				}
 			}
 		} else if strings.HasSuffix(entry.Name(), ext) {
-			// Add the file to the list
 			v.results = append(v.results, fullpath)
 		}
 	}

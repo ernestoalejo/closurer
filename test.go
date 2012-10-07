@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"path/filepath"
+
+	"github.com/ernestokarim/closurer/utils"
 )
 
 func TestHandler(r *Request) error {
@@ -34,7 +36,7 @@ func TestAllHandler(r *Request) error {
 // Search for "_test.js" files and relativize them to
 // the root directory. It replaces the .js ext with .html.
 func ScanTests() ([]string, error) {
-	tests, err := Scan(conf.RootJs, "_test.js")
+	tests, err := utils.Scan(conf.RootJs, "_test.js")
 	if err != nil {
 		return nil, err
 	}
