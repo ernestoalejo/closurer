@@ -2,6 +2,9 @@
 To Do:
 ~~~~~~
 
+ * Move the cache to the utils package.
+ * Move the configurations to its own package.
+
  * Separate packages for CSS, JS, SOY and server. Splitted from the config & main package.
  * The server should use mux if possible.
  * The server should use some facilities to run servers: templates, request and handler.

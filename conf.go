@@ -179,3 +179,7 @@ func fixInheritsPath(current string, p string) string {
 	}
 	return p
 }
+
+func Current() *Config {
+	return conf
+}
