@@ -2,10 +2,10 @@
 To Do:
 ~~~~~~
  
- * Move all the command line flags to the config package.
+ * Use an error that saves the callstack.
+ * The HTML templates should be apart from the code (and retrieved in runtime).
  * The gss compile handler should be transformed to new one, and the commented line
    of the main actived again.
- * The HTML templates should be apart from the code (and retrieved in runtime).
  * When refactoring the JS package, move the compilation of CSS out of there to avoid
    dependencies.
 
