@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ernestokarim/closurer/config"
+	"github.com/ernestokarim/closurer/cache"
 )
 
 var (
@@ -27,12 +28,12 @@ var (
 func main() {
 	flag.Parse()
 
-	// Read configuration
+	cache.SetNoCache(*noCache)
+
 	if err := config.ReadFromFile(*confArg); err != nil {
 		log.Fatal(err)
 	}
 
-	// Performs the benchmarks
 	if *bench {
 		if err := Bench(); err != nil {
 			log.Fatal(err)
@@ -40,7 +41,6 @@ func main() {
 		return
 	}
 
-	// Start the correct mode
 	if *build {
 		Build()
 	} else {
