@@ -11,6 +11,10 @@ var modificationCache = map[string]time.Time{}
 // it was scanned. It so, or if it's not present in the cache,
 // it returns true and stores the new time.
 func Modified(dest, filename string) (bool, error) {
+	if noCache {
+		return true, nil
+	}
+
 	name := dest + filename
 
 	info, err := os.Lstat(filename)

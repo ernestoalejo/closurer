@@ -2,10 +2,6 @@
 To Do:
 ~~~~~~
 
- ! The new cache file should take into account the noCache flag.
-
-
-
  * Move the cache to the utils package.
  * Move the configurations to its own package.
 

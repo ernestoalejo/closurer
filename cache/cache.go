@@ -7,9 +7,18 @@ import (
 	"os"
 )
 
+var noCache = false
+
+func SetNoCache(v bool) {
+	noCache = v
+}
+
 // Load the caches from a file.
 func LoadCache(filename string) error {
-	// Open the cache file if it exists
+	if noCache {
+		return nil
+	}
+
 	f, err := os.Open(filename)
 	if err != nil && os.IsNotExist(err) {
 		return nil
@@ -20,9 +29,7 @@ func LoadCache(filename string) error {
 
 	log.Println("Reading deps cache:", filename)
 
-	// Decode the caches
 	d := gob.NewDecoder(f)
-
 	if err := d.Decode(&modificationCache); err != nil {
 		return fmt.Errorf("cannot decode the modifications cache: %s", err)
 	}
