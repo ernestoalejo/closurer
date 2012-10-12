@@ -91,13 +91,11 @@ func Bench() error {
 	for i := 0; i < 10; i += 1 {
 		log.Println("Loop:", i)
 
-		// Build the deps tree
 		depstree, err := NewDepsTree("bench")
 		if err != nil {
 			return err
 		}
 
-		// Calculate all the input namespaces
 		namespaces := []string{}
 		for _, input := range conf.Inputs {
 			if strings.Contains(input, "_test") {
@@ -111,7 +109,6 @@ func Bench() error {
 			namespaces = append(namespaces, ns...)
 		}
 
-		// Calculate the list of files to compile
 		_, err = depstree.GetDependencies(namespaces)
 		if err != nil {
 			return err
