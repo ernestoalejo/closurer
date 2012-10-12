@@ -1,31 +1,9 @@
 package main
 
-import ()
+import (
+	"github.com/ernestokarim/closurer/app"
+)
 
-func HomeHandler(r *Request) error {
-	return r.ExecuteTemplate(HOME_TEMPLATE, nil)
+func HomeHandler(r *app.Request) error {
+	return r.ExecuteTemplate([]string{"home"}, nil)
 }
-
-const HOME_TEMPLATE = `
-{{define "base"}}
-<!DOCTYPE html>
-<html>
-<head>
-
-	<meta charset="utf-8">
-	<title>Home</title>
-
-</head>
-<body>
-
-	<h1>Actions</h1>
-	<ul>
-		<li><a href="/compile">Compiled output</a></li>
-		<li><a href="/test/list">List of tests</a></li>
-		<li><a href="/test/all">MultiTest runner</a></li>
-	</ul>
-
-</body>
-</html>
-{{end}}
-`

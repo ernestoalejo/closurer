@@ -1,0 +1,13 @@
+{{define "base"}}
+
+window.CLOSURE_NO_DEPS = true;
+window.CLOSURE_BASE_PATH = 'http://localhost{{.Port}}/input/';
+
+{{.Content}}
+
+var ns = [{{.Namespaces}}];
+for(var i = 0; i {{.LT}} ns.length; i++) {
+  goog.require(ns[i]);
+}
+
+{{end}}

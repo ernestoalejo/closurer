@@ -10,11 +10,12 @@ import (
 	"path"
 	"strings"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
 )
 
-func RawOutput(r *Request) error {
+func RawOutput(r *app.Request) error {
 	log.Println("Output RAW mode!")
 
 	// Compile the .gss files
@@ -81,7 +82,7 @@ func RawOutput(r *Request) error {
 		"Namespaces": template.HTML("'" + strings.Join(namespaces, "', '") + "'"),
 	}
 	r.W.Header().Set("Content-Type", "text/javascript")
-	return r.ExecuteTemplate(RAW_TEMPLATE, data)
+	return r.ExecuteTemplate([]string{"raw"}, data)
 }
 
 func AddFile(w io.Writer, name string) error {
@@ -95,19 +96,3 @@ func AddFile(w io.Writer, name string) error {
 
 	return nil
 }
-
-const RAW_TEMPLATE = `
-{{define "base"}}
-
-window.CLOSURE_NO_DEPS = true;
-window.CLOSURE_BASE_PATH = 'http://localhost{{.Port}}/input/';
-
-{{.Content}}
-
-var ns = [{{.Namespaces}}];
-for(var i = 0; i {{.LT}} ns.length; i++) {
-	goog.require(ns[i]);
-}
-
-{{end}}
-`

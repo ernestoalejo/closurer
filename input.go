@@ -8,11 +8,12 @@ import (
 	"path"
 	"time"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 )
 
-func InputHandler(r *Request) error {
-	// Requested filename
+func InputHandler(r *app.Request) error {
+	// app.Requested filename
 	name := r.Req.URL.Path[7:]
 
 	// Execute the pre-compile actions
@@ -49,7 +50,7 @@ func InputHandler(r *Request) error {
 	return fmt.Errorf("file not found: %s", name)
 }
 
-func GenerateDeps(r *Request) error {
+func GenerateDeps(r *app.Request) error {
 	// Execute the pre-compile actions
 	if err := PreCompileActions(); err != nil {
 		return err

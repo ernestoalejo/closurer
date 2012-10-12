@@ -8,7 +8,10 @@ import (
 	"runtime/pprof"
 	"strings"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
+
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -42,13 +45,16 @@ func main() {
 }
 
 func Serve() {
-	http.Handle("/", Handler(HomeHandler))
-	http.Handle("/compile", Handler(CompileHandler))
-	//http.Handle("/css", Handler(CompileGssHandler))
-	http.Handle("/input/", Handler(InputHandler))
-	http.Handle("/test/", Handler(TestHandler))
-	http.Handle("/test/all", Handler(TestAllHandler))
-	http.Handle("/test/list", Handler(TestListHandler))
+	r := mux.NewRouter().StrictSlash(true)
+	http.Handle("/", r)
+
+	r.Handle("/", app.Handler(HomeHandler))
+	r.Handle("/compile", app.Handler(CompileHandler))
+	//r.Handle("/css", app.Handler(CompileGssHandler))
+	r.Handle("/input/", app.Handler(InputHandler))
+	r.Handle("/test/", app.Handler(TestHandler))
+	r.Handle("/test/all", app.Handler(TestAllHandler))
+	r.Handle("/test/list", app.Handler(TestListHandler))
 
 	log.Printf("Started closurer server on http://localhost%s/\n", config.Port)
 	log.Fatal(http.ListenAndServe(config.Port, nil))

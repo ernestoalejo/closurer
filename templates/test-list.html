@@ -1,0 +1,22 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  <title>Unit Tests List</title>
+
+</head>
+<body>
+
+  <h1>All JsUnit Tests</h1>
+  
+  <ul>
+    {{range .AllTests}}
+      <li><a href="/test/{{.}}">{{.}}</a></li>
+    {{end}}
+  </ul>
+
+</body>
+</html>
+{{end}}

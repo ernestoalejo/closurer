@@ -11,11 +11,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
 )
 
-func CompileHandler(r *Request) error {
+func CompileHandler(r *app.Request) error {
 	conf := config.Current()
 
 	// Execute the pre-compile actions
