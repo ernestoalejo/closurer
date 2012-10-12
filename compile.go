@@ -84,7 +84,7 @@ func CompileJs(w io.Writer) error {
 
 	// Build the out path
 	out := path.Join(conf.Build, "compiled.js")
-	if *build {
+	if config.Build {
 		out = *jsOutput
 		mustCompile = true
 	}

@@ -16,7 +16,6 @@ var (
 	port       = flag.String("port", ":9810", "the port where the server will be listening")
 	confArg    = flag.String("conf", "", "the config file")
 	outputCmd  = flag.Bool("output-cmd", false, "output compiler command to a file")
-	build      = flag.Bool("build", false, "build the compiled files only and exit")
 	cssOutput  = flag.String("css-output", "compiled.css", "the css file that will be built")
 	jsOutput   = flag.String("js-output", "compiled.js", "the js file that will be built")
 	bench      = flag.Bool("bench", false, "enables internal circuits for benchmarks")
@@ -41,7 +40,7 @@ func main() {
 		return
 	}
 
-	if *build {
+	if config.Build {
 		Build()
 	} else {
 		Serve()

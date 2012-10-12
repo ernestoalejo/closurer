@@ -92,7 +92,7 @@ func Compile() error {
 		}
 	}
 
-	if !modified {
+	if !modified && !config.Build {
 		return nil
 	}
 

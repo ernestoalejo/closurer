@@ -2,8 +2,6 @@
 To Do:
 ~~~~~~
  
- * Save if it's a build compilation in the config object, to retrieve it in gss, and
-   recompile files always when building.
  * The gss compile handler should be transformed to new one, and the commented line
    of the main actived again.
  * Save the no-cache state in the config object to avoid the global setter of the
