@@ -16,7 +16,7 @@ import (
 	"github.com/ernestokarim/closurer/gss"
 )
 
-func CompileHandler(r *app.Request) error {
+func Compile(r *app.Request) error {
 	conf := config.Current()
 
 	// Execute the pre-compile actions

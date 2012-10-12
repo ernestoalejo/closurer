@@ -12,7 +12,7 @@ import (
 	"github.com/ernestokarim/closurer/config"
 )
 
-func InputHandler(r *app.Request) error {
+func Input(r *app.Request) error {
 	// app.Requested filename
 	name := r.Req.URL.Path[7:]
 

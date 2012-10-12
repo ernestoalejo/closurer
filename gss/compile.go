@@ -16,7 +16,7 @@ const CSS_NAME = "compiled.css"
 
 /*
 // Returns the compiled CSS.
-func CompileGssHandler(r *app.Request) error {
+func CompileGss(r *app.Request) error {
 	conf := config.Current()
 
 	r.W.Header().Set("Content-Type", "text/css")

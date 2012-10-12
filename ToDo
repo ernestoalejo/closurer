@@ -2,10 +2,8 @@
 To Do:
 ~~~~~~
  
- * Remove the Handler part of the server function names.
  * Update the "gaelib" to the latest version.
  * Use an error that saves the callstack.
- * The HTML templates should be apart from the code (and retrieved in runtime).
  * The gss compile handler should be transformed to new one, and the commented line
    of the main actived again.
  * Move home to the main package, its too short to have its own file.

@@ -4,6 +4,6 @@ import (
 	"github.com/ernestokarim/closurer/app"
 )
 
-func HomeHandler(r *app.Request) error {
+func Home(r *app.Request) error {
 	return r.ExecuteTemplate([]string{"home"}, nil)
 }

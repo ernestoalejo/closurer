@@ -13,7 +13,7 @@ type TestData struct {
 	Name string
 }
 
-func TestHandler(r *app.Request) error {
+func Test(r *app.Request) error {
 	name := r.Req.URL.Path[6:]
 	name = name[:len(name)-5] + ".js"
 
@@ -27,7 +27,7 @@ type TestListData struct {
 	AllTests []string
 }
 
-func TestAllHandler(r *app.Request) error {
+func TestAll(r *app.Request) error {
 	tests, err := ScanTests()
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func TestAllHandler(r *app.Request) error {
 	return r.ExecuteTemplate([]string{"global-test"}, tdata)
 }
 
-func TestListHandler(r *app.Request) error {
+func TestList(r *app.Request) error {
 	tests, err := ScanTests()
 	if err != nil {
 		return err
