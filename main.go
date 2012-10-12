@@ -8,8 +8,8 @@ import (
 	"runtime/pprof"
 	"strings"
 
-	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/cache"
+	"github.com/ernestokarim/closurer/config"
 )
 
 var (
