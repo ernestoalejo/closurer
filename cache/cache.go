@@ -7,15 +7,13 @@ import (
 	"os"
 )
 
-var noCache = false
-
-func SetNoCache(v bool) {
-	noCache = v
-}
+// This flag will be loaded by the config package; it must be here to
+// avoid a circular dependency.
+var NoCache bool
 
 // Load the caches from a file.
 func Load(filename string) error {
-	if noCache {
+	if NoCache {
 		return nil
 	}
 

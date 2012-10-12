@@ -8,7 +8,6 @@ import (
 	"runtime/pprof"
 	"strings"
 
-	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
 )
 
@@ -21,13 +20,10 @@ var (
 	bench      = flag.Bool("bench", false, "enables internal circuits for benchmarks")
 	cpuProfile = flag.String("cpu-profile", "", "write cpu profile to file")
 	memProfile = flag.String("mem-profile", "", "write memory profile to file")
-	noCache    = flag.Bool("no-cache", false, "disables the files cache")
 )
 
 func main() {
 	flag.Parse()
-
-	cache.SetNoCache(*noCache)
 
 	if err := config.ReadFromFile(*confArg); err != nil {
 		log.Fatal(err)

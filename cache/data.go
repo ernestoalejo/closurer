@@ -13,7 +13,7 @@ func WriteData(key string, value interface{}) {
 // blank will be returned.
 func ReadData(key string, blank interface{}) interface{} {
 	d, ok := dataCache[key]
-	if !ok || noCache {
+	if !ok || NoCache {
 		dataCache[key] = blank
 		return blank
 	}
