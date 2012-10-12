@@ -1,8 +1,6 @@
 package cache
 
-import (
-
-)
+import ()
 
 var dataCache = map[string]interface{}{}
 
@@ -22,4 +20,3 @@ func ReadData(key string, blank interface{}) interface{} {
 
 	return d
 }
-

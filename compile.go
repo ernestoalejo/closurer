@@ -139,7 +139,7 @@ func CompileJs(w io.Writer) error {
 
 func JsCompiler(out string, deps []*Source) error {
 	conf := config.Current()
-	
+
 	// Prepare the call to the compiler
 	args := []string{
 		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),

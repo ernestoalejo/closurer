@@ -45,7 +45,7 @@ func CacheModified(dest, filename string) (bool, error) {
 // Load the caches from a file.
 func LoadCache() error {
 	conf := config.Current()
-	
+
 	if *noCache {
 		return nil
 	}
