@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/utils"
 )
@@ -38,10 +39,10 @@ type Source struct {
 // Creates a new source. Returns the source, if it has been
 // loaded from cache or not, and an error.
 func NewSource(dest, filename, base string) (*Source, bool, error) {
-	src := CachedSource(dest, filename)
+	src := cache.ReadData(dest+filename, new(Source)).(*Source)
 
 	// Return the file from cache if possible
-	if modified, err := CacheModified(dest, filename); err != nil {
+	if modified, err := cache.Modified(dest, filename); err != nil {
 		return nil, false, err
 	} else if !modified {
 		return src, true, nil

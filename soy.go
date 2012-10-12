@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/utils"
 )
@@ -34,7 +35,7 @@ func CompileSoy() error {
 
 	for _, t := range soy {
 		// Checks if the cached version is ok
-		if modified, err := CacheModified("compile", t); err != nil {
+		if modified, err := cache.Modified("compile", t); err != nil {
 			return err
 		} else if !modified {
 			continue

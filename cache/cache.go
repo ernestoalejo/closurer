@@ -14,7 +14,7 @@ func SetNoCache(v bool) {
 }
 
 // Load the caches from a file.
-func LoadCache(filename string) error {
+func Load(filename string) error {
 	if noCache {
 		return nil
 	}
@@ -41,7 +41,7 @@ func LoadCache(filename string) error {
 }
 
 // Save the caches to a file.
-func WriteCache(filename string) error {
+func Dump(filename string) error {
 	// Create the cache file
 	f, err := os.Create(filename)
 	if err != nil {
