@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	confArg    = flag.String("conf", "", "the config file")
 	outputCmd  = flag.Bool("output-cmd", false, "output compiler command to a file")
 	cssOutput  = flag.String("css-output", "compiled.css", "the css file that will be built")
 	jsOutput   = flag.String("js-output", "compiled.js", "the js file that will be built")
@@ -24,7 +23,7 @@ var (
 func main() {
 	flag.Parse()
 
-	if err := config.ReadFromFile(*confArg); err != nil {
+	if err := config.ReadFromFile(config.ConfPath); err != nil {
 		log.Fatal(err)
 	}
 
