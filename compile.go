@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/ernestokarim/closurer/config"
+	"github.com/ernestokarim/closurer/gss"
 )
 
 func CompileHandler(r *Request) error {
@@ -56,7 +57,7 @@ func CompileJs(w io.Writer) error {
 	start := time.Now()
 
 	// Compile the .gss files
-	if err := CompileGss(); err != nil {
+	if err := gss.Compile(); err != nil {
 		return err
 	}
 

@@ -11,13 +11,14 @@ import (
 	"strings"
 
 	"github.com/ernestokarim/closurer/config"
+	"github.com/ernestokarim/closurer/gss"
 )
 
 func RawOutput(r *Request) error {
 	log.Println("Output RAW mode!")
 
 	// Compile the .gss files
-	if err := CompileGss(); err != nil {
+	if err := gss.Compile(); err != nil {
 		return err
 	}
 
