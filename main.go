@@ -7,6 +7,8 @@ import (
 	"os"
 	"runtime/pprof"
 	"strings"
+
+	"github.com/ernestokarim/closurer/config"
 )
 
 var (
@@ -26,7 +28,7 @@ func main() {
 	flag.Parse()
 
 	// Read configuration
-	if err := ReadConf(); err != nil {
+	if err := config.ReadFromFile(*confArg); err != nil {
 		log.Fatal(err)
 	}
 
@@ -83,6 +85,8 @@ func Bench() error {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
+
+	conf := config.Current()
 
 	for i := 0; i < 10; i += 1 {
 		log.Println("Loop:", i)

@@ -9,6 +9,8 @@ import (
 	"os"
 	"path"
 	"strings"
+
+	"github.com/ernestokarim/closurer/config"
 )
 
 func RawOutput(r *Request) error {
@@ -30,6 +32,7 @@ func RawOutput(r *Request) error {
 		return err
 	}
 
+	conf := config.Current()
 	content := bytes.NewBuffer(nil)
 
 	// Copy the base.js file to the output

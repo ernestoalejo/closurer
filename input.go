@@ -7,6 +7,8 @@ import (
 	"os"
 	"path"
 	"time"
+
+	"github.com/ernestokarim/closurer/config"
 )
 
 func InputHandler(r *Request) error {
@@ -66,6 +68,8 @@ func GenerateDeps(r *Request) error {
 	if err != nil {
 		return err
 	}
+
+	conf := config.Current()
 
 	// Calculate all the input namespaces
 	namespaces := []string{}

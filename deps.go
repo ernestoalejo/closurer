@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/utils"
 )
 
@@ -115,6 +116,8 @@ type DepsTree struct {
 // compilation
 // Dest will be "compile" or "input" depending on the use.
 func NewDepsTree(dest string) (*DepsTree, error) {
+	conf := config.Current()
+
 	// Initialize the tree
 	depstree := &DepsTree{
 		sources:  map[string]*Source{},
@@ -160,6 +163,8 @@ func (tree *DepsTree) AddSource(filename string) error {
 	if src.Base {
 		tree.base = src
 	}
+
+	conf := config.Current()
 
 	// Scan all the previous sources searching for repeated
 	// namespaces. We ignore closure library files because they're
@@ -306,6 +311,8 @@ func WriteDeps(f io.Writer, deps []*Source) error {
 // The order is important, the paths will be scanned as
 // they've been written.
 func BaseJSPaths() []string {
+	conf := config.Current()
+
 	p := []string{
 		path.Join(conf.ClosureLibrary, "closure", "goog"),
 		conf.ClosureLibrary,

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"sync"
+
+	"github.com/ernestokarim/closurer/config"
 )
 
 var loadCacheOnce sync.Once
@@ -12,7 +14,7 @@ var loadCacheOnce sync.Once
 // and reload the confs if needed.
 func PreCompileActions() error {
 	// Reload the confs if they've changed
-	if err := ReadConf(); err != nil {
+	if err := config.ReadFromFile(*confArg); err != nil {
 		return err
 	}
 
@@ -23,6 +25,7 @@ func PreCompileActions() error {
 	})
 
 	// Create the build directory if it doesn't exists before
+	conf := config.Current()
 	if err := os.MkdirAll(conf.Build, 0755); err != nil {
 		return fmt.Errorf("cannot create the build directory")
 	}

@@ -9,9 +9,13 @@ import (
 	"path"
 	"strings"
 	"time"
+
+	"github.com/ernestokarim/closurer/config"
 )
 
 func CompileHandler(r *Request) error {
+	conf := config.Current()
+
 	// Execute the pre-compile actions
 	if err := PreCompileActions(); err != nil {
 		return err
@@ -69,6 +73,8 @@ func CompileJs(w io.Writer) error {
 
 	// Whether we must recompile or the old file is correct
 	mustCompile := false
+
+	conf := config.Current()
 
 	// Build the out path
 	out := path.Join(conf.Build, "compiled.js")
@@ -132,6 +138,8 @@ func CompileJs(w io.Writer) error {
 }
 
 func JsCompiler(out string, deps []*Source) error {
+	conf := config.Current()
+	
 	// Prepare the call to the compiler
 	args := []string{
 		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),

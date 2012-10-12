@@ -8,11 +8,14 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/utils"
 )
 
 // Compile all modified templates
 func CompileSoy() error {
+	conf := config.Current()
+
 	// Output early if there's no SOY files
 	if conf.RootSoy == "" {
 		return nil

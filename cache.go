@@ -7,12 +7,14 @@ import (
 	"os"
 	"path"
 	"time"
+
+	"github.com/ernestokarim/closurer/config"
 )
 
 var (
 	modificationCache = map[string]time.Time{}
 	sourcesCache      = map[string]*Source{}
-	confsCache        = map[string]*Config{}
+	confsCache        = map[string]*config.Config{}
 )
 
 // Checks if filename has been modified since the last time
@@ -42,6 +44,8 @@ func CacheModified(dest, filename string) (bool, error) {
 
 // Load the caches from a file.
 func LoadCache() error {
+	conf := config.Current()
+	
 	if *noCache {
 		return nil
 	}
@@ -77,6 +81,8 @@ func LoadCache() error {
 
 // Save the caches to a file.
 func WriteCache() error {
+	conf := config.Current()
+
 	if *noCache {
 		return nil
 	}
@@ -104,15 +110,15 @@ func WriteCache() error {
 	return nil
 }
 
-func CachedConf(filename string) *Config {
+func CachedConf(filename string) *config.Config {
 	// Retrieve/Create a new entry in the configs map
-	config, ok := confsCache[filename]
+	conf, ok := confsCache[filename]
 	if !ok || *noCache {
-		config = new(Config)
-		confsCache[filename] = config
+		conf = new(config.Config)
+		confsCache[filename] = conf
 	}
 
-	return config
+	return conf
 }
 
 func CachedSource(dest, filename string) *Source {

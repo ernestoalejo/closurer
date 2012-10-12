@@ -8,11 +8,14 @@ import (
 	"os/exec"
 	"path"
 
+	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/utils"
 )
 
 // Returns the compiled CSS.
 func CompileGssHandler(r *Request) error {
+	conf := config.Current()
+
 	r.W.Header().Set("Content-Type", "text/css")
 
 	// Output early if there's no GSS files
@@ -50,6 +53,8 @@ func CompileGssHandler(r *Request) error {
 
 // Compiles the .gss files
 func CompileGss() error {
+	conf := config.Current()
+	
 	// Create/Clean the renaming map file to avoid compilation errors (the JS
 	// compiler assumes there's a file with this name there).
 	f, err := os.Create(path.Join(conf.Build, "renaming-map.js"))
