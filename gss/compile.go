@@ -12,6 +12,8 @@ import (
 	"github.com/ernestokarim/closurer/utils"
 )
 
+const CSS_NAME = "compiled.css"
+
 /*
 // Returns the compiled CSS.
 func CompileGssHandler(r *Request) error {
@@ -97,7 +99,7 @@ func Compile() error {
 	log.Println("Compiling gss")
 
 	// Compute the output path
-	out := path.Join(conf.Build, "compiled.css")
+	out := path.Join(conf.Build, CSS_NAME)
 
 	// Run the soy compiler
 	cmd := exec.Command(

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -58,6 +59,10 @@ func CompileJs(w io.Writer) error {
 
 	// Compile the .gss files
 	if err := gss.Compile(); err != nil {
+		return err
+	}
+
+	if err := copyCssFile(); err != nil {
 		return err
 	}
 
@@ -227,4 +232,23 @@ func JsCompiler(out string, deps []*Source) error {
 	}
 
 	return nil
+}
+
+func copyCssFile() error {
+	conf := config.Current()
+
+	src, err := os.Open(filepath.Join(conf.Build, gss.CSS_NAME))
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	dest, err := os.Create(*cssOutput)
+	if err != nil {
+		return err
+	}
+	defer dest.Close()
+
+	_, err = io.Copy(dest, src)
+	return err
 }

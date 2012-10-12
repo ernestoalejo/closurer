@@ -2,13 +2,14 @@
 To Do:
 ~~~~~~
  
- * Move the CSS compiled file to the correct location if it's a compilation.
  * Save if it's a build compilation in the config object, to retrieve it in gss, and
    recompile files always when building.
  * The gss compile handler should be transformed to new one, and the commented line
    of the main actived again.
  * Save the no-cache state in the config object to avoid the global setter of the
    cache package.
+ * When refactoring the JS package, move the compilation of CSS out of there to avoid
+   dependencies.
 
 ~~~~~~
 
