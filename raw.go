@@ -76,7 +76,7 @@ func RawOutput(r *Request) error {
 	// Output the template
 	data := map[string]interface{}{
 		"Content":    template.HTML(string(content.Bytes())),
-		"Port":       *port,
+		"Port":       conf.Port,
 		"LT":         template.HTML("<"),
 		"Namespaces": template.HTML("'" + strings.Join(namespaces, "', '") + "'"),
 	}

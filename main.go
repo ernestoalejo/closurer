@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	port       = flag.String("port", ":9810", "the port where the server will be listening")
 	confArg    = flag.String("conf", "", "the config file")
 	outputCmd  = flag.Bool("output-cmd", false, "output compiler command to a file")
 	cssOutput  = flag.String("css-output", "compiled.css", "the css file that will be built")
@@ -52,8 +51,8 @@ func Serve() {
 	http.Handle("/test/all", Handler(TestAllHandler))
 	http.Handle("/test/list", Handler(TestListHandler))
 
-	log.Printf("Started closurer server on http://localhost%s/\n", *port)
-	log.Fatal(http.ListenAndServe(*port, nil))
+	log.Printf("Started closurer server on http://localhost%s/\n", config.Port)
+	log.Fatal(http.ListenAndServe(config.Port, nil))
 }
 
 func Build() {
