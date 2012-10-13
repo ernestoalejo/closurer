@@ -2,19 +2,21 @@
 To Do:
 ~~~~~~
  
- * Use an error that saves the callstack.
+ ! Don't pass the filename to the Dump/Load cache functions, obtain it from the
+   config file.
+
  * The gss compile handler should be transformed to new one, and the commented line
    of the main actived again.
  * Move home to the main package, its too short to have its own file.
  * When refactoring the JS package, move the compilation of CSS out of there to avoid
    dependencies.
+ * Validate the config object before using it.
+ * Add an app.Errorf function to format the error, and avoid long lines when returning
+   custom messages.
 
 ~~~~~~
 
  * Separate packages for CSS, JS, SOY and server. Splitted from the config & main package.
- * The server should use mux if possible.
- * The server should use some facilities to run servers: templates, request and handler.
-   Keep them up to date in a different lib.
  * Compile CSS and JS in different runs.
 
  * Stylesheets with images have the wrong URLs when using the /css handler.
@@ -27,6 +29,5 @@ To Do:
 
  * List of files that will be compiled.
  * Move the tests and benchmarks to a x_test.go file
- * Validate settings before using them.
 
  * Build testing facilities to a folder in disk.

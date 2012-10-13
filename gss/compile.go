@@ -1,12 +1,12 @@
 package gss
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/utils"
@@ -45,7 +45,7 @@ func CompileGss(r *app.Request) error {
 	// Copy the compile file to the output
 	f, err := os.Open(path.Join(conf.Build, "compiled.css"))
 	if err != nil {
-		return fmt.Errorf("cannot read the compiled css: %s", err)
+		return app.Error(err)
 	}
 	defer f.Close()
 
@@ -113,7 +113,7 @@ func Compile() error {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("gss compiler error: %s\n%s", err, string(output))
+		return app.Errorf("exec error: %s\n%s", err, string(output))
 	}
 
 	return nil

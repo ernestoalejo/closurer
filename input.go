@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -31,7 +30,7 @@ func Input(r *app.Request) error {
 	for _, p := range paths {
 		f, err := os.Open(path.Join(p, name))
 		if err != nil && !os.IsNotExist(err) {
-			return fmt.Errorf("cannot open the file: %s", err)
+			return app.Error(err)
 		} else if err == nil {
 			defer f.Close()
 
@@ -47,7 +46,7 @@ func Input(r *app.Request) error {
 		}
 	}
 
-	return fmt.Errorf("file not found: %s", name)
+	return app.Errorf("file not found: %s", name)
 }
 
 func GenerateDeps(r *app.Request) error {

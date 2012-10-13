@@ -44,7 +44,7 @@ func Compile(r *app.Request) error {
 		// Copy the file to the output
 		f, err := os.Open(path.Join(conf.Build, "compiled.js"))
 		if err != nil {
-			return fmt.Errorf("cannot read the compiled javascript: %s", err)
+			return app.Error(err)
 		}
 		defer f.Close()
 
@@ -124,7 +124,7 @@ func CompileJs(w io.Writer) error {
 		// Create the deps.js file for our project
 		f, err := os.Create(path.Join(conf.Build, "deps.js"))
 		if err != nil {
-			return fmt.Errorf("cannot create deps file: %s", err)
+			return app.Error(err)
 		}
 		defer f.Close()
 
@@ -178,9 +178,6 @@ func JsCompiler(out string, deps []*Source) error {
 
 	// Add the checks
 	for k, check := range conf.Checks {
-		if check != "OFF" && check != "ERROR" && check != "WARNING" {
-			return fmt.Errorf("unrecognized compiler check: %s", check)
-		}
 		args = append(args, "--jscomp_"+strings.ToLower(check), k)
 	}
 
@@ -191,16 +188,10 @@ func JsCompiler(out string, deps []*Source) error {
 		args = append(args, "--compilation_level", "SIMPLE_OPTIMIZATIONS")
 	} else if conf.Mode == "WHITESPACE" {
 		args = append(args, "--compilation_level", "WHITESPACE_ONLY")
-	} else {
-		return fmt.Errorf("compilation mode not recognized: %s", conf.Mode)
 	}
 
 	// Add the warning level
-	if conf.Level == "QUIET" || conf.Level == "DEFAULT" || conf.Level == "VERBOSE" {
-		args = append(args, "--warning_level", conf.Level)
-	} else {
-		return fmt.Errorf("warnings level not recognized: %s", conf.Level)
-	}
+	args = append(args, "--warning_level", conf.Level)
 
 	// Add the externs
 	for _, extern := range conf.Externs {
@@ -211,7 +202,7 @@ func JsCompiler(out string, deps []*Source) error {
 	if *outputCmd {
 		f, err := os.Create(path.Join(conf.Build, "cmd"))
 		if err != nil {
-			return fmt.Errorf("cannot create the output command file: %s", err)
+			return app.Error(err)
 		}
 		fmt.Fprintln(f, args)
 		f.Close()
@@ -223,7 +214,7 @@ func JsCompiler(out string, deps []*Source) error {
 	cmd := exec.Command("java", args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("cannot compile the code: %s\n%s", err, string(output))
+		return app.Errorf("exec error: %s\n%s", err, string(output))
 	}
 
 	// If the compiler outputs something, send it to the console

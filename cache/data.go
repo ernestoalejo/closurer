@@ -1,6 +1,8 @@
 package cache
 
-import ()
+import (
+	"github.com/ernestokarim/closurer/config"
+)
 
 var dataCache = map[string]interface{}{}
 
@@ -13,7 +15,7 @@ func WriteData(key string, value interface{}) {
 // blank will be returned.
 func ReadData(key string, blank interface{}) interface{} {
 	d, ok := dataCache[key]
-	if !ok || NoCache {
+	if !ok || config.NoCache {
 		dataCache[key] = blank
 		return blank
 	}

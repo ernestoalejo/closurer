@@ -1,10 +1,11 @@
 package utils
 
 import (
-	"fmt"
 	"io/ioutil"
 	"path"
 	"strings"
+
+	"github.com/ernestokarim/closurer/app"
 )
 
 type visitor struct {
@@ -14,7 +15,7 @@ type visitor struct {
 func (v *visitor) scan(filepath string, ext string) error {
 	ls, err := ioutil.ReadDir(filepath)
 	if err != nil {
-		return fmt.Errorf("cannot read the path %s: %s", filepath, err)
+		return app.Error(err)
 	}
 
 	for _, entry := range ls {

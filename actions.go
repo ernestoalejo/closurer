@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
 )
@@ -22,7 +22,7 @@ func PreCompileActions() error {
 	conf := config.Current()
 
 	if err := os.MkdirAll(conf.Build, 0755); err != nil {
-		return fmt.Errorf("cannot create the build directory")
+		return app.Error(err)
 	}
 
 	var err error

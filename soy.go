@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/utils"
@@ -44,13 +44,13 @@ func CompileSoy() error {
 		// Relativize the path
 		prel, err := filepath.Rel(conf.RootSoy, t)
 		if err != nil {
-			return fmt.Errorf("cannot put relative the path %s: %s", t, err)
+			return app.Error(err)
 		}
 
 		// Creates all the necessary directories
 		out := path.Join(conf.Build, "templates", prel+".js")
 		if err := os.MkdirAll(path.Dir(out), 0755); err != nil {
-			return fmt.Errorf("cannot create the build tree: %s", out)
+			return app.Error(err)
 		}
 
 		log.Println("Compiling template:", t)
@@ -67,8 +67,7 @@ func CompileSoy() error {
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			return fmt.Errorf("soy compiler error for file %s: %s\n%s", t,
-				err, string(output))
+			return app.Errorf("exec error with %s: %s\n%s", t, err, string(output))
 		}
 	}
 

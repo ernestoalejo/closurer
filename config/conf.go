@@ -2,13 +2,10 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"path"
 	"strings"
-
-	"github.com/ernestokarim/closurer/cache"
 )
 
 type Config struct {
@@ -56,10 +53,10 @@ var conf = new(Config)
 // Load a config file recursively (inheritation) and apply
 // the settings to the global object.
 func ReadFromFile(filename string) error {
-	config := cache.ReadData(filename, new(Config)).(*Config)
+	config := CacheReadConfig(filename)
 
 	// Check the modified time
-	if modified, err := cache.Modified("config", filename); err != nil {
+	if modified, err := CacheModified("config", filename); err != nil {
 		return err
 	} else if modified {
 		log.Println("Reading config file:", filename)
@@ -67,7 +64,7 @@ func ReadFromFile(filename string) error {
 		// Open the file
 		f, err := os.Open(filename)
 		if err != nil {
-			return fmt.Errorf("cannot open the config file %s: %s", filename, err)
+			return err
 		}
 		defer f.Close()
 

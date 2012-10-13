@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/ernestokarim/closurer/app"
@@ -65,7 +64,7 @@ func ScanTests() ([]string, error) {
 		// Relativize the path adding .html instead of .js
 		p, err := filepath.Rel(conf.RootJs, test[:len(test)-2]+"html")
 		if err != nil {
-			return nil, fmt.Errorf("cannot relativize %s: %s", test, err)
+			return nil, app.Error(err)
 		}
 		tests[i] = p
 	}

@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/utils"
@@ -57,7 +58,7 @@ func NewSource(dest, filename, base string) (*Source, bool, error) {
 	// Open the file
 	f, err := os.Open(filename)
 	if err != nil {
-		return nil, false, fmt.Errorf("cannot open the source file %s: %s", filename, err)
+		return nil, false, app.Error(err)
 	}
 	defer f.Close()
 
@@ -95,7 +96,7 @@ func NewSource(dest, filename, base string) (*Source, bool, error) {
 	if src.Base {
 		if len(src.Provides) > 0 || len(src.Requires) > 0 {
 			return nil, false,
-				fmt.Errorf("base files should not provide or require namespaces: %s", filename)
+				app.Errorf("base files should not provide or require namespaces: %s", filename)
 		}
 		src.Provides = append(src.Provides, "goog")
 	}
@@ -174,7 +175,7 @@ func (tree *DepsTree) AddSource(filename string) error {
 		for k, source := range tree.sources {
 			for _, provide := range source.Provides {
 				if In(src.Provides, provide) {
-					return fmt.Errorf("multiple provide %s: %s and %s", provide, k, filename)
+					return app.Errorf("multiple provide %s: %s and %s", provide, k, filename)
 				}
 			}
 		}
@@ -201,7 +202,7 @@ func (tree *DepsTree) Check() error {
 		for _, require := range source.Requires {
 			_, ok := tree.provides[require]
 			if !ok {
-				return fmt.Errorf("namespace not found %s: %s", require, k)
+				return app.Errorf("namespace not found %s: %s", require, k)
 			}
 		}
 	}
@@ -214,7 +215,7 @@ func (tree *DepsTree) Check() error {
 func (tree *DepsTree) GetProvides(filename string) ([]string, error) {
 	src, ok := tree.sources[filename]
 	if !ok {
-		return nil, fmt.Errorf("input not present in the sources: %s", filename)
+		return nil, app.Errorf("input not present in the sources: %s", filename)
 	}
 
 	return src.Provides, nil
@@ -250,13 +251,13 @@ func (tree *DepsTree) ResolveDependencies(ns string, info *TraversalInfo) error 
 	// Check that the namespace is correct
 	src, ok := tree.provides[ns]
 	if !ok {
-		return fmt.Errorf("namespace not found: %s", ns)
+		return app.Errorf("namespace not found: %s", ns)
 	}
 
 	// Detects circular deps
 	if In(info.traversal, ns) {
 		info.traversal = append(info.traversal, ns)
-		return fmt.Errorf("circular dependency detected: %v", info.traversal)
+		return app.Errorf("circular dependency detected: %v", info.traversal)
 	}
 
 	// Memoize results, don't recalculate old depencies
@@ -297,7 +298,7 @@ func WriteDeps(f io.Writer, deps []*Source) error {
 			}
 		}
 		if n == "" {
-			return fmt.Errorf("cannot generate the relative filename for %s", src.Filename)
+			return app.Errorf("cannot generate the relative filename for %s", src.Filename)
 		}
 
 		// Write the line to the output of the deps.js file request

@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"html/template"
 	"io"
 	"os"
@@ -10,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ernestokarim/closurer/cache"
+	"github.com/ernestokarim/closurer/config"
 )
 
 const (
@@ -39,18 +38,18 @@ func RawExecuteTemplate(w io.Writer, names []string, data interface{}) error {
 
 	// Parse the templates
 	t, ok := templatesCache[cname]
-	if !ok || cache.NoCache {
+	if !ok || config.NoCache {
 		var err error
 		t, err = template.New(cname).Funcs(templatesFuncs).ParseFiles(names...)
 		if err != nil {
-			return fmt.Errorf("cannot parse the template: %s", err)
+			return Error(err)
 		}
 		templatesCache[cname] = t
 	}
 
 	// Execute them
 	if err := t.ExecuteTemplate(w, "base", data); err != nil {
-		return fmt.Errorf("cannot execute the template: %s", err)
+		return Error(err)
 	}
 
 	return nil

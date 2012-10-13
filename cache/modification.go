@@ -3,6 +3,8 @@ package cache
 import (
 	"os"
 	"time"
+
+	"github.com/ernestokarim/closurer/config"
 )
 
 var modificationCache = map[string]time.Time{}
@@ -11,7 +13,7 @@ var modificationCache = map[string]time.Time{}
 // it was scanned. It so, or if it's not present in the cache,
 // it returns true and stores the new time.
 func Modified(dest, filename string) (bool, error) {
-	if NoCache {
+	if config.NoCache {
 		return true, nil
 	}
 

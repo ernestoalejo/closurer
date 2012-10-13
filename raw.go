@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -88,7 +87,7 @@ func RawOutput(r *app.Request) error {
 func AddFile(w io.Writer, name string) error {
 	f, err := os.Open(name)
 	if err != nil {
-		return fmt.Errorf("cannot open the base.js file: %s", err)
+		return app.Error(err)
 	}
 	defer f.Close()
 

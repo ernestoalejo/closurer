@@ -20,6 +20,10 @@ func (err *AppError) Log() {
 	log.Printf("ERROR: %s\n", err.Error())
 }
 
+func Errorf(format string, args ...interface{}) error {
+	return Error(fmt.Errorf(format, args...))
+}
+
 func Error(original error) error {
 	return &AppError{
 		OriginalErr: original,
