@@ -10,7 +10,7 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/domain"
-	"github.com/ernestokarim/closurer/utils"
+	"github.com/ernestokarim/closurer/scan"
 )
 
 // Store the info of a dependencies tree
@@ -41,7 +41,7 @@ func NewDepsTree(dest string) (*DepsTree, error) {
 	roots := BaseJSPaths()
 	for _, root := range roots {
 		// Scan the sources
-		src, err := utils.Scan(root, ".js")
+		src, err := scan.Do(root, ".js")
 		if err != nil {
 			return nil, err
 		}

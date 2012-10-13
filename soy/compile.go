@@ -10,7 +10,7 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
-	"github.com/ernestokarim/closurer/utils"
+	"github.com/ernestokarim/closurer/scan"
 )
 
 // Compile all modified templates
@@ -21,7 +21,7 @@ func Compile() error {
 		return nil
 	}
 
-	soy, err := utils.Scan(conf.RootSoy, ".soy")
+	soy, err := scan.Do(conf.RootSoy, ".soy")
 	if err != nil {
 		return err
 	}

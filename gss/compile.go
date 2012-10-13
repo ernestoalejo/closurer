@@ -13,7 +13,7 @@ import (
 	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/hooks"
-	"github.com/ernestokarim/closurer/utils"
+	"github.com/ernestokarim/closurer/scan"
 )
 
 const (
@@ -70,7 +70,7 @@ func Compile() error {
 		return nil
 	}
 
-	gss, err := utils.Scan(conf.RootGss, ".gss")
+	gss, err := scan.Do(conf.RootGss, ".gss")
 	if err != nil {
 		return err
 	}

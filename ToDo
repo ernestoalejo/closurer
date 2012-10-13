@@ -2,7 +2,6 @@
 To Do:
 ~~~~~~
 
- * Rename the utils package to scan.
  * Move the DepsTree building to the scan package.
  * When refactoring the JS package, move the compilation of CSS & SOY out of there.
  * Move home to the main package, its too short to have its own file.

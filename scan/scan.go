@@ -1,4 +1,4 @@
-package utils
+package scan
 
 import (
 	"io/ioutil"
@@ -42,7 +42,7 @@ func (v *visitor) validDir(name string) bool {
 
 // Scans folder recursively search for files with the ext
 // extension and returns the whole list.
-func Scan(folder string, ext string) ([]string, error) {
+func Do(folder string, ext string) ([]string, error) {
 	v := &visitor{[]string{}}
 	if err := v.scan(folder, ext); err != nil {
 		return nil, err

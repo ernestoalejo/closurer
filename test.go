@@ -5,7 +5,7 @@ import (
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
-	"github.com/ernestokarim/closurer/utils"
+	"github.com/ernestokarim/closurer/scan"
 )
 
 type TestData struct {
@@ -55,7 +55,7 @@ func TestList(r *app.Request) error {
 func ScanTests() ([]string, error) {
 	conf := config.Current()
 
-	tests, err := utils.Scan(conf.RootJs, "_test.js")
+	tests, err := scan.Do(conf.RootJs, "_test.js")
 	if err != nil {
 		return nil, err
 	}
