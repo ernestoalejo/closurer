@@ -13,6 +13,7 @@ import (
 	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/hooks"
 	"github.com/ernestokarim/closurer/scan"
+	"github.com/ernestokarim/closurer/test"
 
 	"github.com/gorilla/mux"
 )
@@ -55,9 +56,9 @@ func Serve() {
 	r.Handle("/compile", app.Handler(Compile))
 	r.Handle("/css", app.Handler(gss.CompiledCss))
 	r.Handle("/input/", app.Handler(Input))
-	r.Handle("/test/", app.Handler(Test))
-	r.Handle("/test/all", app.Handler(TestAll))
-	r.Handle("/test/list", app.Handler(TestList))
+	r.Handle("/test/", app.Handler(test.Main))
+	r.Handle("/test/all", app.Handler(test.TestAll))
+	r.Handle("/test/list", app.Handler(test.TestList))
 
 	log.Printf("Started closurer server on http://localhost%s/\n", config.Port)
 	log.Fatal(http.ListenAndServe(config.Port, nil))

@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"path/filepath"
@@ -12,7 +12,7 @@ type TestData struct {
 	Name string
 }
 
-func Test(r *app.Request) error {
+func Main(r *app.Request) error {
 	name := r.Req.URL.Path[6:]
 	name = name[:len(name)-5] + ".js"
 
@@ -22,12 +22,14 @@ func Test(r *app.Request) error {
 	return r.ExecuteTemplate([]string{"test"}, tdata)
 }
 
+// ========================================================
+
 type TestListData struct {
 	AllTests []string
 }
 
 func TestAll(r *app.Request) error {
-	tests, err := ScanTests()
+	tests, err := scanTests()
 	if err != nil {
 		return err
 	}
@@ -38,8 +40,10 @@ func TestAll(r *app.Request) error {
 	return r.ExecuteTemplate([]string{"global-test"}, tdata)
 }
 
+// ========================================================
+
 func TestList(r *app.Request) error {
-	tests, err := ScanTests()
+	tests, err := scanTests()
 	if err != nil {
 		return err
 	}
@@ -50,9 +54,11 @@ func TestList(r *app.Request) error {
 	return r.ExecuteTemplate([]string{"test-list"}, tdata)
 }
 
+// ========================================================
+
 // Search for "_test.js" files and relativize them to
 // the root directory. It replaces the .js ext with .html.
-func ScanTests() ([]string, error) {
+func scanTests() ([]string, error) {
 	conf := config.Current()
 
 	tests, err := scan.Do(conf.RootJs, "_test.js")
