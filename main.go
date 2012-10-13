@@ -22,20 +22,20 @@ func main() {
 	}
 
 	if config.Build {
-		if err := Build(); err != nil {
+		if err := build(); err != nil {
 			log.Fatal(err)
 		}
 	} else {
-		Serve()
+		serve()
 	}
 }
 
-func Serve() {
+func serve() {
 	r := mux.NewRouter().StrictSlash(true)
 	http.Handle("/", r)
 
-	r.Handle("/", app.Handler(Home))
-	r.Handle("/compile", app.Handler(Compile))
+	r.Handle("/", app.Handler(home))
+	r.Handle("/compile", app.Handler(compile))
 	r.Handle("/css", app.Handler(gss.CompiledCss))
 	r.Handle("/input/{name:.+}", app.Handler(Input))
 	r.Handle("/test", app.Handler(test.Main))
@@ -46,11 +46,11 @@ func Serve() {
 	log.Fatal(http.ListenAndServe(config.Port, nil))
 }
 
-func Home(r *app.Request) error {
+func home(r *app.Request) error {
 	return r.ExecuteTemplate([]string{"home"}, nil)
 }
 
-func Compile(r *app.Request) error {
+func compile(r *app.Request) error {
 	conf := config.Current()
 	if conf.Mode == "RAW" {
 		return RawOutput(r)

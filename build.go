@@ -10,7 +10,7 @@ import (
 	"github.com/ernestokarim/closurer/js"
 )
 
-func Build() error {
+func build() error {
 	if err := js.FullCompile(); err != nil {
 		return err
 	}
