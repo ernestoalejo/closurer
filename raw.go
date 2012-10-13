@@ -59,9 +59,12 @@ func RawOutput(r *app.Request) error {
 		return err
 	}
 
-	css, err := ioutil.ReadFile(filepath.Join(conf.Build, config.CSS_NAME))
-	if err != nil {
-		return app.Error(err)
+	css := make([]byte, 0)
+	if conf.RootGss != "" {
+		css, err = ioutil.ReadFile(filepath.Join(conf.Build, config.CSS_NAME))
+		if err != nil {
+			return app.Error(err)
+		}
 	}
 
 	data := map[string]interface{}{
