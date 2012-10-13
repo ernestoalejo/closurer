@@ -35,7 +35,7 @@ func Serve() {
 	http.Handle("/", r)
 
 	r.Handle("/", app.Handler(Home))
-	r.Handle("/compile", app.Handler(js.CompiledJs))
+	r.Handle("/compile", app.Handler(Compile))
 	r.Handle("/css", app.Handler(gss.CompiledCss))
 	r.Handle("/input/{name:.+}", app.Handler(Input))
 	r.Handle("/test", app.Handler(test.Main))
@@ -48,4 +48,13 @@ func Serve() {
 
 func Home(r *app.Request) error {
 	return r.ExecuteTemplate([]string{"home"}, nil)
+}
+
+func Compile(r *app.Request) error {
+	conf := config.Current()
+	if conf.Mode == "RAW" {
+		return RawOutput(r)
+	}
+
+	return js.CompiledJs(r)
 }

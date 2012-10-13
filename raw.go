@@ -17,19 +17,16 @@ import (
 )
 
 func RawOutput(r *app.Request) error {
-	log.Println("Output RAW mode!")
+	log.Println("Output RAW mode")
 
-	// Compile the .gss files
 	if err := gss.Compile(); err != nil {
 		return err
 	}
 
-	// Compile the .soy files
 	if err := soy.Compile(); err != nil {
 		return err
 	}
 
-	// Build the dependency tree between the JS files
 	depstree, err := scan.NewDepsTree("input")
 	if err != nil {
 		return err
@@ -38,21 +35,17 @@ func RawOutput(r *app.Request) error {
 	conf := config.Current()
 	content := bytes.NewBuffer(nil)
 
-	// Copy the base.js file to the output
 	base := path.Join(conf.ClosureLibrary, "closure", "goog", "base.js")
 	if err := AddFile(content, base); err != nil {
 		return err
 	}
 
-	// Add the CSS mapping file
 	if err := AddFile(content, path.Join(conf.Build, "renaming-map.js")); err != nil {
 		return err
 	}
 
-	// Calculate all the input namespaces
 	namespaces := []string{}
 	for _, input := range conf.Inputs {
-		// Ignore _test files
 		if strings.Contains(input, "_test") {
 			continue
 		}
@@ -64,18 +57,15 @@ func RawOutput(r *app.Request) error {
 		namespaces = append(namespaces, ns...)
 	}
 
-	// Calculate the list of dependencies
 	deps, err := depstree.GetDependencies(namespaces)
 	if err != nil {
 		return err
 	}
 
-	// Write them to the output
 	if err := scan.WriteDeps(content, deps); err != nil {
 		return err
 	}
 
-	// Output the template
 	data := map[string]interface{}{
 		"Content":    template.HTML(string(content.Bytes())),
 		"Port":       config.Port,
