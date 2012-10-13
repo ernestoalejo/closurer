@@ -4,6 +4,7 @@ To Do:
 
  * Validate the config object before using it.
  * The /css handler should be refactored to include its output in the /compile handler.
+ * Move the hard-coded filenames to constant in config.
 
 ~~~~~~
 

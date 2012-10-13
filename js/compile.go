@@ -11,10 +11,8 @@ import (
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
-	"github.com/ernestokarim/closurer/domain"
 	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/hooks"
-	"github.com/ernestokarim/closurer/scan"
 	"github.com/ernestokarim/closurer/soy"
 )
 
@@ -50,7 +48,7 @@ func FullCompile() error {
 func Compile() error {
 	conf := config.Current()
 
-	deps, err := GenerateDeps("compile")
+	deps, _, err := GenerateDeps("compile")
 	if err != nil {
 		return err
 	}
@@ -119,43 +117,4 @@ func Compile() error {
 	log.Println("Done compiling JS!")
 
 	return nil
-}
-
-func GenerateDeps(dest string) ([]*domain.Source, error) {
-	conf := config.Current()
-
-	depstree, err := scan.NewDepsTree(dest)
-	if err != nil {
-		return nil, err
-	}
-
-	namespaces := []string{}
-	for _, input := range conf.Inputs {
-		if strings.Contains(input, "_test") {
-			continue
-		}
-
-		ns, err := depstree.GetProvides(input)
-		if err != nil {
-			return nil, err
-		}
-		namespaces = append(namespaces, ns...)
-	}
-
-	deps, err := depstree.GetDependencies(namespaces)
-	if err != nil {
-		return nil, err
-	}
-
-	f, err := os.Create(filepath.Join(conf.Build, "deps.js"))
-	if err != nil {
-		return nil, app.Error(err)
-	}
-	defer f.Close()
-
-	if err := scan.WriteDeps(f, deps); err != nil {
-		return nil, err
-	}
-
-	return deps, nil
 }

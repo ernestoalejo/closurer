@@ -12,13 +12,11 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
-	"github.com/ernestokarim/closurer/scan"
+	"github.com/ernestokarim/closurer/js"
 	"github.com/ernestokarim/closurer/soy"
 )
 
 func RawOutput(r *app.Request) error {
-	log.Println("Output RAW mode")
-
 	if err := gss.Compile(); err != nil {
 		return err
 	}
@@ -27,10 +25,12 @@ func RawOutput(r *app.Request) error {
 		return err
 	}
 
-	depstree, err := scan.NewDepsTree("input")
+	_, namespaces, err := js.GenerateDeps("input")
 	if err != nil {
 		return err
 	}
+
+	log.Println("Output RAW mode")
 
 	conf := config.Current()
 	content := bytes.NewBuffer(nil)
@@ -40,29 +40,11 @@ func RawOutput(r *app.Request) error {
 		return err
 	}
 
-	if err := AddFile(content, path.Join(conf.Build, "renaming-map.js")); err != nil {
+	if err := AddFile(content, path.Join(conf.Build, gss.RENAMING_MAP_NAME)); err != nil {
 		return err
 	}
 
-	namespaces := []string{}
-	for _, input := range conf.Inputs {
-		if strings.Contains(input, "_test") {
-			continue
-		}
-
-		ns, err := depstree.GetProvides(input)
-		if err != nil {
-			return err
-		}
-		namespaces = append(namespaces, ns...)
-	}
-
-	deps, err := depstree.GetDependencies(namespaces)
-	if err != nil {
-		return err
-	}
-
-	if err := scan.WriteDeps(content, deps); err != nil {
+	if err := AddFile(content, path.Join(conf.Build, js.DEPS_NAME)); err != nil {
 		return err
 	}
 

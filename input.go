@@ -27,7 +27,7 @@ func Input(r *app.Request) error {
 			return err
 		}
 
-		if _, err := js.GenerateDeps("input"); err != nil {
+		if _, _, err := js.GenerateDeps("input"); err != nil {
 			return err
 		}
 
