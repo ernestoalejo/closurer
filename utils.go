@@ -1,6 +1,8 @@
 package main
 
-import ()
+import (
+	"github.com/ernestokarim/closurer/domain"
+)
 
 // Return true if s is in lst.
 func In(lst []string, s string) bool {
@@ -13,7 +15,7 @@ func In(lst []string, s string) bool {
 }
 
 // Return true if s is in lst.
-func InSource(lst []*Source, s *Source) bool {
+func InSource(lst []*domain.Source, s *domain.Source) bool {
 	for _, v := range lst {
 		if v == s {
 			return true

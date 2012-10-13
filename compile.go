@@ -13,6 +13,7 @@ import (
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
+	"github.com/ernestokarim/closurer/domain"
 	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/hooks"
 	"github.com/ernestokarim/closurer/soy"
@@ -146,7 +147,7 @@ func CompileJs(w io.Writer) error {
 	return nil
 }
 
-func JsCompiler(out string, deps []*Source) error {
+func JsCompiler(out string, deps []*domain.Source) error {
 	conf := config.Current()
 
 	// Prepare the call to the compiler
