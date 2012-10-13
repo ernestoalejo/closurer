@@ -4,13 +4,19 @@ import (
 	"encoding/gob"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 )
 
+const CACHE_FILENAME = "cache"
+
 // Load the caches from a file.
-func Load(filename string) error {
+func Load() error {
+	conf := config.Current()
+	filename := filepath.Join(conf.Build, CACHE_FILENAME)
+
 	if config.NoCache {
 		return nil
 	}
@@ -37,8 +43,10 @@ func Load(filename string) error {
 }
 
 // Save the caches to a file.
-func Dump(filename string) error {
-	f, err := os.Create(filename)
+func Dump() error {
+	conf := config.Current()
+
+	f, err := os.Create(filepath.Join(conf.Build, CACHE_FILENAME))
 	if err != nil {
 		return app.Error(err)
 	}

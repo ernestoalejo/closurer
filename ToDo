@@ -1,9 +1,6 @@
 
 To Do:
 ~~~~~~
- 
- ! Don't pass the filename to the Dump/Load cache functions, obtain it from the
-   config file.
 
  * The gss compile handler should be transformed to new one, and the commented line
    of the main actived again.

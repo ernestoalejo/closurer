@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/ernestokarim/closurer/app"
@@ -20,14 +19,13 @@ func PreCompileActions() error {
 	}
 
 	conf := config.Current()
-
 	if err := os.MkdirAll(conf.Build, 0755); err != nil {
 		return app.Error(err)
 	}
 
 	var err error
 	loadCacheOnce.Do(func() {
-		err = cache.Load(filepath.Join(conf.Build, "cache"))
+		err = cache.Load()
 	})
 
 	return err
@@ -35,6 +33,5 @@ func PreCompileActions() error {
 
 // Called after each compilation tasks. It saves the caches.
 func PostCompileActions() error {
-	conf := config.Current()
-	return cache.Dump(filepath.Join(conf.Build, "cache"))
+	return cache.Dump()
 }
