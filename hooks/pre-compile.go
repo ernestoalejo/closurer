@@ -18,6 +18,10 @@ func PreCompile() error {
 		return err
 	}
 
+	if err := config.Validate(); err != nil {
+		return err
+	}
+
 	conf := config.Current()
 	if err := os.MkdirAll(conf.Build, 0755); err != nil {
 		return app.Error(err)

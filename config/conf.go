@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -28,7 +29,7 @@ type Config struct {
 	ClosureTemplates   string `json:"closure-templates"`
 	ClosureStylesheets string `json:"closure-stylesheets"`
 
-	// Compilation mode: SIMPLE, ADVANCE, WHITESPACE
+	// Compilation mode: RAW, SIMPLE, ADVANCE, WHITESPACE
 	Mode string `json:"mode"`
 
 	// Warnings level: QUIET, DEFAULT, VERBOSE
@@ -50,6 +51,10 @@ type Config struct {
 // Global configuration.
 var conf = new(Config)
 
+func Current() *Config {
+	return conf
+}
+
 // Load a config file recursively (inheritation) and apply
 // the settings to the global object.
 func ReadFromFile(filename string) error {
@@ -68,12 +73,10 @@ func ReadFromFile(filename string) error {
 		}
 		defer f.Close()
 
-		// Load the data
 		if err := json.NewDecoder(f).Decode(config); err != nil {
 			return err
 		}
 
-		// Adjust the paths
 		config.ClosureLibrary = fixPath(config.ClosureLibrary)
 		config.ClosureCompiler = fixPath(config.ClosureCompiler)
 		config.ClosureTemplates = fixPath(config.ClosureTemplates)
@@ -81,7 +84,6 @@ func ReadFromFile(filename string) error {
 		config.Inherits = fixInheritsPath(filename, config.Inherits)
 	}
 
-	// Recursively scan inherited files
 	if config.Inherits != "" {
 		if err := ReadFromFile(config.Inherits); err != nil {
 			return err
@@ -89,6 +91,65 @@ func ReadFromFile(filename string) error {
 	}
 
 	applyConf(config)
+
+	return nil
+}
+
+func Validate() error {
+	c := conf
+
+	if c.Id == "" {
+		return fmt.Errorf("the id of the app is required")
+	}
+
+	if c.RootJs == "" {
+		return fmt.Errorf("the js root folder is required")
+	}
+
+	if c.Build == "" {
+		return fmt.Errorf("the build folder is required")
+	}
+
+	if c.ClosureLibrary == "" || c.ClosureCompiler == "" || c.ClosureTemplates == "" ||
+		c.ClosureStylesheets == "" {
+		return fmt.Errorf("all the closure paths are required")
+	}
+
+	if c.Mode != "SIMPLE" && c.Mode != "ADVANCE" && c.Mode != "WHITESPACE" && c.Mode != "RAW" {
+		return fmt.Errorf("illegal compilation mode: %s", c.Mode)
+	}
+
+	if c.Level != "QUIET" && c.Level != "DEFAULT" && c.Level != "VERBOSE" {
+		return fmt.Errorf("illegal warning level: %s", c.Level)
+	}
+
+	if len(c.Inputs) == 0 {
+		return fmt.Errorf("no inputs file provided")
+	}
+
+	for e, t := range c.Checks {
+		checks := map[string]bool{
+			"checkRegExp":            true,
+			"checkTypes":             true,
+			"checkVars":              true,
+			"deprecated":             true,
+			"fileoverviewTags":       true,
+			"invalidCasts":           true,
+			"missingProperties":      true,
+			"nonStandardJsDocs":      true,
+			"undefinedVars":          true,
+			"internetExplorerChecks": true,
+			"unknownDefines":         true,
+			"uselessCode":            true,
+		}
+		if _, ok := checks[e]; !ok {
+			return fmt.Errorf("illegal checj: %s", e)
+		}
+
+		if t != "WARNING" && t != "ERROR" && t != "OFF" {
+			return fmt.Errorf("illegal value for the check %s: %s", e, t)
+		}
+	}
 
 	return nil
 }
@@ -172,8 +233,4 @@ func fixInheritsPath(current string, p string) string {
 		p = path.Join(path.Dir(current), p)
 	}
 	return p
-}
-
-func Current() *Config {
-	return conf
 }

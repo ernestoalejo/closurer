@@ -20,6 +20,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := config.Validate(); err != nil {
+		log.Fatal(err)
+	}
+
 	if config.Build {
 		if err := build(); err != nil {
 			log.Fatal(err)
