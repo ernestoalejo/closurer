@@ -21,9 +21,28 @@ func Compile() error {
 		return nil
 	}
 
+	oldSoy, err := scan.Do(filepath.Join(conf.Build, "templates"), ".js")
+	if err != nil {
+		return err
+	}
+
 	soy, err := scan.Do(conf.RootSoy, ".soy")
 	if err != nil {
 		return err
+	}
+
+	indexed := map[string]bool{}
+	for _, f := range soy {
+		indexed[f] = true
+	}
+
+	// Delete compiled templates no longer present in the sources
+	for _, f := range oldSoy {
+		if _, ok := indexed[f]; !ok {
+			if err := os.Remove(f); err != nil {
+				return app.Error(err)
+			}
+		}
 	}
 
 	if len(soy) == 0 {

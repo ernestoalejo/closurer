@@ -2,9 +2,6 @@
 To Do:
 ~~~~~~
 
- * Renaming a soy template after caching it, throws a multiple files providing X.
-   The old JS file must be removed from the build directory.
-
  * List of files that will be compiled.
  * Move the tests and benchmarks to a x_test.go file
 
