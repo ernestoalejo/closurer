@@ -87,7 +87,6 @@ func Compile() error {
 			return err
 		} else if m {
 			modified = true
-			break
 		}
 	}
 

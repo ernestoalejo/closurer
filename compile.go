@@ -1,21 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"io"
-	"log"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
-	"github.com/ernestokarim/closurer/domain"
 	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/hooks"
+	"github.com/ernestokarim/closurer/js"
 	"github.com/ernestokarim/closurer/scan"
 	"github.com/ernestokarim/closurer/soy"
 )
@@ -60,9 +56,6 @@ func Compile(r *app.Request) error {
 }
 
 func CompileJs(w io.Writer) error {
-	start := time.Now()
-
-	// Compile the .gss files
 	if err := gss.Compile(); err != nil {
 		return err
 	}
@@ -138,93 +131,9 @@ func CompileJs(w io.Writer) error {
 		}
 
 		// Compile the javascript
-		if err := JsCompiler(out, deps); err != nil {
+		if err := js.Compile(out, deps); err != nil {
 			return err
 		}
-	}
-
-	log.Println("Done compiling! Elapsed:", time.Since(start))
-
-	return nil
-}
-
-func JsCompiler(out string, deps []*domain.Source) error {
-	conf := config.Current()
-
-	// Prepare the call to the compiler
-	args := []string{
-		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
-		"--js_output_file", out,
-		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
-		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "deps.js"),
-		"--js", path.Join(conf.Build, "deps.js"),
-		"--output_wrapper", "(function(){%output%})();",
-	}
-
-	if conf.RootGss != "" {
-		args = append(args, "--js", path.Join(conf.Build, "renaming-map.js"))
-	}
-
-	// Add the dependencies in order
-	for _, dep := range deps {
-		if !strings.Contains(dep.Filename, "_test.js") {
-			args = append(args, "--js", dep.Filename)
-		}
-	}
-
-	// Add the defines
-	for k, define := range conf.Define {
-		if define != "true" && define != "false" {
-			define = "\"" + define + "\""
-		}
-		args = append(args, "--define", k+"="+define)
-	}
-
-	// Add the checks
-	for k, check := range conf.Checks {
-		args = append(args, "--jscomp_"+strings.ToLower(check), k)
-	}
-
-	// Add the compilation mode
-	if conf.Mode == "ADVANCED" {
-		args = append(args, "--compilation_level", "ADVANCED_OPTIMIZATIONS")
-	} else if conf.Mode == "SIMPLE" {
-		args = append(args, "--compilation_level", "SIMPLE_OPTIMIZATIONS")
-	} else if conf.Mode == "WHITESPACE" {
-		args = append(args, "--compilation_level", "WHITESPACE_ONLY")
-	}
-
-	// Add the warning level
-	args = append(args, "--warning_level", conf.Level)
-
-	// Add the externs
-	for _, extern := range conf.Externs {
-		args = append(args, "--externs", extern)
-	}
-
-	// Output the command that we'll run.
-	if *outputCmd {
-		f, err := os.Create(path.Join(conf.Build, "cmd"))
-		if err != nil {
-			return app.Error(err)
-		}
-		fmt.Fprintln(f, args)
-		f.Close()
-	}
-
-	log.Println("Compiling code to build/compiled.js")
-
-	// Compile the code
-	cmd := exec.Command("java", args...)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return app.Errorf("exec error: %s\n%s", err, string(output))
-	}
-
-	// If the compiler outputs something, send it to the console
-	// for logging (so don't clubber the JS output of the handler).
-	if len(output) > 0 {
-		log.Println("Output from compiler:\n", string(output))
 	}
 
 	return nil

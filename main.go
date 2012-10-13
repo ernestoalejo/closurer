@@ -19,7 +19,6 @@ import (
 )
 
 var (
-	outputCmd  = flag.Bool("output-cmd", false, "output compiler command to a file")
 	cssOutput  = flag.String("css-output", "compiled.css", "the css file that will be built")
 	jsOutput   = flag.String("js-output", "compiled.js", "the js file that will be built")
 	bench      = flag.Bool("bench", false, "enables internal circuits for benchmarks")
