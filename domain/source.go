@@ -2,6 +2,7 @@ package domain
 
 import (
 	"bufio"
+	"encoding/gob"
 	"io"
 	"os"
 	"regexp"
@@ -15,6 +16,10 @@ var (
 	provideRe  = regexp.MustCompile(`^\s*goog\.provide\(\s*[\'"](.+)[\'"]\s*\)`)
 	requiresRe = regexp.MustCompile(`^\s*goog\.require\(\s*[\'"](.+)[\'"]\s*\)`)
 )
+
+func init() {
+	gob.Register(&Source{})
+}
 
 // Represents a JS source
 type Source struct {

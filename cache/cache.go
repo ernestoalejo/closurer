@@ -29,7 +29,7 @@ func Load() error {
 	}
 	defer f.Close()
 
-	log.Println("Reading deps cache:", filename)
+	log.Println("Reading cache:", filename)
 
 	d := gob.NewDecoder(f)
 	if err := d.Decode(&modificationCache); err != nil {

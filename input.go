@@ -5,7 +5,8 @@ import (
 	"log"
 	"os"
 	"path"
-	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
@@ -15,8 +16,7 @@ import (
 )
 
 func Input(r *app.Request) error {
-	// app.Requested filename
-	name := r.Req.URL.Path[7:]
+	name := mux.Vars(r.Req)["name"]
 
 	// Execute the pre-compile actions
 	if err := hooks.PreCompile(); err != nil {
@@ -53,20 +53,16 @@ func Input(r *app.Request) error {
 }
 
 func GenerateDeps(r *app.Request) error {
-	// Execute the pre-compile actions
 	if err := hooks.PreCompile(); err != nil {
 		return err
 	}
 
-	// Compile all the modified templates
 	if err := soy.Compile(); err != nil {
 		return err
 	}
 
-	start := time.Now()
 	log.Println("Building dependency tree...")
 
-	// Build the dependency tree between the JS files
 	depstree, err := scan.NewDepsTree("input")
 	if err != nil {
 		return err
@@ -74,7 +70,6 @@ func GenerateDeps(r *app.Request) error {
 
 	conf := config.Current()
 
-	// Calculate all the input namespaces
 	namespaces := []string{}
 	for _, input := range conf.Inputs {
 		ns, err := depstree.GetProvides(input)
@@ -84,24 +79,20 @@ func GenerateDeps(r *app.Request) error {
 		namespaces = append(namespaces, ns...)
 	}
 
-	// Add some special namespaces for easier testing
 	namespaces = append(namespaces, "goog.userAgent.product",
 		"goog.testing.MultiTestRunner")
 
-	// Calculate the list of dependencies
 	deps, err := depstree.GetDependencies(namespaces)
 	if err != nil {
 		return err
 	}
 
-	log.Println("Done generating deps.js! Elapsed:", time.Since(start))
+	log.Println("Done generating deps.js!")
 
-	// Execute the post-compile actions
 	if err := hooks.PostCompile(); err != nil {
 		return err
 	}
 
-	// Output the list correctly formatted
 	r.W.Header().Set("Content-Type", "text/javascript")
 	if err := scan.WriteDeps(r.W, deps); err != nil {
 		return err
