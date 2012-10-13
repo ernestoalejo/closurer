@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/ernestokarim/closurer/app"
@@ -57,11 +59,17 @@ func RawOutput(r *app.Request) error {
 		return err
 	}
 
+	css, err := ioutil.ReadFile(filepath.Join(conf.Build, config.CSS_NAME))
+	if err != nil {
+		return app.Error(err)
+	}
+
 	data := map[string]interface{}{
 		"Content":    template.HTML(string(content.Bytes())),
 		"Port":       config.Port,
 		"LT":         template.HTML("<"),
 		"Namespaces": template.HTML("'" + strings.Join(namespaces, "', '") + "'"),
+		"Css":        template.JSEscapeString(string(css)),
 	}
 	r.W.Header().Set("Content-Type", "text/javascript")
 	return r.ExecuteTemplate([]string{"raw"}, data)

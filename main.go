@@ -7,7 +7,6 @@ import (
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
-	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/js"
 	"github.com/ernestokarim/closurer/test"
 
@@ -36,7 +35,6 @@ func serve() {
 
 	r.Handle("/", app.Handler(home))
 	r.Handle("/compile", app.Handler(compile))
-	r.Handle("/css", app.Handler(gss.CompiledCss))
 	r.Handle("/input/{name:.+}", app.Handler(Input))
 	r.Handle("/test", app.Handler(test.Main))
 	r.Handle("/test/all", app.Handler(test.TestAll))

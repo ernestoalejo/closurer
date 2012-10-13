@@ -10,4 +10,22 @@ for(var i = 0; i {{.LT}} ns.length; i++) {
   goog.require(ns[i]);
 }
 
+function addCss(cssCode) {
+  if(cssCode.length == 0)
+    return;
+
+  var styleElement = document.createElement("style");
+  styleElement.type = "text/css";
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = cssCode;
+  } else {
+    styleElement.appendChild(document.createTextNode(cssCode));
+  }
+
+  document.getElementsByTagName("head")[0].appendChild(styleElement);
+}
+
+addCss("{{.Css}}");
+
 {{end}}

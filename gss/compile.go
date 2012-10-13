@@ -1,8 +1,6 @@
 package gss
 
 import (
-	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -12,41 +10,8 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
-	"github.com/ernestokarim/closurer/hooks"
 	"github.com/ernestokarim/closurer/scan"
 )
-
-// Serves the compiled CSS file through the 
-func CompiledCss(r *app.Request) error {
-	r.W.Header().Set("Content-Type", "text/css")
-	conf := config.Current()
-
-	if err := hooks.PreCompile(); err != nil {
-		return err
-	}
-
-	if err := Compile(); err != nil {
-		return err
-	}
-
-	if err := hooks.PostCompile(); err != nil {
-		return err
-	}
-
-	f, err := os.Open(filepath.Join(conf.Build, config.CSS_NAME))
-	if os.IsNotExist(err) {
-		fmt.Fprintln(r.W, "")
-	} else if err != nil {
-		return app.Error(err)
-	}
-	defer f.Close()
-
-	if _, err := io.Copy(r.W, f); err != nil {
-		return app.Error(err)
-	}
-
-	return nil
-}
 
 // Compiles the .gss files
 func Compile() error {
