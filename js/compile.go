@@ -13,6 +13,7 @@ import (
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/domain"
 	"github.com/ernestokarim/closurer/gss"
+	"github.com/ernestokarim/closurer/hooks"
 	"github.com/ernestokarim/closurer/scan"
 	"github.com/ernestokarim/closurer/soy"
 )
@@ -20,6 +21,10 @@ import (
 const JS_NAME = "compiled.js"
 
 func FullCompile() error {
+	if err := hooks.PreCompile(); err != nil {
+		return err
+	}
+
 	if err := gss.Compile(); err != nil {
 		return err
 	}
@@ -28,7 +33,15 @@ func FullCompile() error {
 		return err
 	}
 
-	return Compile()
+	if err := Compile(); err != nil {
+		return err
+	}
+
+	if err := hooks.PostCompile(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func Compile() error {
