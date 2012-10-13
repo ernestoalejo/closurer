@@ -1,4 +1,4 @@
-package main
+package scan
 
 import (
 	"github.com/ernestokarim/closurer/domain"

@@ -16,6 +16,7 @@ import (
 	"github.com/ernestokarim/closurer/domain"
 	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/hooks"
+	"github.com/ernestokarim/closurer/scan"
 	"github.com/ernestokarim/closurer/soy"
 )
 
@@ -76,7 +77,7 @@ func CompileJs(w io.Writer) error {
 	}
 
 	// Build the dependency tree between the JS files
-	depstree, err := NewDepsTree("compile")
+	depstree, err := scan.NewDepsTree("compile")
 	if err != nil {
 		return err
 	}
@@ -102,7 +103,7 @@ func CompileJs(w io.Writer) error {
 		}
 	}
 
-	if mustCompile || depstree.mustCompile {
+	if mustCompile || depstree.MustCompile {
 		// Calculate all the input namespaces
 		namespaces := []string{}
 		for _, input := range conf.Inputs {
@@ -132,7 +133,7 @@ func CompileJs(w io.Writer) error {
 		defer f.Close()
 
 		// Write the deps file
-		if err := WriteDeps(f, deps); err != nil {
+		if err := scan.WriteDeps(f, deps); err != nil {
 			return err
 		}
 

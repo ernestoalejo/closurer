@@ -12,6 +12,7 @@ import (
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/hooks"
+	"github.com/ernestokarim/closurer/scan"
 
 	"github.com/gorilla/mux"
 )
@@ -92,7 +93,7 @@ func Bench() error {
 	for i := 0; i < 10; i += 1 {
 		log.Println("Loop:", i)
 
-		depstree, err := NewDepsTree("bench")
+		depstree, err := scan.NewDepsTree("bench")
 		if err != nil {
 			return err
 		}

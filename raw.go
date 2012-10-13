@@ -12,6 +12,7 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
+	"github.com/ernestokarim/closurer/scan"
 	"github.com/ernestokarim/closurer/soy"
 )
 
@@ -29,7 +30,7 @@ func RawOutput(r *app.Request) error {
 	}
 
 	// Build the dependency tree between the JS files
-	depstree, err := NewDepsTree("input")
+	depstree, err := scan.NewDepsTree("input")
 	if err != nil {
 		return err
 	}
@@ -70,7 +71,7 @@ func RawOutput(r *app.Request) error {
 	}
 
 	// Write them to the output
-	if err := WriteDeps(content, deps); err != nil {
+	if err := scan.WriteDeps(content, deps); err != nil {
 		return err
 	}
 

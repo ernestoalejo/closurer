@@ -2,7 +2,6 @@
 To Do:
 ~~~~~~
 
- * Move the DepsTree building to the scan package.
  * When refactoring the JS package, move the compilation of CSS & SOY out of there.
  * Move home to the main package, its too short to have its own file.
  * Validate the config object before using it.

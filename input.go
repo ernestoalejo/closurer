@@ -10,6 +10,7 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/hooks"
+	"github.com/ernestokarim/closurer/scan"
 	"github.com/ernestokarim/closurer/soy"
 )
 
@@ -28,7 +29,7 @@ func Input(r *app.Request) error {
 	}
 
 	// Otherwise serve the file if it can be found
-	paths := BaseJSPaths()
+	paths := scan.BaseJSPaths()
 	for _, p := range paths {
 		f, err := os.Open(path.Join(p, name))
 		if err != nil && !os.IsNotExist(err) {
@@ -66,7 +67,7 @@ func GenerateDeps(r *app.Request) error {
 	log.Println("Building dependency tree...")
 
 	// Build the dependency tree between the JS files
-	depstree, err := NewDepsTree("input")
+	depstree, err := scan.NewDepsTree("input")
 	if err != nil {
 		return err
 	}
@@ -102,7 +103,7 @@ func GenerateDeps(r *app.Request) error {
 
 	// Output the list correctly formatted
 	r.W.Header().Set("Content-Type", "text/javascript")
-	if err := WriteDeps(r.W, deps); err != nil {
+	if err := scan.WriteDeps(r.W, deps); err != nil {
 		return err
 	}
 

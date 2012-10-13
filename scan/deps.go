@@ -1,4 +1,4 @@
-package main
+package scan
 
 import (
 	"fmt"
@@ -10,17 +10,17 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/domain"
-	"github.com/ernestokarim/closurer/scan"
 )
 
 // Store the info of a dependencies tree
 type DepsTree struct {
-	sources     map[string]*domain.Source
-	provides    map[string]*domain.Source
-	base        *domain.Source
-	basePath    string
-	mustCompile bool
-	dest        string
+	MustCompile bool
+
+	sources  map[string]*domain.Source
+	provides map[string]*domain.Source
+	base     *domain.Source
+	basePath string
+	dest     string
 }
 
 // Build a dependency tree that allows the client to know the order of
@@ -41,7 +41,7 @@ func NewDepsTree(dest string) (*DepsTree, error) {
 	roots := BaseJSPaths()
 	for _, root := range roots {
 		// Scan the sources
-		src, err := scan.Do(root, ".js")
+		src, err := Do(root, ".js")
 		if err != nil {
 			return nil, err
 		}
@@ -98,8 +98,8 @@ func (tree *DepsTree) AddSource(filename string) error {
 	// Save the source
 	tree.sources[filename] = src
 
-	// Update the mustCompile flag
-	tree.mustCompile = tree.mustCompile || !cached
+	// Update the MustCompile flag
+	tree.MustCompile = tree.MustCompile || !cached
 
 	return nil
 }
