@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime/pprof"
 	"strings"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/hooks"
+	"github.com/ernestokarim/closurer/js"
 	"github.com/ernestokarim/closurer/scan"
 	"github.com/ernestokarim/closurer/test"
 
@@ -52,7 +55,7 @@ func Serve() {
 	http.Handle("/", r)
 
 	r.Handle("/", app.Handler(Home))
-	r.Handle("/compile", app.Handler(Compile))
+	r.Handle("/compile", app.Handler(js.CompiledJs))
 	r.Handle("/css", app.Handler(gss.CompiledCss))
 	r.Handle("/input/{name:.+}", app.Handler(Input))
 	r.Handle("/test", app.Handler(test.Main))
@@ -68,13 +71,36 @@ func Build() {
 		log.Fatal(err)
 	}
 
-	if err := CompileJs(os.Stdout); err != nil {
+	if err := js.FullCompile(); err != nil {
 		log.Fatal(err)
 	}
 
 	if err := hooks.PostCompile(); err != nil {
 		log.Fatal(err)
 	}
+
+	if err := copyCssFile(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func copyCssFile() error {
+	conf := config.Current()
+
+	src, err := os.Open(filepath.Join(conf.Build, gss.CSS_NAME))
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	dest, err := os.Create(*cssOutput)
+	if err != nil {
+		return err
+	}
+	defer dest.Close()
+
+	_, err = io.Copy(dest, src)
+	return err
 }
 
 func Bench() error {
