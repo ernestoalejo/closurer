@@ -29,6 +29,10 @@ func build() error {
 func copyCssFile() error {
 	conf := config.Current()
 
+	if conf.RootGss == "" {
+		return nil
+	}
+
 	src, err := os.Open(filepath.Join(conf.Build, config.CSS_NAME))
 	if err != nil {
 		return app.Error(err)
