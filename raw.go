@@ -12,6 +12,7 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
+	"github.com/ernestokarim/closurer/soy"
 )
 
 func RawOutput(r *app.Request) error {
@@ -23,7 +24,7 @@ func RawOutput(r *app.Request) error {
 	}
 
 	// Compile the .soy files
-	if err := CompileSoy(); err != nil {
+	if err := soy.Compile(); err != nil {
 		return err
 	}
 

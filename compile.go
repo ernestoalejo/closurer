@@ -15,6 +15,7 @@ import (
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/hooks"
+	"github.com/ernestokarim/closurer/soy"
 )
 
 func Compile(r *app.Request) error {
@@ -69,7 +70,7 @@ func CompileJs(w io.Writer) error {
 	}
 
 	// Compile the .soy files
-	if err := CompileSoy(); err != nil {
+	if err := soy.Compile(); err != nil {
 		return err
 	}
 

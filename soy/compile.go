@@ -1,4 +1,4 @@
-package main
+package soy
 
 import (
 	"log"
@@ -14,46 +14,40 @@ import (
 )
 
 // Compile all modified templates
-func CompileSoy() error {
+func Compile() error {
 	conf := config.Current()
 
-	// Output early if there's no SOY files
 	if conf.RootSoy == "" {
 		return nil
 	}
 
-	// Search the templates
 	soy, err := utils.Scan(conf.RootSoy, ".soy")
 	if err != nil {
 		return err
 	}
 
-	// No results, no compiling
 	if len(soy) == 0 {
 		return nil
 	}
 
 	for _, t := range soy {
-		// Checks if the cached version is ok
 		if modified, err := cache.Modified("compile", t); err != nil {
 			return err
 		} else if !modified {
 			continue
 		}
 
-		// Relativize the path
 		prel, err := filepath.Rel(conf.RootSoy, t)
 		if err != nil {
 			return app.Error(err)
 		}
 
-		// Creates all the necessary directories
 		out := path.Join(conf.Build, "templates", prel+".js")
 		if err := os.MkdirAll(path.Dir(out), 0755); err != nil {
 			return app.Error(err)
 		}
 
-		log.Println("Compiling template:", t)
+		log.Println("Compiling template", t, "...")
 
 		// Run the compiler command
 		cmd := exec.Command(
@@ -69,6 +63,8 @@ func CompileSoy() error {
 		if err != nil {
 			return app.Errorf("exec error with %s: %s\n%s", t, err, string(output))
 		}
+
+		log.Println("Done compiling template!")
 	}
 
 	return nil

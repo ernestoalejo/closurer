@@ -10,6 +10,7 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/hooks"
+	"github.com/ernestokarim/closurer/soy"
 )
 
 func Input(r *app.Request) error {
@@ -57,7 +58,7 @@ func GenerateDeps(r *app.Request) error {
 	}
 
 	// Compile all the modified templates
-	if err := CompileSoy(); err != nil {
+	if err := soy.Compile(); err != nil {
 		return err
 	}
 
