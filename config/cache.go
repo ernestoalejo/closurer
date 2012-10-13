@@ -10,7 +10,7 @@ var (
 	modificationCache = map[string]time.Time{}
 )
 
-func CacheReadConfig(key string) *Config {
+func cacheReadConfig(key string) *Config {
 	d, ok := configCache[key]
 	if !ok || NoCache {
 		configCache[key] = new(Config)
@@ -20,22 +20,20 @@ func CacheReadConfig(key string) *Config {
 	return d
 }
 
-func CacheModified(dest, filename string) (bool, error) {
+func cacheModified(filename string) (bool, error) {
 	if NoCache {
 		return true, nil
 	}
-
-	name := dest + filename
 
 	info, err := os.Lstat(filename)
 	if err != nil {
 		return false, err
 	}
 
-	modified, ok := modificationCache[name]
+	modified, ok := modificationCache[filename]
 
 	if !ok || info.ModTime() != modified {
-		modificationCache[name] = info.ModTime()
+		modificationCache[filename] = info.ModTime()
 		return true, nil
 	}
 

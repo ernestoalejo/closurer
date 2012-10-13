@@ -53,10 +53,10 @@ var conf = new(Config)
 // Load a config file recursively (inheritation) and apply
 // the settings to the global object.
 func ReadFromFile(filename string) error {
-	config := CacheReadConfig(filename)
+	config := cacheReadConfig(filename)
 
 	// Check the modified time
-	if modified, err := CacheModified("config", filename); err != nil {
+	if modified, err := cacheModified(filename); err != nil {
 		return err
 	} else if modified {
 		log.Println("Reading config file:", filename)
