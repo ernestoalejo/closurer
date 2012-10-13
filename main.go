@@ -10,6 +10,8 @@ import (
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
+	"github.com/ernestokarim/closurer/gss"
+	"github.com/ernestokarim/closurer/hooks"
 
 	"github.com/gorilla/mux"
 )
@@ -50,7 +52,7 @@ func Serve() {
 
 	r.Handle("/", app.Handler(Home))
 	r.Handle("/compile", app.Handler(Compile))
-	//r.Handle("/css", app.Handler(CompileGss))
+	r.Handle("/css", app.Handler(gss.CompiledCss))
 	r.Handle("/input/", app.Handler(Input))
 	r.Handle("/test/", app.Handler(Test))
 	r.Handle("/test/all", app.Handler(TestAll))
@@ -61,7 +63,7 @@ func Serve() {
 }
 
 func Build() {
-	if err := PreCompileActions(); err != nil {
+	if err := hooks.PreCompile(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -69,7 +71,7 @@ func Build() {
 		log.Fatal(err)
 	}
 
-	if err := PostCompileActions(); err != nil {
+	if err := hooks.PostCompile(); err != nil {
 		log.Fatal(err)
 	}
 }

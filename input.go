@@ -9,6 +9,7 @@ import (
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
+	"github.com/ernestokarim/closurer/hooks"
 )
 
 func Input(r *app.Request) error {
@@ -16,7 +17,7 @@ func Input(r *app.Request) error {
 	name := r.Req.URL.Path[7:]
 
 	// Execute the pre-compile actions
-	if err := PreCompileActions(); err != nil {
+	if err := hooks.PreCompile(); err != nil {
 		return err
 	}
 
@@ -38,7 +39,7 @@ func Input(r *app.Request) error {
 			io.Copy(r.W, f)
 
 			// Execute the post-compile actions
-			if err := PostCompileActions(); err != nil {
+			if err := hooks.PostCompile(); err != nil {
 				return err
 			}
 
@@ -51,7 +52,7 @@ func Input(r *app.Request) error {
 
 func GenerateDeps(r *app.Request) error {
 	// Execute the pre-compile actions
-	if err := PreCompileActions(); err != nil {
+	if err := hooks.PreCompile(); err != nil {
 		return err
 	}
 
@@ -94,7 +95,7 @@ func GenerateDeps(r *app.Request) error {
 	log.Println("Done generating deps.js! Elapsed:", time.Since(start))
 
 	// Execute the post-compile actions
-	if err := PostCompileActions(); err != nil {
+	if err := hooks.PostCompile(); err != nil {
 		return err
 	}
 

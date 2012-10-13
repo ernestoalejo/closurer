@@ -2,8 +2,6 @@
 To Do:
 ~~~~~~
 
- * The gss compile handler should be transformed to new one, and the commented line
-   of the main actived again.
  * Move home to the main package, its too short to have its own file.
  * When refactoring the JS package, move the compilation of CSS out of there to avoid
    dependencies.

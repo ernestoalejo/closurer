@@ -1,4 +1,4 @@
-package main
+package hooks
 
 import (
 	"os"
@@ -13,7 +13,7 @@ var loadCacheOnce sync.Once
 
 // Called before each compilation task. It load the caches
 // and reload the confs if needed.
-func PreCompileActions() error {
+func PreCompile() error {
 	if err := config.ReadFromFile(config.ConfPath); err != nil {
 		return err
 	}
@@ -29,9 +29,4 @@ func PreCompileActions() error {
 	})
 
 	return err
-}
-
-// Called after each compilation tasks. It saves the caches.
-func PostCompileActions() error {
-	return cache.Dump()
 }

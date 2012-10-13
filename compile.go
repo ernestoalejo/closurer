@@ -14,13 +14,14 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
+	"github.com/ernestokarim/closurer/hooks"
 )
 
 func Compile(r *app.Request) error {
 	conf := config.Current()
 
 	// Execute the pre-compile actions
-	if err := PreCompileActions(); err != nil {
+	if err := hooks.PreCompile(); err != nil {
 		return err
 	}
 
@@ -36,7 +37,7 @@ func Compile(r *app.Request) error {
 	}
 
 	// Execute the post-compile actions
-	if err := PostCompileActions(); err != nil {
+	if err := hooks.PostCompile(); err != nil {
 		return err
 	}
 
