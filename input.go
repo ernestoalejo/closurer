@@ -2,7 +2,6 @@ package main
 
 import (
 	"io"
-	"log"
 	"os"
 	"path"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/hooks"
+	"github.com/ernestokarim/closurer/js"
 	"github.com/ernestokarim/closurer/scan"
 	"github.com/ernestokarim/closurer/soy"
 )
@@ -18,14 +18,35 @@ import (
 func Input(r *app.Request) error {
 	name := mux.Vars(r.Req)["name"]
 
-	// Execute the pre-compile actions
 	if err := hooks.PreCompile(); err != nil {
 		return err
 	}
 
-	// Re-calculate deps and compile templates if needed
 	if name == "deps.js" {
-		return GenerateDeps(r)
+		if err := soy.Compile(); err != nil {
+			return err
+		}
+
+		if _, err := js.GenerateDeps("input"); err != nil {
+			return err
+		}
+
+		conf := config.Current()
+		f, err := os.Open(path.Join(conf.Build, js.DEPS_NAME))
+		if err != nil {
+			return app.Error(err)
+		}
+		defer f.Close()
+
+		if _, err := io.Copy(r.W, f); err != nil {
+			return app.Error(err)
+		}
+
+		if err := hooks.PreCompile(); err != nil {
+			return err
+		}
+
+		return nil
 	}
 
 	// Otherwise serve the file if it can be found
@@ -50,53 +71,4 @@ func Input(r *app.Request) error {
 	}
 
 	return app.Errorf("file not found: %s", name)
-}
-
-func GenerateDeps(r *app.Request) error {
-	if err := hooks.PreCompile(); err != nil {
-		return err
-	}
-
-	if err := soy.Compile(); err != nil {
-		return err
-	}
-
-	log.Println("Building dependency tree...")
-
-	depstree, err := scan.NewDepsTree("input")
-	if err != nil {
-		return err
-	}
-
-	conf := config.Current()
-
-	namespaces := []string{}
-	for _, input := range conf.Inputs {
-		ns, err := depstree.GetProvides(input)
-		if err != nil {
-			return err
-		}
-		namespaces = append(namespaces, ns...)
-	}
-
-	namespaces = append(namespaces, "goog.userAgent.product",
-		"goog.testing.MultiTestRunner")
-
-	deps, err := depstree.GetDependencies(namespaces)
-	if err != nil {
-		return err
-	}
-
-	log.Println("Done generating deps.js!")
-
-	if err := hooks.PostCompile(); err != nil {
-		return err
-	}
-
-	r.W.Header().Set("Content-Type", "text/javascript")
-	if err := scan.WriteDeps(r.W, deps); err != nil {
-		return err
-	}
-
-	return nil
 }

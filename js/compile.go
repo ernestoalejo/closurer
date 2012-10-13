@@ -18,7 +18,10 @@ import (
 	"github.com/ernestokarim/closurer/soy"
 )
 
-const JS_NAME = "compiled.js"
+const (
+	JS_NAME   = "compiled.js"
+	DEPS_NAME = "deps.js"
+)
 
 func FullCompile() error {
 	if err := hooks.PreCompile(); err != nil {
@@ -47,7 +50,7 @@ func FullCompile() error {
 func Compile() error {
 	conf := config.Current()
 
-	deps, err := generateDeps()
+	deps, err := GenerateDeps("compile")
 	if err != nil {
 		return err
 	}
@@ -57,7 +60,7 @@ func Compile() error {
 		"--js_output_file", path.Join(conf.Build, JS_NAME),
 		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
 		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "deps.js"),
-		"--js", filepath.Join(conf.Build, "deps.js"),
+		"--js", filepath.Join(conf.Build, DEPS_NAME),
 		"--output_wrapper", `(function(){%output%})();`,
 	}
 
@@ -118,10 +121,10 @@ func Compile() error {
 	return nil
 }
 
-func generateDeps() ([]*domain.Source, error) {
+func GenerateDeps(dest string) ([]*domain.Source, error) {
 	conf := config.Current()
 
-	depstree, err := scan.NewDepsTree("compile")
+	depstree, err := scan.NewDepsTree(dest)
 	if err != nil {
 		return nil, err
 	}

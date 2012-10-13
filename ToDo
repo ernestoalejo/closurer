@@ -2,22 +2,15 @@
 To Do:
 ~~~~~~
 
- * The GenerateDeps from js and main should be joined.
  * Validate the config object before using it.
  * The /css handler should be refactored to include its output in the /compile handler.
 
 ~~~~~~
 
- * Separate packages for CSS, JS, SOY and server. Splitted from the config & main package.
- * Compile CSS and JS in different runs.
-
  * Stylesheets with images have the wrong URLs when using the /css handler.
 
  * Renaming a soy template after caching it, throws a multiple files providing X.
    The old JS file must be removed from the build directory.
-
- * GenerateDeps() [input.go] should be refactored together with the js compiler
-   to always generate a file and serve it as a first step to the unification.
 
  * List of files that will be compiled.
  * Move the tests and benchmarks to a x_test.go file
