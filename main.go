@@ -45,3 +45,7 @@ func Serve() {
 	log.Printf("Started closurer server on http://localhost%s/\n", config.Port)
 	log.Fatal(http.ListenAndServe(config.Port, nil))
 }
+
+func Home(r *app.Request) error {
+	return r.ExecuteTemplate([]string{"home"}, nil)
+}
