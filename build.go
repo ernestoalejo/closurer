@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/js"
 )
@@ -30,18 +31,21 @@ func copyCssFile() error {
 
 	src, err := os.Open(filepath.Join(conf.Build, config.CSS_NAME))
 	if err != nil {
-		return err
+		return app.Error(err)
 	}
 	defer src.Close()
 
 	dest, err := os.Create(config.CssOutput)
 	if err != nil {
-		return err
+		return app.Error(err)
 	}
 	defer dest.Close()
 
-	_, err = io.Copy(dest, src)
-	return err
+	if _, err = io.Copy(dest, src); err != nil {
+		return app.Error(err)
+	}
+
+	return nil
 }
 
 func copyJsFile() error {
@@ -49,16 +53,19 @@ func copyJsFile() error {
 
 	src, err := os.Open(filepath.Join(conf.Build, config.JS_NAME))
 	if err != nil {
-		return err
+		return app.Error(err)
 	}
 	defer src.Close()
 
 	dest, err := os.Create(config.JsOutput)
 	if err != nil {
-		return err
+		return app.Error(err)
 	}
 	defer dest.Close()
 
-	_, err = io.Copy(dest, src)
-	return err
+	if _, err = io.Copy(dest, src); err != nil {
+		return app.Error(err)
+	}
+
+	return nil
 }

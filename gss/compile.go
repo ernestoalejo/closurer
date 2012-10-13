@@ -21,7 +21,7 @@ func Compile() error {
 	// compiler assumes there's a file with this name there).
 	f, err := os.Create(path.Join(conf.Build, config.RENAMING_MAP_NAME))
 	if err != nil {
-		return err
+		return app.Error(err)
 	}
 	f.Close()
 
