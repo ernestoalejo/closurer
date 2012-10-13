@@ -12,11 +12,16 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/gss"
+	"github.com/ernestokarim/closurer/hooks"
 	"github.com/ernestokarim/closurer/js"
 	"github.com/ernestokarim/closurer/soy"
 )
 
 func RawOutput(r *app.Request) error {
+	if err := hooks.PreCompile(); err != nil {
+		return err
+	}
+
 	if err := gss.Compile(); err != nil {
 		return err
 	}
@@ -36,15 +41,19 @@ func RawOutput(r *app.Request) error {
 	content := bytes.NewBuffer(nil)
 
 	base := path.Join(conf.ClosureLibrary, "closure", "goog", "base.js")
-	if err := AddFile(content, base); err != nil {
+	if err := addFile(content, base); err != nil {
 		return err
 	}
 
-	if err := AddFile(content, path.Join(conf.Build, gss.RENAMING_MAP_NAME)); err != nil {
+	if err := addFile(content, path.Join(conf.Build, gss.RENAMING_MAP_NAME)); err != nil {
 		return err
 	}
 
-	if err := AddFile(content, path.Join(conf.Build, js.DEPS_NAME)); err != nil {
+	if err := addFile(content, path.Join(conf.Build, js.DEPS_NAME)); err != nil {
+		return err
+	}
+
+	if err := hooks.PostCompile(); err != nil {
 		return err
 	}
 
@@ -58,7 +67,7 @@ func RawOutput(r *app.Request) error {
 	return r.ExecuteTemplate([]string{"raw"}, data)
 }
 
-func AddFile(w io.Writer, name string) error {
+func addFile(w io.Writer, name string) error {
 	f, err := os.Open(name)
 	if err != nil {
 		return app.Error(err)
