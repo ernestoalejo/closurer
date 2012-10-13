@@ -2,16 +2,17 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/schema"
 )
 
-var schemaDecoder = schema.NewDecoder()
-var errHandler Handler = nil
+var (
+	schemaDecoder = schema.NewDecoder()
+
+	errorHandlers = map[int]Handler{}
+)
 
 type Request struct {
 	Req *http.Request
@@ -21,7 +22,7 @@ type Request struct {
 // Load the request data using gorilla schema into a struct
 func (r *Request) LoadData(data interface{}) error {
 	if err := r.Req.ParseForm(); err != nil {
-		return fmt.Errorf("error parsing the request form: %s", err)
+		return Error(err)
 	}
 
 	if err := schemaDecoder.Decode(data, r.Req.Form); err != nil {
@@ -42,7 +43,7 @@ func (r *Request) LoadData(data interface{}) error {
 
 		// Not a MultiError, log it
 		if err != nil {
-			return fmt.Errorf("error decoding the schema: %s", err)
+			return Error(err)
 		}
 	}
 
@@ -51,7 +52,7 @@ func (r *Request) LoadData(data interface{}) error {
 
 func (r *Request) LoadJsonData(data interface{}) error {
 	if err := json.NewDecoder(r.Req.Body).Decode(data); err != nil {
-		return fmt.Errorf("error decoding the json: %s", err)
+		return Error(err)
 	}
 
 	return nil
@@ -59,7 +60,7 @@ func (r *Request) LoadJsonData(data interface{}) error {
 
 func (r *Request) EmitJson(data interface{}) error {
 	if err := json.NewEncoder(r.W).Encode(data); err != nil {
-		return fmt.Errorf("error encoding the json: %s", err)
+		return Error(err)
 	}
 
 	return nil
@@ -96,32 +97,31 @@ func (r *Request) ExecuteTemplate(names []string, data interface{}) error {
 	return RawExecuteTemplate(r.W, names, data)
 }
 
-// You shouldn't use this function, but directly return
-// an error from the handler.
-func (r *Request) internalServerError(message string) {
-	if errHandler != nil {
-		r.W.WriteHeader(http.StatusInternalServerError)
-		err := errHandler(r)
-		if err == nil {
-			return
-		}
-		message += err.Error()
-	}
-
-	http.Error(r.W, message, http.StatusInternalServerError)
-}
-
 func (r *Request) JsonResponse(data interface{}) error {
 	if err := json.NewEncoder(r.W).Encode(data); err != nil {
-		return fmt.Errorf("cannot serialize the response: %s", err)
+		return Error(err)
 	}
 	return nil
 }
 
-func (r *Request) LogError(err error) {
-	log.Printf("ERROR: %s\n", err)
+func (r *Request) processError(err error) {
+	e, ok := (err).(*AppError)
+	if !ok {
+		e = Error(err).(*AppError)
+	}
+
+	e.Log()
+
+	h, ok := errorHandlers[e.Code]
+	if ok {
+		if err := h(r); err == nil {
+			return
+		}
+	}
+
+	http.Error(r.W, "", e.Code)
 }
 
-func SetErrorHandler(f Handler) {
-	errHandler = f
+func SetErrorHandler(code int, f Handler) {
+	errorHandlers[code] = f
 }

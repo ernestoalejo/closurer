@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"net/http"
-	"runtime/debug"
 )
 
 // All handlers in the app must implement this type
@@ -18,14 +17,12 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	defer func() {
 		if rec := recover(); rec != nil {
-			err := fmt.Errorf("panic recovered error: %+v\n%s", rec, debug.Stack())
-			r.LogError(err)
-			r.internalServerError(err.Error())
+			err := Error(fmt.Errorf("panic recovered error: %s", rec))
+			r.processError(err)
 		}
 	}()
 
 	if err := fn(r); err != nil {
-		r.LogError(err)
-		r.internalServerError(err.Error())
+		r.processError(err)
 	}
 }

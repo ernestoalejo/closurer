@@ -2,7 +2,6 @@
 To Do:
 ~~~~~~
  
- * Update the "gaelib" to the latest version.
  * Use an error that saves the callstack.
  * The gss compile handler should be transformed to new one, and the commented line
    of the main actived again.
