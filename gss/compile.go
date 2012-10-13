@@ -16,11 +16,6 @@ import (
 	"github.com/ernestokarim/closurer/scan"
 )
 
-const (
-	CSS_NAME          = "compiled.css"
-	RENAMING_MAP_NAME = "renaming-map.js"
-)
-
 // Serves the compiled CSS file through the 
 func CompiledCss(r *app.Request) error {
 	r.W.Header().Set("Content-Type", "text/css")
@@ -38,7 +33,7 @@ func CompiledCss(r *app.Request) error {
 		return err
 	}
 
-	f, err := os.Open(filepath.Join(conf.Build, CSS_NAME))
+	f, err := os.Open(filepath.Join(conf.Build, config.CSS_NAME))
 	if os.IsNotExist(err) {
 		fmt.Fprintln(r.W, "")
 	} else if err != nil {
@@ -59,7 +54,7 @@ func Compile() error {
 
 	// Create/Clean the renaming map file to avoid compilation errors (the JS
 	// compiler assumes there's a file with this name there).
-	f, err := os.Create(path.Join(conf.Build, RENAMING_MAP_NAME))
+	f, err := os.Create(path.Join(conf.Build, config.RENAMING_MAP_NAME))
 	if err != nil {
 		return err
 	}
@@ -100,10 +95,10 @@ func Compile() error {
 	cmd := exec.Command(
 		"java",
 		"-jar", path.Join(conf.ClosureStylesheets, "build", "closure-stylesheets.jar"),
-		"--output-file", filepath.Join(conf.Build, CSS_NAME),
+		"--output-file", filepath.Join(conf.Build, config.CSS_NAME),
 		"--output-renaming-map-format", "CLOSURE_COMPILED",
 		"--rename", "CLOSURE",
-		"--output-renaming-map", path.Join(conf.Build, RENAMING_MAP_NAME))
+		"--output-renaming-map", path.Join(conf.Build, config.RENAMING_MAP_NAME))
 	cmd.Args = append(cmd.Args, gss...)
 
 	output, err := cmd.CombinedOutput()

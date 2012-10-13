@@ -45,11 +45,11 @@ func RawOutput(r *app.Request) error {
 		return err
 	}
 
-	if err := addFile(content, path.Join(conf.Build, gss.RENAMING_MAP_NAME)); err != nil {
+	if err := addFile(content, path.Join(conf.Build, config.RENAMING_MAP_NAME)); err != nil {
 		return err
 	}
 
-	if err := addFile(content, path.Join(conf.Build, js.DEPS_NAME)); err != nil {
+	if err := addFile(content, path.Join(conf.Build, config.DEPS_NAME)); err != nil {
 		return err
 	}
 

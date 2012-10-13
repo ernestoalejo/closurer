@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/ernestokarim/closurer/config"
-	"github.com/ernestokarim/closurer/gss"
 	"github.com/ernestokarim/closurer/js"
 )
 
@@ -29,7 +28,7 @@ func build() error {
 func copyCssFile() error {
 	conf := config.Current()
 
-	src, err := os.Open(filepath.Join(conf.Build, gss.CSS_NAME))
+	src, err := os.Open(filepath.Join(conf.Build, config.CSS_NAME))
 	if err != nil {
 		return err
 	}
@@ -48,7 +47,7 @@ func copyCssFile() error {
 func copyJsFile() error {
 	conf := config.Current()
 
-	src, err := os.Open(filepath.Join(conf.Build, js.JS_NAME))
+	src, err := os.Open(filepath.Join(conf.Build, config.JS_NAME))
 	if err != nil {
 		return err
 	}

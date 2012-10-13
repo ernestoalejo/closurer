@@ -17,7 +17,7 @@ func CompiledJs(r *app.Request) error {
 		return err
 	}
 
-	f, err := os.Open(path.Join(conf.Build, JS_NAME))
+	f, err := os.Open(path.Join(conf.Build, config.JS_NAME))
 	if err != nil {
 		return app.Error(err)
 	}

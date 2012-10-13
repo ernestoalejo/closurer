@@ -40,7 +40,7 @@ func GenerateDeps(dest string) ([]*domain.Source, []string, error) {
 		return nil, nil, err
 	}
 
-	f, err := os.Create(filepath.Join(conf.Build, "deps.js"))
+	f, err := os.Create(filepath.Join(conf.Build, config.DEPS_NAME))
 	if err != nil {
 		return nil, nil, app.Error(err)
 	}

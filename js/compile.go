@@ -16,11 +16,6 @@ import (
 	"github.com/ernestokarim/closurer/soy"
 )
 
-const (
-	JS_NAME   = "compiled.js"
-	DEPS_NAME = "deps.js"
-)
-
 func FullCompile() error {
 	if err := hooks.PreCompile(); err != nil {
 		return err
@@ -55,10 +50,10 @@ func Compile() error {
 
 	args := []string{
 		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
-		"--js_output_file", path.Join(conf.Build, JS_NAME),
+		"--js_output_file", path.Join(conf.Build, config.JS_NAME),
 		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
 		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "deps.js"),
-		"--js", filepath.Join(conf.Build, DEPS_NAME),
+		"--js", filepath.Join(conf.Build, config.DEPS_NAME),
 		"--output_wrapper", `(function(){%output%})();`,
 	}
 

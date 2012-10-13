@@ -22,7 +22,7 @@ func Input(r *app.Request) error {
 		return err
 	}
 
-	if name == "deps.js" {
+	if name == config.DEPS_NAME {
 		if err := soy.Compile(); err != nil {
 			return err
 		}
@@ -32,7 +32,7 @@ func Input(r *app.Request) error {
 		}
 
 		conf := config.Current()
-		f, err := os.Open(path.Join(conf.Build, js.DEPS_NAME))
+		f, err := os.Open(path.Join(conf.Build, config.DEPS_NAME))
 		if err != nil {
 			return app.Error(err)
 		}
