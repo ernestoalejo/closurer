@@ -3,6 +3,4 @@ To Do:
 ~~~~~~
 
  * List of files that will be compiled.
- * Move the tests and benchmarks to a x_test.go file
-
  * Build testing facilities to a folder in disk.
