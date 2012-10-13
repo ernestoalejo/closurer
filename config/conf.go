@@ -115,7 +115,7 @@ func Validate() error {
 		return fmt.Errorf("all the closure paths are required")
 	}
 
-	if c.Mode != "SIMPLE" && c.Mode != "ADVANCE" && c.Mode != "WHITESPACE" && c.Mode != "RAW" {
+	if c.Mode != "SIMPLE" && c.Mode != "ADVANCED" && c.Mode != "WHITESPACE" && c.Mode != "RAW" {
 		return fmt.Errorf("illegal compilation mode: %s", c.Mode)
 	}
 
