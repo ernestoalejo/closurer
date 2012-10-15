@@ -17,16 +17,16 @@ import (
 func Compile() error {
 	conf := config.Current()
 
-	// Create/Clean the renaming map file to avoid compilation errors (the JS
-	// compiler assumes there's a file with this name there).
-	f, err := os.Create(path.Join(conf.Build, config.RENAMING_MAP_NAME))
-	if err != nil {
-		return app.Error(err)
-	}
-	f.Close()
-
 	// Output early if there's no GSS files.
 	if conf.RootGss == "" {
+		// Create/Clean the renaming map file to avoid compilation errors (the JS
+		// compiler assumes there's a file with this name there).
+		f, err := os.Create(path.Join(conf.Build, config.RENAMING_MAP_NAME))
+		if err != nil {
+			return app.Error(err)
+		}
+		f.Close()
+
 		return nil
 	}
 
@@ -37,6 +37,14 @@ func Compile() error {
 
 	// No results, no compiling
 	if len(gss) == 0 {
+		// Create/Clean the renaming map file to avoid compilation errors (the JS
+		// compiler assumes there's a file with this name there).
+		f, err := os.Create(path.Join(conf.Build, config.RENAMING_MAP_NAME))
+		if err != nil {
+			return app.Error(err)
+		}
+		f.Close()
+
 		return nil
 	}
 
