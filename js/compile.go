@@ -54,6 +54,7 @@ func Compile() error {
 		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
 		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "deps.js"),
 		"--js", filepath.Join(conf.Build, config.DEPS_NAME),
+		"--js", filepath.Join(conf.Build, config.RENAMING_MAP_NAME),
 		"--output_wrapper", `(function(){%output%})();`,
 	}
 
