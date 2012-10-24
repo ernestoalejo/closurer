@@ -10,6 +10,10 @@ for(var i = 0; i {{.LT}} ns.length; i++) {
   goog.require(ns[i]);
 }
 
-goog.style.installStyles("{{.Css}}");
+document.addEventListener('DOMContentLoaded', function() {
+  var css = "{{.Css}}";
+  if(css.length > 0)
+    goog.style.installStyles(css);
+});
 
 {{end}}
