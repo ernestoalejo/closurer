@@ -2,5 +2,7 @@
 To Do:
 ~~~~~~
 
+ * Errors in the compilation should be reported to the page, not only the console.
+
  * List of files that will be compiled.
  * Build testing facilities to a folder in disk.
