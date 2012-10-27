@@ -103,7 +103,12 @@ func Compile() error {
 	cmd := exec.Command("java", args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return app.Errorf("exec error: %s\n%s", err, string(output))
+		if len(output) != 0 {
+			fmt.Println(string(output))
+			os.Exit(1)
+		}
+
+		return app.Errorf("exec error: %s", err)
 	}
 
 	if len(output) > 0 {

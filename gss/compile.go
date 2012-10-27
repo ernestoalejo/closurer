@@ -1,6 +1,7 @@
 package gss
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -76,7 +77,12 @@ func Compile() error {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return app.Errorf("exec error: %s\n%s", err, string(output))
+		if len(output) != 0 {
+			fmt.Println(string(output))
+			os.Exit(1)
+		}
+
+		return app.Errorf("exec error: %s", err)
 	}
 
 	log.Println("Done compiling GSS!")
