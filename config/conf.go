@@ -44,6 +44,10 @@ type Config struct {
 	// Define additional values in the compilation
 	Define map[string]string `json:"define"`
 
+	// Define additional non-standard functions that can be used
+	// in the .gss files.
+	NonStandardCssFuncs []string `json:"non-standard-css-funcs"`
+
 	// Inherits another configurations file
 	Inherits string `json:"inherits"`
 }
@@ -206,6 +210,10 @@ func applyConf(config *Config) {
 
 	if len(config.Define) > 0 {
 		conf.Define = config.Define
+	}
+
+	if len(config.NonStandardCssFuncs) > 0 {
+		conf.NonStandardCssFuncs = config.NonStandardCssFuncs
 	}
 }
 

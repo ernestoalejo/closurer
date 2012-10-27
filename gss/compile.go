@@ -65,7 +65,16 @@ func Compile() error {
 
 	log.Println("Compiling GSS...")
 
-	// Run the soy compiler
+	// Prepare the list of non-standard functions.
+	funcs := []string{}
+	if len(conf.NonStandardCssFuncs) > 0 {
+		for _, f := range conf.NonStandardCssFuncs {
+			funcs = append(funcs, "--allowed-non-standard-function")
+			funcs = append(funcs, f)
+		}
+	}
+
+	// Run the gss compiler
 	cmd := exec.Command(
 		"java",
 		"-jar", path.Join(conf.ClosureStylesheets, "build", "closure-stylesheets.jar"),
@@ -73,6 +82,7 @@ func Compile() error {
 		"--output-renaming-map-format", "CLOSURE_COMPILED",
 		"--rename", "CLOSURE",
 		"--output-renaming-map", path.Join(conf.Build, config.RENAMING_MAP_NAME))
+	cmd.Args = append(cmd.Args, funcs...)
 	cmd.Args = append(cmd.Args, gss...)
 
 	output, err := cmd.CombinedOutput()
