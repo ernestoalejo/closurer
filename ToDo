@@ -2,6 +2,8 @@
 To Do:
 ~~~~~~
 
+ ! Deal with the occasional cache reading errors (bad format) that appears sometimes.
+
  * Errors in the compilation should be reported to the page, not only the console.
 
  * List of files that will be compiled.
