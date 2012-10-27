@@ -21,6 +21,10 @@ func Compile() error {
 		return nil
 	}
 
+	if err := os.MkdirAll(path.Join(conf.Build, "templates"), 0755); err != nil {
+		return app.Error(err)
+	}
+
 	oldSoy, err := scan.Do(filepath.Join(conf.Build, "templates"), ".js")
 	if err != nil {
 		return err
