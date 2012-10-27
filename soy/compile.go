@@ -37,6 +37,7 @@ func Compile() error {
 
 	indexed := map[string]bool{}
 	for _, f := range soy {
+		f = conf.Build + f[len(conf.RootSoy):]
 		indexed[f] = true
 	}
 

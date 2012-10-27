@@ -72,7 +72,7 @@ func RawOutput(r *app.Request) error {
 		"Port":       config.Port,
 		"LT":         template.HTML("<"),
 		"Namespaces": template.HTML("'" + strings.Join(namespaces, "', '") + "'"),
-		"Css":        template.JSEscapeString(string(css)),
+		"Css":        template.HTML(template.JSEscapeString(string(css))),
 	}
 	r.W.Header().Set("Content-Type", "text/javascript")
 	return r.ExecuteTemplate([]string{"raw"}, data)
