@@ -20,13 +20,9 @@ func Compile() error {
 
 	// Output early if there's no GSS files.
 	if conf.RootGss == "" {
-		// Create/Clean the renaming map file to avoid compilation errors (the JS
-		// compiler assumes there's a file with this name there).
-		f, err := os.Create(path.Join(conf.Build, config.RENAMING_MAP_NAME))
-		if err != nil {
-			return app.Error(err)
+		if err := cleanRenamingMap(); err != nil {
+			return err
 		}
-		f.Close()
 
 		return nil
 	}
@@ -38,13 +34,9 @@ func Compile() error {
 
 	// No results, no compiling
 	if len(gss) == 0 {
-		// Create/Clean the renaming map file to avoid compilation errors (the JS
-		// compiler assumes there's a file with this name there).
-		f, err := os.Create(path.Join(conf.Build, config.RENAMING_MAP_NAME))
-		if err != nil {
-			return app.Error(err)
+		if err := cleanRenamingMap(); err != nil {
+			return err
 		}
-		f.Close()
 
 		return nil
 	}
@@ -65,6 +57,10 @@ func Compile() error {
 
 	log.Println("Compiling GSS...")
 
+	if err := cleanRenamingMap(); err != nil {
+		return err
+	}
+
 	// Prepare the list of non-standard functions.
 	funcs := []string{}
 	if len(conf.NonStandardCssFuncs) > 0 {
@@ -74,15 +70,23 @@ func Compile() error {
 		}
 	}
 
+	// Prepare the renaming map args
+	renaming := []string{}
+	if conf.RenameCss == "true" {
+		renaming = []string{
+			"--output-renaming-map-format", "CLOSURE_COMPILED",
+			"--rename", "CLOSURE",
+			"--output-renaming-map", path.Join(conf.Build, config.RENAMING_MAP_NAME),
+		}
+	}
+
 	// Run the gss compiler
 	cmd := exec.Command(
 		"java",
 		"-jar", path.Join(conf.ClosureStylesheets, "build", "closure-stylesheets.jar"),
-		"--output-file", filepath.Join(conf.Build, config.CSS_NAME),
-		"--output-renaming-map-format", "CLOSURE_COMPILED",
-		"--rename", "CLOSURE",
-		"--output-renaming-map", path.Join(conf.Build, config.RENAMING_MAP_NAME))
+		"--output-file", filepath.Join(conf.Build, config.CSS_NAME))
 	cmd.Args = append(cmd.Args, funcs...)
+	cmd.Args = append(cmd.Args, renaming...)
 	cmd.Args = append(cmd.Args, gss...)
 
 	output, err := cmd.CombinedOutput()
@@ -96,6 +100,20 @@ func Compile() error {
 	}
 
 	log.Println("Done compiling GSS!")
+
+	return nil
+}
+
+func cleanRenamingMap() error {
+	conf := config.Current()
+
+	// Create/Clean the renaming map file to avoid compilation errors (the JS
+	// compiler assumes there's a file with this name there).
+	f, err := os.Create(path.Join(conf.Build, config.RENAMING_MAP_NAME))
+	if err != nil {
+		return app.Error(err)
+	}
+	f.Close()
 
 	return nil
 }

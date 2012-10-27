@@ -48,6 +48,9 @@ type Config struct {
 	// in the .gss files.
 	NonStandardCssFuncs []string `json:"non-standard-css-funcs"`
 
+	// Rename the CSS classes to a shorter form
+	RenameCss string `json:"rename-css"`
+
 	// Inherits another configurations file
 	Inherits string `json:"inherits"`
 }
@@ -129,6 +132,10 @@ func Validate() error {
 
 	if len(c.Inputs) == 0 {
 		return fmt.Errorf("no inputs file provided")
+	}
+
+	if c.RenameCss != "true" && c.RenameCss != "false" && c.RootGss != "" {
+		return fmt.Errorf("no renaming policy provided for gss")
 	}
 
 	for e, t := range c.Checks {
@@ -214,6 +221,10 @@ func applyConf(config *Config) {
 
 	if len(config.NonStandardCssFuncs) > 0 {
 		conf.NonStandardCssFuncs = config.NonStandardCssFuncs
+	}
+
+	if config.RenameCss != "" {
+		conf.RenameCss = config.RenameCss
 	}
 }
 
