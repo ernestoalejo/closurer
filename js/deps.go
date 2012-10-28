@@ -37,7 +37,6 @@ func GenerateDeps(dest string) ([]*domain.Source, []string, error) {
 
 	if dest == "input" {
 		namespaces = append(namespaces, "goog.style")
-		namespaces = append(namespaces, "goog.testing.jsunit")
 	}
 
 	deps, err := depstree.GetDependencies(namespaces)
