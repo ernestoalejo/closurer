@@ -8,7 +8,15 @@
 
   <script type="text/javascript" src="/input/base.js"></script>
   <script type="text/javascript" src="/input/deps.js"></script>
-  <script type="text/javascript" src="/input/{{.Name}}"></script>
+
+  <script type="text/javascript">
+
+    var obj = goog.dependencies_.pathToNames["{{.Name}}"];
+    for(var key in obj) {
+      goog.require(key);
+    }
+
+  </script>
 
 </head>
 <body>
