@@ -24,7 +24,7 @@ func GenerateDeps(dest string) ([]*domain.Source, []string, error) {
 
 	namespaces := []string{}
 	for _, input := range conf.Inputs {
-		if strings.Contains(input, "_test") {
+		if dest != "input" && strings.Contains(input, "_test") {
 			continue
 		}
 
