@@ -40,7 +40,7 @@ func serve() {
 	r.Handle("/", app.Handler(home))
 	r.Handle("/compile", app.Handler(compile))
 	r.Handle("/input/{name:.+}", app.Handler(Input))
-	r.Handle("/test", app.Handler(test.Main))
+	r.Handle("/test/{name:.+}", app.Handler(test.Main))
 	r.Handle("/test/all", app.Handler(test.TestAll))
 	r.Handle("/test/list", app.Handler(test.TestList))
 

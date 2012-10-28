@@ -38,6 +38,7 @@ func Input(r *app.Request) error {
 		}
 		defer f.Close()
 
+		r.W.Header().Set("Content-Type", "text/javascript")
 		if _, err := io.Copy(r.W, f); err != nil {
 			return app.Error(err)
 		}

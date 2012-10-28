@@ -6,6 +6,7 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/scan"
+	"github.com/gorilla/mux"
 )
 
 type TestData struct {
@@ -13,7 +14,7 @@ type TestData struct {
 }
 
 func Main(r *app.Request) error {
-	name := r.Req.URL.Path[6:]
+	name := mux.Vars(r.Req)["name"]
 	name = name[:len(name)-5] + ".js"
 
 	tdata := &TestData{
