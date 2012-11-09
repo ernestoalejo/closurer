@@ -140,22 +140,28 @@ func Validate() error {
 
 	for e, t := range c.Checks {
 		checks := map[string]bool{
+			"ambiguousFunctionDecl":  true,
 			"checkRegExp":            true,
 			"checkTypes":             true,
 			"checkVars":              true,
+			"constantProperty":       true,
 			"deprecated":             true,
 			"fileoverviewTags":       true,
 			"internetExplorerChecks": true,
 			"invalidCasts":           true,
 			"missingProperties":      true,
 			"nonStandardJsDocs":      true,
+			"strictModuleDepCheck":   true,
 			"typeInvalidation":       true,
+			"undefinedNames":         true,
 			"undefinedVars":          true,
 			"unknownDefines":         true,
 			"uselessCode":            true,
+			"globalThis":             true,
+			"duplicateMessage":       true,
 		}
 		if _, ok := checks[e]; !ok {
-			return fmt.Errorf("illegal checj: %s", e)
+			return fmt.Errorf("illegal check: %s", e)
 		}
 
 		if t != "WARNING" && t != "ERROR" && t != "OFF" {
