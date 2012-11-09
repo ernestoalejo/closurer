@@ -145,11 +145,12 @@ func Validate() error {
 			"checkVars":              true,
 			"deprecated":             true,
 			"fileoverviewTags":       true,
+			"internetExplorerChecks": true,
 			"invalidCasts":           true,
 			"missingProperties":      true,
 			"nonStandardJsDocs":      true,
+			"typeInvalidation":       true,
 			"undefinedVars":          true,
-			"internetExplorerChecks": true,
 			"unknownDefines":         true,
 			"uselessCode":            true,
 		}
