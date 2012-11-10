@@ -41,6 +41,8 @@ func GenerateDeps(dest string) ([]*domain.Source, []string, error) {
 		namespaces = append(namespaces, "goog.userAgent.product")
 		namespaces = append(namespaces, "goog.testing.MultiTestRunner")
 		namespaces = append(namespaces, depstree.GetTestingNamespaces()...)
+	} else if dest == "input-production" {
+		namespaces = append(namespaces, "goog.style")
 	}
 
 	deps, err := depstree.GetDependencies(namespaces)

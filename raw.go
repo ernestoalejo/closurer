@@ -32,7 +32,7 @@ func RawOutput(r *app.Request) error {
 		return err
 	}
 
-	_, namespaces, err := js.GenerateDeps("input")
+	_, namespaces, err := js.GenerateDeps("input-production")
 	if err != nil {
 		return err
 	}
