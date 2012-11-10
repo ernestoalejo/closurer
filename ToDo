@@ -2,6 +2,8 @@
 To Do:
 ~~~~~~
 
+ * Memory allocation errors. Perhaps caching the deps tree (or it's struct
+   in memory can help). Measure and fix it.
  ! Deal with the occasional cache reading errors (bad format) that appears sometimes.
 
  * Errors in the compilation should be reported to the page, not only the console.
