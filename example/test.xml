@@ -1,0 +1,45 @@
+
+<application build="build">
+
+  <output js="static/js" css="static/css" />
+
+  <js root="client/js" compiler="~/projects/closure/closure-compiler">
+    <checks>
+      <error name="ambiguousFunctionDecl"/>
+      <error name="checkRegExp"/>
+      <error name="checkTypes"/>
+      <error name="checkVars"/>
+      <error name="constantProperty"/>
+      <error name="deprecated"/>
+      <error name="duplicateMessage"/>
+      <error name="fileoverviewTags"/>
+      <error name="globalThis"/>
+      <error name="internetExplorerChecks"/>
+      <error name="invalidCasts"/>
+      <error name="missingProperties"/>
+      <error name="nonStandardJsDocs"/>
+      <error name="undefinedVars"/>
+      <error name="unknownDefines"/>
+      <error name="uselessCode"/>
+      <error name="strictModuleDepCheck"/>
+      <error name="typeInvalidation"/>
+      <error name="undefinedNames"/>
+    </checks>
+
+    <target name="dev" mode="RAW" level="VERBOSE">
+      <define name="goog.LOCALE" value="es"/>
+      <define name="goog.DEBUG" value="true"/>
+      <define name="goog.dom.ASSUME_STANDARDS_MODE" value="true"/>
+    </target>
+
+    <input file="client/js/main.js"/>
+  </js>
+
+  <gss root="client/gss" compiler="~/projects/closure/closure-stylesheets">
+    <target name="dev" rename="false"/>
+  </gss>
+
+  <soy root="client/soy" compiler="~/projects/closure/closure-templates" />
+  <library root="~/projects/closure/closure-library"/>
+
+</application>

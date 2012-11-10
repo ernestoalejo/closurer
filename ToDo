@@ -2,6 +2,10 @@
 To Do:
 ~~~~~~
 
+ * Compile all the files.
+ * Cache the config.
+ * Implement inherit.
+
  * Adapt to a multi-arch compilation (+ loader).
  * Memory allocation errors. Perhaps caching the deps tree (or it's struct
    in memory can help). Measure and fix it.
