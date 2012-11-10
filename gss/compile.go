@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/cache"
@@ -80,7 +81,15 @@ func Compile() error {
 		}
 	}
 
-	// Run the gss compiler
+	// Prepare the defines
+	defines := []string{}
+	if conf.Defines != nil {
+		for _, define := range conf.Defines.Gss {
+			defines = append(defines, "--define", define)
+		}
+	}
+
+	// Prepare the command
 	cmd := exec.Command(
 		"java",
 		"-jar", path.Join(conf.ClosureStylesheets, "build", "closure-stylesheets.jar"),
@@ -88,7 +97,14 @@ func Compile() error {
 	cmd.Args = append(cmd.Args, funcs...)
 	cmd.Args = append(cmd.Args, renaming...)
 	cmd.Args = append(cmd.Args, gss...)
+	cmd.Args = append(cmd.Args, defines...)
 
+	// Output the command if asked to
+	if config.OutputCmd {
+		fmt.Println("java", strings.Join(cmd.Args, " "))
+	}
+
+	// Run the compiler
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if len(output) != 0 {
@@ -97,6 +113,10 @@ func Compile() error {
 		}
 
 		return app.Errorf("exec error: %s", err)
+	}
+
+	if len(output) > 0 {
+		log.Println("Output from GSS compiler:\n", string(output))
 	}
 
 	log.Println("Done compiling GSS!")

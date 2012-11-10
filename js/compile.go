@@ -64,11 +64,13 @@ func Compile() error {
 		}
 	}
 
-	for k, define := range conf.Define {
-		if define != "true" && define != "false" {
-			define = "\"" + define + "\""
+	if conf.Defines != nil {
+		for k, define := range conf.Defines.Js {
+			if define != "true" && define != "false" {
+				define = "\"" + define + "\""
+			}
+			args = append(args, "--define", k+"="+define)
 		}
-		args = append(args, "--define", k+"="+define)
 	}
 
 	for k, check := range conf.Checks {
@@ -89,18 +91,17 @@ func Compile() error {
 		args = append(args, "--externs", extern)
 	}
 
-	if config.OutputCmd {
-		f, err := os.Create(path.Join(conf.Build, "cmd"))
-		if err != nil {
-			return app.Error(err)
-		}
-		fmt.Fprintln(f, args)
-		f.Close()
-	}
-
 	log.Println("Compiling JS...")
 
+	// Prepare the command
 	cmd := exec.Command("java", args...)
+
+	// Output it if asked to
+	if config.OutputCmd {
+		fmt.Println("java", strings.Join(cmd.Args, " "))
+	}
+
+	// Run the JS compiler
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if len(output) != 0 {
@@ -112,7 +113,7 @@ func Compile() error {
 	}
 
 	if len(output) > 0 {
-		log.Println("Output from compiler:\n", string(output))
+		log.Println("Output from JS compiler:\n", string(output))
 	}
 
 	log.Println("Done compiling JS!")

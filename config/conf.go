@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+type Define struct {
+	Js  map[string]string `json:"js"`
+	Gss []string          `json:"gss"`
+}
+
 type Config struct {
 	Id string `json:"id"`
 
@@ -42,7 +47,7 @@ type Config struct {
 	Checks map[string]string `json:"checks"`
 
 	// Define additional values in the compilation
-	Define map[string]string `json:"define"`
+	Defines *Define `json:"define"`
 
 	// Define additional non-standard functions that can be used
 	// in the .gss files.
@@ -222,8 +227,17 @@ func applyConf(config *Config) {
 		conf.Checks = config.Checks
 	}
 
-	if len(config.Define) > 0 {
-		conf.Define = config.Define
+	if config.Defines != nil {
+		if conf.Defines == nil {
+			conf.Defines = config.Defines
+		} else {
+			if len(config.Defines.Js) > 0 {
+				conf.Defines.Js = config.Defines.Js
+			}
+			if len(config.Defines.Gss) > 0 {
+				conf.Defines.Gss = config.Defines.Gss
+			}
+		}
 	}
 
 	if len(config.NonStandardCssFuncs) > 0 {
