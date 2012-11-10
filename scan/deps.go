@@ -130,6 +130,17 @@ func (tree *DepsTree) GetProvides(filename string) ([]string, error) {
 	return src.Provides, nil
 }
 
+// Return the list of namespaces need to include the test files too
+func (tree *DepsTree) GetTestingNamespaces() []string {
+	ns := make([]string, 0)
+	for _, src := range tree.sources {
+		if strings.Contains(src.Filename, "_test.js") {
+			ns = append(ns, src.Provides...)
+		}
+	}
+	return ns
+}
+
 // Struct to store the info of a dependencies tree traversal
 type TraversalInfo struct {
 	deps      []*domain.Source
