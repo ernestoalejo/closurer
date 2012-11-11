@@ -3,7 +3,6 @@ package js
 import (
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
@@ -116,7 +115,6 @@ func Compile() error {
 	if err != nil {
 		if len(output) != 0 {
 			fmt.Println(string(output))
-			os.Exit(1)
 		}
 
 		return app.Errorf("exec error: %s", err)

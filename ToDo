@@ -2,11 +2,11 @@
 To Do:
 ~~~~~~
 
- * An error in the GSS compiler shouldn't close the app.
  * Cache the config.
  * Implement inherit.
-
  * Adapt to a multi-arch compilation (+ loader).
+ * The compiling errors should be show in the webpage if possible (not a build).
+
  * Memory allocation errors. Perhaps caching the deps tree (or it's struct
    in memory can help). Measure and fix it.
  ! Deal with the occasional cache reading errors (bad format) that appears sometimes.

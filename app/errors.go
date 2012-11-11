@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"runtime/debug"
+	"strings"
 )
 
 type AppError struct {
@@ -17,7 +18,9 @@ func (err *AppError) Error() string {
 }
 
 func (err *AppError) Log() {
-	log.Printf("ERROR: %s\n", err.Error())
+	if !strings.Contains(err.OriginalErr.Error(), "exec error:") {
+		log.Printf("ERROR: %s\n", err.Error())
+	}
 }
 
 func Errorf(format string, args ...interface{}) error {
