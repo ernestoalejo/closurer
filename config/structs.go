@@ -144,11 +144,11 @@ type ExternNode struct {
 // ==================================================================
 
 type GssNode struct {
-	Root     string `xml:"root,attr"`
 	Compiler string `xml:"compiler,attr"`
 
 	Targets []*GssTargetNode `xml:"target"`
 	Funcs   []*FuncNode      `xml:"func"`
+	Inputs  []*InputNode     `xml:"input"`
 }
 
 func (n *GssNode) CurTarget() *GssTargetNode {

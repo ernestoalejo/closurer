@@ -84,7 +84,12 @@ func (c *Config) validate() error {
 		}
 	}
 
-	if c.Gss != nil && c.Gss.Root != "" {
+	// At least one input file should be provided
+	if len(c.Js.Inputs) == 0 {
+		return app.Errorf("No inputs provided for JS code")
+	}
+
+	if c.Gss != nil {
 		// GSS compiler
 		if c.Gss.Compiler == "" {
 			return app.Errorf("The Closure Stylesheets path is required")
@@ -93,6 +98,11 @@ func (c *Config) validate() error {
 		// GSS targets
 		if len(c.Gss.Targets) == 0 {
 			return app.Errorf("No target provided for GSS code")
+		}
+
+		// At least one input file should be provided
+		if len(c.Gss.Inputs) == 0 {
+			return app.Errorf("No inputs provided for GSS code")
 		}
 
 		// Compare JS targets and GSS targets

@@ -12,7 +12,6 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/cache"
 	"github.com/ernestokarim/closurer/config"
-	"github.com/ernestokarim/closurer/scan"
 )
 
 // Compiles the .gss files
@@ -29,24 +28,10 @@ func Compile() error {
 		return nil
 	}
 
-	gss, err := scan.Do(conf.Gss.Root, ".gss")
-	if err != nil {
-		return err
-	}
-
-	// No results, no compiling
-	if len(gss) == 0 {
-		if err := cleanRenamingMap(); err != nil {
-			return err
-		}
-
-		return nil
-	}
-
 	// Check if the cached version is still ok
 	modified := false
-	for _, filepath := range gss {
-		if m, err := cache.Modified("compile", filepath); err != nil {
+	for _, input := range conf.Gss.Inputs {
+		if m, err := cache.Modified("compile", input.File); err != nil {
 			return err
 		} else if m {
 			modified = true
@@ -86,6 +71,12 @@ func Compile() error {
 		defines = append(defines, "--define", define.Name)
 	}
 
+	// Prepare the inputs
+	inputs := []string{}
+	for _, input := range conf.Gss.Inputs {
+		inputs = append(inputs, input.File)
+	}
+
 	// Prepare the command
 	cmd := exec.Command(
 		"java",
@@ -93,7 +84,7 @@ func Compile() error {
 		"--output-file", filepath.Join(conf.Build, config.CSS_NAME))
 	cmd.Args = append(cmd.Args, funcs...)
 	cmd.Args = append(cmd.Args, renaming...)
-	cmd.Args = append(cmd.Args, gss...)
+	cmd.Args = append(cmd.Args, inputs...)
 	cmd.Args = append(cmd.Args, defines...)
 
 	// Output the command if asked to
