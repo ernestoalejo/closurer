@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 )
 
