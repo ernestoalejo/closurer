@@ -56,7 +56,7 @@ func serve() {
 	r.Handle("/test/list", app.Handler(test.TestList))
 	r.Handle("/test/{name:.+}", app.Handler(test.Main))
 
-	fmt.Printf("Started closurer server on http://localhost%s/\n", config.Port)
+	log.Printf("Started closurer server on http://localhost%s/\n", config.Port)
 	log.Fatal(http.ListenAndServe(config.Port, nil))
 }
 
