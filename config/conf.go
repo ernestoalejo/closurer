@@ -5,13 +5,28 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ernestokarim/closurer/app"
 )
 
-var globalConf *Config
+var (
+	globalConf       *Config
+	lastModification time.Time
+)
 
 func Load(filename string) error {
+	if globalConf != nil && !NoCache {
+		info, err := os.Lstat(filename)
+		if err != nil {
+			return app.Error(err)
+		}
+
+		if info.ModTime() == lastModification {
+			return nil
+		}
+	}
+
 	f, err := os.Open(filename)
 	if err != nil {
 		return app.Error(err)
@@ -28,6 +43,12 @@ func Load(filename string) error {
 	}
 
 	globalConf = conf
+
+	info, err := os.Lstat(filename)
+	if err != nil {
+		return app.Error(err)
+	}
+	lastModification = info.ModTime()
 
 	return nil
 }

@@ -2,7 +2,7 @@
 To Do:
 ~~~~~~
 
- * Cache the config.
+ * Now that config receives only a file, make it a flag and remove the arg to Load().
  * Implement inherits.
  * Add the multiarch loader.
  * The compiling errors should be show in the webpage if possible (not a build).
