@@ -3,15 +3,15 @@ To Do:
 ~~~~~~
 
  * Implement inherits.
- * Add the multiarch loader.
+ * Specify multiple targets in the command line.
+ * Add the option to output a file by its sha1.
+ * Add the option to output a mapping file between the targets and the outputs.
  * The compiling errors should be show in the webpage if possible (not a build).
+ * Templates are recompiled everytime in production mode.
 
  * Memory allocation errors. Perhaps caching the deps tree (or it's struct
    in memory can help). Measure and fix it.
- ! Deal with the occasional cache reading errors (bad format) that appears sometimes.
- * Templates are recompiled everytime in production mode.
-
+ * Deal with the occasional cache reading errors (bad format) that appears sometimes.
  * Errors in the compilation should be reported to the page, not only the console.
-
  * List of files that will be compiled.
  * Build testing facilities to a folder in disk.
