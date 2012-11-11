@@ -2,6 +2,8 @@
 To Do:
 ~~~~~~
 
+ *  Add the vendor option to the Gss compiler.
+
  * config.Current() it's silly; use global or something like that.
  * The compiling errors should be show in the webpage if possible (not a build).
  * Templates are recompiled everytime in production mode.
