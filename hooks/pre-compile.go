@@ -14,7 +14,7 @@ var loadCacheOnce sync.Once
 // Called before each compilation task. It load the caches
 // and reload the confs if needed.
 func PreCompile() error {
-	if err := config.Load(config.ConfPath); err != nil {
+	if err := config.Load(); err != nil {
 		return err
 	}
 

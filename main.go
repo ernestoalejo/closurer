@@ -16,7 +16,7 @@ import (
 func main() {
 	flag.Parse()
 
-	if err := config.Load(config.ConfPath); err != nil {
+	if err := config.Load(); err != nil {
 		log.Fatal(err)
 	}
 

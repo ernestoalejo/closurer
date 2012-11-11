@@ -15,9 +15,9 @@ var (
 	lastModification time.Time
 )
 
-func Load(filename string) error {
+func Load() error {
 	if globalConf != nil && !NoCache {
-		info, err := os.Lstat(filename)
+		info, err := os.Lstat(ConfPath)
 		if err != nil {
 			return app.Error(err)
 		}
@@ -27,7 +27,7 @@ func Load(filename string) error {
 		}
 	}
 
-	f, err := os.Open(filename)
+	f, err := os.Open(ConfPath)
 	if err != nil {
 		return app.Error(err)
 	}
@@ -44,7 +44,7 @@ func Load(filename string) error {
 
 	globalConf = conf
 
-	info, err := os.Lstat(filename)
+	info, err := os.Lstat(ConfPath)
 	if err != nil {
 		return app.Error(err)
 	}
