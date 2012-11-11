@@ -38,11 +38,13 @@ func Load() error {
 		return app.Error(err)
 	}
 
+	// Assign it before validating, because we need it to
+	// inherit targets.
+	globalConf = conf
+
 	if err := conf.validate(); err != nil {
 		return err
 	}
-
-	globalConf = conf
 
 	info, err := os.Lstat(ConfPath)
 	if err != nil {
@@ -58,6 +60,7 @@ func Current() *Config {
 }
 
 func (c *Config) validate() error {
+	// Library & compiler paths
 	if c.Js.Root == "" {
 		return app.Errorf("The JS root folder is required")
 	}
@@ -70,32 +73,58 @@ func (c *Config) validate() error {
 	if c.Js.Compiler == "" {
 		return app.Errorf("The Closure Compiler path is required")
 	}
+
+	// JS targets and inheritation
 	if len(c.Js.Targets) == 0 {
 		return app.Errorf("No target provided for JS code")
 	}
-	if c.Gss.Root != "" {
+	for _, t := range c.Js.Targets {
+		if err := t.ApplyInherits(); err != nil {
+			return err
+		}
+	}
+
+	if c.Gss != nil && c.Gss.Root != "" {
+		// GSS compiler
 		if c.Gss.Compiler == "" {
 			return app.Errorf("The Closure Stylesheets path is required")
 		}
+
+		// GSS targets
 		if len(c.Gss.Targets) == 0 {
 			return app.Errorf("No target provided for GSS code")
 		}
+
+		// Compare JS targets and GSS targets
 		if len(c.Js.Targets) != len(c.Gss.Targets) {
 			return app.Errorf("Different number of targets provided for GSS & JS")
 		}
-
 		for i, tjs := range c.Js.Targets {
 			tgss := c.Gss.Targets[i]
 			if tjs.Name != tgss.Name {
 				return app.Errorf("Targets with different name or order: %s != %s",
 					tjs.Name, tgss.Name)
 			}
+
+			// Rename property of the GSS target
+			if tgss.Rename != "true" && tgss.Rename != "false" && tgss.Rename != "" {
+				return app.Errorf("Illegal renaming policy value")
+			}
+
+			for _, t := range c.Gss.Targets {
+				if err := t.ApplyInherits(); err != nil {
+					return err
+				}
+			}
 		}
 	}
+
+	// Soy compiler
 	if c.Soy.Root != "" && c.Soy.Compiler == "" {
 		return app.Errorf("The Closure Templates path is required")
 	}
 
+	// Current target in build mode
 	tjs := c.Js.CurTarget()
 	tgss := c.Gss.CurTarget()
 	if Build && tjs.Name == Target {
@@ -109,6 +138,7 @@ func (c *Config) validate() error {
 		}
 	}
 
+	// Check compilation mode and warnings level
 	for _, t := range c.Js.Targets {
 		modes := map[string]bool{
 			"SIMPLE":     true,
@@ -130,16 +160,12 @@ func (c *Config) validate() error {
 		}
 	}
 
+	// Check for at least one input file
 	if len(c.Js.Inputs) == 0 {
 		return app.Errorf("Input files required in target")
 	}
 
-	for _, t := range c.Gss.Targets {
-		if t.Rename != "true" && t.Rename != "false" && t.Rename != "" {
-			return app.Errorf("Illegal renaming policy value")
-		}
-	}
-
+	// Check that the command line target is in the config file
 	found := false
 	for _, t := range c.Js.Targets {
 		if t.Name == Target {
@@ -147,18 +173,23 @@ func (c *Config) validate() error {
 			break
 		}
 	}
-
 	if !found {
 		return app.Errorf("Target %s not found in the config file", Target)
 	}
 
+	// Validate the compilation checks
 	validChecks(c.Js.Checks.Errors)
 	validChecks(c.Js.Checks.Warnings)
 	validChecks(c.Js.Checks.Offs)
 
-	c.Gss.Compiler = fixPath(c.Gss.Compiler)
+	// Fix the compilers paths
 	c.Js.Compiler = fixPath(c.Js.Compiler)
-	c.Soy.Compiler = fixPath(c.Soy.Compiler)
+	if c.Gss != nil {
+		c.Gss.Compiler = fixPath(c.Gss.Compiler)
+	}
+	if c.Soy != nil {
+		c.Soy.Compiler = fixPath(c.Soy.Compiler)
+	}
 	c.Library.Root = fixPath(c.Library.Root)
 
 	return nil
@@ -181,7 +212,7 @@ func fixPath(p string) string {
 	return strings.Replace(p, "~", "/home/"+user, -1)
 }
 
-func validChecks(lst []CheckNode) error {
+func validChecks(lst []*CheckNode) error {
 	for _, check := range lst {
 		checks := map[string]bool{
 			"ambiguousFunctionDecl":  true,

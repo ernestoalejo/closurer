@@ -21,7 +21,7 @@ func Compile() error {
 	target := conf.Gss.CurTarget()
 
 	// Output early if there's no GSS files.
-	if conf.Gss.Root == "" {
+	if conf.Gss == nil {
 		if err := cleanRenamingMap(); err != nil {
 			return err
 		}
