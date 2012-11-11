@@ -2,7 +2,6 @@
 To Do:
 ~~~~~~
 
- * Move the output filenames to each target.
  * Cache the config.
  * Implement inherits.
  * Add the multiarch loader.

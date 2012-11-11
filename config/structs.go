@@ -3,16 +3,10 @@ package config
 type Config struct {
 	Build string `xml:"build,attr"`
 
-	Output  OutputNode  `xml:"output"`
 	Js      JsNode      `xml:"js"`
 	Gss     GssNode     `xml:"gss"`
 	Soy     SoyNode     `xml:"soy"`
 	Library LibraryNode `xml:"library"`
-}
-
-type OutputNode struct {
-	Js  string `xml:"js,attr"`
-	Css string `xml:"css,attr"`
 }
 
 type JsNode struct {
@@ -45,9 +39,10 @@ type CheckNode struct {
 }
 
 type JsTargetNode struct {
-	Name  string `xml:"name,attr"`
-	Mode  string `xml:"mode,attr"`
-	Level string `xml:"level,attr"`
+	Name   string `xml:"name,attr"`
+	Mode   string `xml:"mode,attr"`
+	Level  string `xml:"level,attr"`
+	Output string `xml:"output,attr"`
 
 	Defines []DefineNode `xml:"define"`
 }
@@ -85,6 +80,7 @@ func (n *GssNode) CurTarget() *GssTargetNode {
 type GssTargetNode struct {
 	Name   string `xml:"name,attr"`
 	Rename string `xml:"rename,attr"`
+	Output string `xml:"output,attr"`
 
 	Defines []DefineNode `xml:"define"`
 }

@@ -62,9 +62,6 @@ func (c *Config) validate() error {
 		if len(c.Js.Targets) != len(c.Gss.Targets) {
 			return app.Errorf("Different number of targets provided for GSS & JS")
 		}
-		if c.Output.Css == "" {
-			return app.Errorf("The GSS output folder is required")
-		}
 
 		for i, tjs := range c.Js.Targets {
 			tgss := c.Gss.Targets[i]
@@ -77,8 +74,18 @@ func (c *Config) validate() error {
 	if c.Soy.Root != "" && c.Soy.Compiler == "" {
 		return app.Errorf("The Closure Templates path is required")
 	}
-	if c.Output.Js == "" {
-		return app.Errorf("The JS output folder is required")
+
+	tjs := c.Js.CurTarget()
+	tgss := c.Gss.CurTarget()
+	if Build && tjs.Name == Target {
+		if tjs.Output == "" {
+			return app.Errorf("Target to build JS without an output file: %s",
+				tjs.Name)
+		}
+		if tgss != nil && tgss.Output == "" {
+			return app.Errorf("Target to build GSS without an output file: %s",
+				tjs.Name)
+		}
 	}
 
 	for _, t := range c.Js.Targets {

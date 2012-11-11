@@ -28,6 +28,7 @@ func build() error {
 
 func copyCssFile() error {
 	conf := config.Current()
+	target := conf.Gss.CurTarget()
 
 	if conf.Gss.Root == "" {
 		return nil
@@ -39,7 +40,7 @@ func copyCssFile() error {
 	}
 	defer src.Close()
 
-	dest, err := os.Create(filepath.Join(conf.Output.Css, config.CSS_NAME))
+	dest, err := os.Create(target.Output)
 	if err != nil {
 		return app.Error(err)
 	}
@@ -54,6 +55,7 @@ func copyCssFile() error {
 
 func copyJsFile() error {
 	conf := config.Current()
+	target := conf.Js.CurTarget()
 
 	src, err := os.Open(filepath.Join(conf.Build, config.JS_NAME))
 	if err != nil {
@@ -61,7 +63,7 @@ func copyJsFile() error {
 	}
 	defer src.Close()
 
-	dest, err := os.Create(filepath.Join(conf.Output.Js, config.JS_NAME))
+	dest, err := os.Create(target.Output)
 	if err != nil {
 		return app.Error(err)
 	}
