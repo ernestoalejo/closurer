@@ -17,7 +17,7 @@ import (
 func Compile() error {
 	conf := config.Current()
 
-	if conf.RootSoy == "" {
+	if conf.Soy.Root == "" {
 		return nil
 	}
 
@@ -31,14 +31,14 @@ func Compile() error {
 		return err
 	}
 
-	soy, err := scan.Do(conf.RootSoy, ".soy")
+	soy, err := scan.Do(conf.Soy.Root, ".soy")
 	if err != nil {
 		return err
 	}
 
 	indexed := map[string]bool{}
 	for _, f := range soy {
-		f = f[len(conf.RootSoy):]
+		f = f[len(conf.Soy.Root):]
 		indexed[f] = true
 	}
 
@@ -63,7 +63,7 @@ func Compile() error {
 			continue
 		}
 
-		prel, err := filepath.Rel(conf.RootSoy, t)
+		prel, err := filepath.Rel(conf.Soy.Root, t)
 		if err != nil {
 			return app.Error(err)
 		}
@@ -78,7 +78,7 @@ func Compile() error {
 		// Run the compiler command
 		cmd := exec.Command(
 			"java",
-			"-jar", path.Join(conf.ClosureTemplates, "build", "SoyToJsSrcCompiler.jar"),
+			"-jar", path.Join(conf.Soy.Compiler, "build", "SoyToJsSrcCompiler.jar"),
 			"--outputPathFormat", out,
 			"--shouldGenerateJsdoc",
 			"--shouldProvideRequireSoyNamespaces",

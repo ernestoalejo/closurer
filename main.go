@@ -16,11 +16,7 @@ import (
 func main() {
 	flag.Parse()
 
-	if err := config.ReadFromFile(config.ConfPath); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := config.Validate(); err != nil {
+	if err := config.Load(config.ConfPath); err != nil {
 		log.Fatal(err)
 	}
 
@@ -54,7 +50,9 @@ func home(r *app.Request) error {
 
 func compile(r *app.Request) error {
 	conf := config.Current()
-	if conf.Mode == "RAW" {
+	target := conf.Js.CurTarget()
+
+	if target.Mode == "RAW" {
 		return RawOutput(r)
 	}
 

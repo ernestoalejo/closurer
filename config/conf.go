@@ -3,101 +3,39 @@ package config
 import (
 	"encoding/xml"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 )
 
-type OutputNode struct {
-	Js  string `xml:"js,attr"`
-	Css string `xml:"css,attr"`
-}
+var globalConf *Config
 
-type JsNode struct {
-	Root     string `xml:"root,attr"`
-	Compiler string `xml:"compiler,attr"`
-
-	Checks  ChecksNode     `xml:"checks"`
-	Targets []JsTargetNode `xml:"target"`
-	Inputs  []InputNode    `xml:"input"`
-}
-
-type ChecksNode struct {
-	Errors   []CheckNode `xml:"error"`
-	Warnings []CheckNode `xml:"warning"`
-	Offs     []CheckNode `xml:"off"`
-}
-
-type CheckNode struct {
-	Name string `xml:"name,attr"`
-}
-
-type JsTargetNode struct {
-	Name  string `xml:"name,attr"`
-	Mode  string `xml:"mode,attr"`
-	Level string `xml:"level,attr"`
-
-	Defines []DefineNode `xml:"define"`
-}
-
-type DefineNode struct {
-	Name  string `xml:"name,attr"`
-	Value string `xml:"value,attr"`
-}
-
-type InputNode struct {
-	File string `xml:"file,attr"`
-}
-
-type GssNode struct {
-	Root     string `xml:"root,attr"`
-	Compiler string `xml:"compiler,attr"`
-
-	Targets []GssTargetNode `xml:"target"`
-}
-
-type GssTargetNode struct {
-	Name   string `xml:"name,attr"`
-	Rename string `xml:"rename,attr"`
-
-	Defines []DefineNode `xml:"define"`
-}
-
-type SoyNode struct {
-	Root     string `xml:"root,attr"`
-	Compiler string `xml:"compiler,attr"`
-}
-
-type LibraryNode struct {
-	Root string `xml:"root,attr"`
-}
-
-type Config struct {
-	Build string `xml:"build,attr"`
-
-	Output  OutputNode  `xml:"output"`
-	Js      JsNode      `xml:"js"`
-	Gss     GssNode     `xml:"gss"`
-	Soy     SoyNode     `xml:"soy"`
-	Library LibraryNode `xml:"library"`
-}
-
-// ==================================================================
-
-func Load(filename string) (*Config, error) {
+func Load(filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
-		return nil, fmt.Errorf("cannot open the config file: %s", err)
+		return fmt.Errorf("cannot open the config file: %s", err)
 	}
 	defer f.Close()
 
 	conf := new(Config)
 	if err := xml.NewDecoder(f).Decode(&conf); err != nil {
-		return nil, fmt.Errorf("cannot decode the config: %s", err)
+		return fmt.Errorf("cannot decode the config: %s", err)
 	}
 
-	return conf, nil
+	if err := conf.validate(); err != nil {
+		return err
+	}
+
+	globalConf = conf
+
+	return nil
 }
 
-func (c *Config) Validate() error {
+func Current() *Config {
+	return globalConf
+}
+
+func (c *Config) validate() error {
 	if c.Js.Root == "" {
 		return fmt.Errorf("The JS root folder is required")
 	}
@@ -110,8 +48,27 @@ func (c *Config) Validate() error {
 	if c.Js.Compiler == "" {
 		return fmt.Errorf("The Closure Compiler path is required")
 	}
-	if c.Gss.Root != "" && c.Gss.Compiler == "" {
-		return fmt.Errorf("The Closure Stylesheets path is required")
+	if len(c.Js.Targets) == 0 {
+		return fmt.Errorf("No target provided for JS code")
+	}
+	if c.Gss.Root != "" {
+		if c.Gss.Compiler == "" {
+			return fmt.Errorf("The Closure Stylesheets path is required")
+		}
+		if len(c.Gss.Targets) == 0 {
+			return fmt.Errorf("No target provided for GSS code")
+		}
+		if len(c.Js.Targets) != len(c.Gss.Targets) {
+			return fmt.Errorf("Different number of targets provided for GSS & JS")
+		}
+
+		for i, tjs := range c.Js.Targets {
+			tgss := c.Gss.Targets[i]
+			if tjs.Name != tgss.Name {
+				return fmt.Errorf("Targets with different name or order: %s != %s",
+					tjs.Name, tgss.Name)
+			}
+		}
 	}
 	if c.Soy.Root != "" && c.Soy.Compiler == "" {
 		return fmt.Errorf("The Closure Templates path is required")
@@ -152,7 +109,29 @@ func (c *Config) Validate() error {
 	validChecks(c.Js.Checks.Warnings)
 	validChecks(c.Js.Checks.Offs)
 
+	c.Gss.Compiler = fixPath(c.Gss.Compiler)
+	c.Js.Compiler = fixPath(c.Js.Compiler)
+	c.Soy.Compiler = fixPath(c.Soy.Compiler)
+	c.Library.Root = fixPath(c.Library.Root)
+
 	return nil
+}
+
+// Replace the ~ with the correct folder path
+func fixPath(p string) string {
+	if !strings.Contains(p, "~") {
+		return p
+	}
+
+	user := os.Getenv("USER")
+	if user == "" {
+		user = os.Getenv("USERNAME")
+	}
+	if user == "" {
+		log.Fatal("Found ~ in a path, but USER nor USERNAME are exported in the env")
+	}
+
+	return strings.Replace(p, "~", "/home/"+user, -1)
 }
 
 func validChecks(lst []CheckNode) error {

@@ -33,7 +33,7 @@ func NewDepsTree(dest string) (*DepsTree, error) {
 	depstree := &DepsTree{
 		sources:  map[string]*domain.Source{},
 		provides: map[string]*domain.Source{},
-		basePath: path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
+		basePath: path.Join(conf.Library.Root, "closure", "goog", "base.js"),
 		dest:     dest,
 	}
 
@@ -80,7 +80,7 @@ func (tree *DepsTree) AddSource(filename string) error {
 	// Scan all the previous sources searching for repeated
 	// namespaces. We ignore closure library files because they're
 	// supposed to be correct and tested by other methods
-	if !strings.HasPrefix(filename, conf.ClosureLibrary) {
+	if !strings.HasPrefix(filename, conf.Library.Root) {
 		for k, source := range tree.sources {
 			for _, provide := range source.Provides {
 				if In(src.Provides, provide) {
@@ -236,13 +236,13 @@ func BaseJSPaths() []string {
 	conf := config.Current()
 
 	p := []string{
-		path.Join(conf.ClosureLibrary, "closure", "goog"),
-		conf.ClosureLibrary,
-		conf.RootJs,
-		path.Join(conf.ClosureTemplates, "javascript"),
+		path.Join(conf.Library.Root, "closure", "goog"),
+		conf.Library.Root,
+		conf.Js.Root,
+		path.Join(conf.Soy.Compiler, "javascript"),
 	}
 
-	if conf.RootSoy != "" {
+	if conf.Soy.Root != "" {
 		p = append(p, path.Join(conf.Build, "templates"))
 	}
 

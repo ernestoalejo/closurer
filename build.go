@@ -29,7 +29,7 @@ func build() error {
 func copyCssFile() error {
 	conf := config.Current()
 
-	if conf.RootGss == "" {
+	if conf.Gss.Root == "" {
 		return nil
 	}
 

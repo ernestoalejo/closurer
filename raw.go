@@ -42,7 +42,7 @@ func RawOutput(r *app.Request) error {
 	conf := config.Current()
 	content := bytes.NewBuffer(nil)
 
-	base := path.Join(conf.ClosureLibrary, "closure", "goog", "base.js")
+	base := path.Join(conf.Library.Root, "closure", "goog", "base.js")
 	if err := addFile(content, base); err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func RawOutput(r *app.Request) error {
 	}
 
 	css := make([]byte, 0)
-	if conf.RootGss != "" {
+	if conf.Gss.Root != "" {
 		css, err = ioutil.ReadFile(filepath.Join(conf.Build, config.CSS_NAME))
 		if err != nil {
 			return app.Error(err)

@@ -42,6 +42,7 @@ func FullCompile() error {
 
 func Compile() error {
 	conf := config.Current()
+	target := conf.Js.CurTarget()
 
 	deps, _, err := GenerateDeps("compile")
 	if err != nil {
@@ -49,10 +50,10 @@ func Compile() error {
 	}
 
 	args := []string{
-		"-jar", path.Join(conf.ClosureCompiler, "build", "compiler.jar"),
+		"-jar", path.Join(conf.Js.Compiler, "build", "compiler.jar"),
 		"--js_output_file", path.Join(conf.Build, config.JS_NAME),
-		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "base.js"),
-		"--js", path.Join(conf.ClosureLibrary, "closure", "goog", "deps.js"),
+		"--js", path.Join(conf.Library.Root, "closure", "goog", "base.js"),
+		"--js", path.Join(conf.Library.Root, "closure", "goog", "deps.js"),
 		"--js", filepath.Join(conf.Build, config.DEPS_NAME),
 		"--js", filepath.Join(conf.Build, config.RENAMING_MAP_NAME),
 		"--output_wrapper", `(function(){%output%})();`,
@@ -64,31 +65,40 @@ func Compile() error {
 		}
 	}
 
-	if conf.Defines != nil {
-		for k, define := range conf.Defines.Js {
-			if define != "true" && define != "false" {
-				define = "\"" + define + "\""
+	if target.Defines != nil {
+		for _, define := range target.Defines {
+			// If it's not a boolean, quote it
+			if define.Value != "true" && define.Value != "false" {
+				define.Value = "\"" + define.Value + "\""
 			}
-			args = append(args, "--define", k+"="+define)
+			args = append(args, "--define", define.Name+"="+define.Value)
 		}
 	}
 
-	for k, check := range conf.Checks {
-		args = append(args, "--jscomp_"+strings.ToLower(check), k)
+	for _, check := range conf.Js.Checks.Errors {
+		args = append(args, "--jscomp_"+check.Name, "ERROR")
+	}
+	for _, check := range conf.Js.Checks.Warnings {
+		args = append(args, "--jscomp_"+check.Name, "WARNING")
+	}
+	for _, check := range conf.Js.Checks.Offs {
+		args = append(args, "--jscomp_"+check.Name, "OFF")
 	}
 
-	if conf.Mode == "ADVANCED" {
+	if target.Mode == "ADVANCED" {
 		args = append(args, "--compilation_level", "ADVANCED_OPTIMIZATIONS")
-	} else if conf.Mode == "SIMPLE" {
+	} else if target.Mode == "SIMPLE" {
 		args = append(args, "--compilation_level", "SIMPLE_OPTIMIZATIONS")
-	} else if conf.Mode == "WHITESPACE" {
+	} else if target.Mode == "WHITESPACE" {
 		args = append(args, "--compilation_level", "WHITESPACE_ONLY")
+	} else {
+		return fmt.Errorf("RAW mode not allowed while compiling")
 	}
 
-	args = append(args, "--warning_level", conf.Level)
+	args = append(args, "--warning_level", target.Level)
 
-	for _, extern := range conf.Externs {
-		args = append(args, "--externs", extern)
+	for _, extern := range conf.Js.Externs {
+		args = append(args, "--externs", extern.File)
 	}
 
 	log.Println("Compiling JS...")

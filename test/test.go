@@ -62,14 +62,14 @@ func TestList(r *app.Request) error {
 func scanTests() ([]string, error) {
 	conf := config.Current()
 
-	tests, err := scan.Do(conf.RootJs, "_test.js")
+	tests, err := scan.Do(conf.Js.Root, "_test.js")
 	if err != nil {
 		return nil, err
 	}
 
 	for i, test := range tests {
 		// Relativize the path adding .html instead of .js
-		p, err := filepath.Rel(conf.RootJs, test[:len(test)-2]+"html")
+		p, err := filepath.Rel(conf.Js.Root, test[:len(test)-2]+"html")
 		if err != nil {
 			return nil, app.Error(err)
 		}

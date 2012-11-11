@@ -18,9 +18,10 @@ import (
 // Compiles the .gss files
 func Compile() error {
 	conf := config.Current()
+	target := conf.Gss.CurTarget()
 
 	// Output early if there's no GSS files.
-	if conf.RootGss == "" {
+	if conf.Gss.Root == "" {
 		if err := cleanRenamingMap(); err != nil {
 			return err
 		}
@@ -28,7 +29,7 @@ func Compile() error {
 		return nil
 	}
 
-	gss, err := scan.Do(conf.RootGss, ".gss")
+	gss, err := scan.Do(conf.Gss.Root, ".gss")
 	if err != nil {
 		return err
 	}
@@ -64,16 +65,14 @@ func Compile() error {
 
 	// Prepare the list of non-standard functions.
 	funcs := []string{}
-	if len(conf.NonStandardCssFuncs) > 0 {
-		for _, f := range conf.NonStandardCssFuncs {
-			funcs = append(funcs, "--allowed-non-standard-function")
-			funcs = append(funcs, f)
-		}
+	for _, f := range conf.Gss.Funcs {
+		funcs = append(funcs, "--allowed-non-standard-function")
+		funcs = append(funcs, f.Name)
 	}
 
 	// Prepare the renaming map args
 	renaming := []string{}
-	if conf.RenameCss == "true" {
+	if target.Rename == "true" {
 		renaming = []string{
 			"--output-renaming-map-format", "CLOSURE_COMPILED",
 			"--rename", "CLOSURE",
@@ -83,16 +82,14 @@ func Compile() error {
 
 	// Prepare the defines
 	defines := []string{}
-	if conf.Defines != nil {
-		for _, define := range conf.Defines.Gss {
-			defines = append(defines, "--define", define)
-		}
+	for _, define := range target.Defines {
+		defines = append(defines, "--define", define.Name)
 	}
 
 	// Prepare the command
 	cmd := exec.Command(
 		"java",
-		"-jar", path.Join(conf.ClosureStylesheets, "build", "closure-stylesheets.jar"),
+		"-jar", path.Join(conf.Gss.Compiler, "build", "closure-stylesheets.jar"),
 		"--output-file", filepath.Join(conf.Build, config.CSS_NAME))
 	cmd.Args = append(cmd.Args, funcs...)
 	cmd.Args = append(cmd.Args, renaming...)

@@ -2,7 +2,7 @@
 To Do:
 ~~~~~~
 
- * Compile all the files.
+ * An error in the GSS compiler shouldn't close the app.
  * Cache the config.
  * Implement inherit.
 
