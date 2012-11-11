@@ -21,7 +21,7 @@ func Modified(dest, filename string) (bool, error) {
 
 	info, err := os.Lstat(filename)
 	if err != nil {
-		return false, err
+		return false, app.Error(err)
 	}
 
 	modified, ok := modificationCache[name]
