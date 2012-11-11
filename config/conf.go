@@ -62,6 +62,9 @@ func (c *Config) validate() error {
 		if len(c.Js.Targets) != len(c.Gss.Targets) {
 			return app.Errorf("Different number of targets provided for GSS & JS")
 		}
+		if c.Output.Css == "" {
+			return app.Errorf("The GSS output folder is required")
+		}
 
 		for i, tjs := range c.Js.Targets {
 			tgss := c.Gss.Targets[i]
@@ -73,6 +76,9 @@ func (c *Config) validate() error {
 	}
 	if c.Soy.Root != "" && c.Soy.Compiler == "" {
 		return app.Errorf("The Closure Templates path is required")
+	}
+	if c.Output.Js == "" {
+		return app.Errorf("The JS output folder is required")
 	}
 
 	for _, t := range c.Js.Targets {
@@ -104,6 +110,18 @@ func (c *Config) validate() error {
 		if t.Rename != "true" && t.Rename != "false" && t.Rename != "" {
 			return app.Errorf("Illegal renaming policy value")
 		}
+	}
+
+	found := false
+	for _, t := range c.Js.Targets {
+		if t.Name == Target {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return app.Errorf("Target %s not found in the config file", Target)
 	}
 
 	validChecks(c.Js.Checks.Errors)

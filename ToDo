@@ -2,9 +2,10 @@
 To Do:
 ~~~~~~
 
+ * Move the output filenames to each target.
  * Cache the config.
- * Implement inherit.
- * Adapt to a multi-arch compilation (+ loader).
+ * Implement inherits.
+ * Add the multiarch loader.
  * The compiling errors should be show in the webpage if possible (not a build).
 
  * Memory allocation errors. Perhaps caching the deps tree (or it's struct

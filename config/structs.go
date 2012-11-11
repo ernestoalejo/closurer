@@ -26,8 +26,10 @@ type JsNode struct {
 }
 
 func (n *JsNode) CurTarget() *JsTargetNode {
-	if len(n.Targets) > 0 {
-		return &n.Targets[0]
+	for _, t := range n.Targets {
+		if t.Name == Target {
+			return &t
+		}
 	}
 	return nil
 }
@@ -72,8 +74,10 @@ type GssNode struct {
 }
 
 func (n *GssNode) CurTarget() *GssTargetNode {
-	if len(n.Targets) > 0 {
-		return &n.Targets[0]
+	for _, t := range n.Targets {
+		if t.Name == Target {
+			return &t
+		}
 	}
 	return nil
 }

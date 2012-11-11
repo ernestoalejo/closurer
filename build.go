@@ -39,7 +39,7 @@ func copyCssFile() error {
 	}
 	defer src.Close()
 
-	dest, err := os.Create(config.CssOutput)
+	dest, err := os.Create(filepath.Join(conf.Output.Css, config.CSS_NAME))
 	if err != nil {
 		return app.Error(err)
 	}
@@ -61,7 +61,7 @@ func copyJsFile() error {
 	}
 	defer src.Close()
 
-	dest, err := os.Create(config.JsOutput)
+	dest, err := os.Create(filepath.Join(conf.Output.Js, config.JS_NAME))
 	if err != nil {
 		return app.Error(err)
 	}
