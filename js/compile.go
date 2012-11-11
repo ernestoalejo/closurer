@@ -75,13 +75,13 @@ func Compile() error {
 	}
 
 	for _, check := range conf.Js.Checks.Errors {
-		args = append(args, "--jscomp_"+check.Name, "ERROR")
+		args = append(args, "--jscomp_error", check.Name)
 	}
 	for _, check := range conf.Js.Checks.Warnings {
-		args = append(args, "--jscomp_"+check.Name, "WARNING")
+		args = append(args, "--jscomp_warning", check.Name)
 	}
 	for _, check := range conf.Js.Checks.Offs {
-		args = append(args, "--jscomp_"+check.Name, "OFF")
+		args = append(args, "--jscomp_off", check.Name)
 	}
 
 	if target.Mode == "ADVANCED" {
