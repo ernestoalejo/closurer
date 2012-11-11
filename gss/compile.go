@@ -57,7 +57,7 @@ func Compile() error {
 		return nil
 	}
 
-	log.Println("Compiling GSS...")
+	log.Println("Compiling GSS: %s", target.Name)
 
 	if err := cleanRenamingMap(); err != nil {
 		return err

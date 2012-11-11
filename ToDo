@@ -2,7 +2,6 @@
 To Do:
 ~~~~~~
 
- * Specify multiple targets in the command line.
  * Add the option to output a file by its sha1.
  * Add the option to output a mapping file between the targets and the outputs.
  * The compiling errors should be show in the webpage if possible (not a build).

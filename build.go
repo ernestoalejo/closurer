@@ -30,7 +30,7 @@ func copyCssFile() error {
 	conf := config.Current()
 	target := conf.Gss.CurTarget()
 
-	if conf.Gss.Root == "" {
+	if conf.Gss == nil {
 		return nil
 	}
 

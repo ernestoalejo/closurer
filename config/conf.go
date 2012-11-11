@@ -111,9 +111,15 @@ func (c *Config) validate() error {
 				return app.Errorf("Illegal renaming policy value")
 			}
 
-			for _, t := range c.Gss.Targets {
-				if err := t.ApplyInherits(); err != nil {
-					return err
+			// Apply the inherits option
+			if err := tgss.ApplyInherits(); err != nil {
+				return err
+			}
+
+			// Check that the GSS defines don't have a value
+			for _, d := range tgss.Defines {
+				if d.Value != "" {
+					return app.Errorf("Define values in GSS should be empty")
 				}
 			}
 		}
@@ -124,17 +130,21 @@ func (c *Config) validate() error {
 		return app.Errorf("The Closure Templates path is required")
 	}
 
-	// Current target in build mode
-	tjs := c.Js.CurTarget()
-	tgss := c.Gss.CurTarget()
-	if Build && tjs.Name == Target {
-		if tjs.Output == "" {
-			return app.Errorf("Target to build JS without an output file: %s",
-				tjs.Name)
-		}
-		if tgss != nil && tgss.Output == "" {
-			return app.Errorf("Target to build GSS without an output file: %s",
-				tjs.Name)
+	// Current targets in build mode
+	for _, t := range TargetList() {
+		SelectTarget(t)
+
+		tjs := c.Js.CurTarget()
+		tgss := c.Gss.CurTarget()
+		if Build && IsTarget(tjs.Name) {
+			if tjs.Output == "" {
+				return app.Errorf("Target to build JS without an output file: %s",
+					tjs.Name)
+			}
+			if tgss != nil && tgss.Output == "" {
+				return app.Errorf("Target to build GSS without an output file: %s",
+					tjs.Name)
+			}
 		}
 	}
 
@@ -167,14 +177,16 @@ func (c *Config) validate() error {
 
 	// Check that the command line target is in the config file
 	found := false
-	for _, t := range c.Js.Targets {
-		if t.Name == Target {
-			found = true
-			break
+	for _, name := range TargetList() {
+		for _, t := range c.Js.Targets {
+			if t.Name == name {
+				found = true
+				break
+			}
 		}
-	}
-	if !found {
-		return app.Errorf("Target %s not found in the config file", Target)
+		if !found {
+			return app.Errorf("Target %s not found in the config file", name)
+		}
 	}
 
 	// Validate the compilation checks

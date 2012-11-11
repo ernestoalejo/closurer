@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -16,15 +17,30 @@ import (
 func main() {
 	flag.Parse()
 
+	if config.BuildTargets == "" {
+		fmt.Println("Target required")
+		flag.Usage()
+		return
+	}
+
 	if err := config.Load(); err != nil {
 		log.Fatal(err)
 	}
 
 	if config.Build {
-		if err := build(); err != nil {
-			err.(*app.AppError).Log()
+		for _, t := range config.TargetList() {
+			config.SelectTarget(t)
+
+			if err := build(); err != nil {
+				err.(*app.AppError).Log()
+			}
 		}
 	} else {
+		if len(config.TargetList()) != 1 {
+			log.Fatal("Cannot serve more than one target at the same time")
+		}
+		config.SelectTarget(config.TargetList()[0])
+
 		serve()
 	}
 }
@@ -40,7 +56,7 @@ func serve() {
 	r.Handle("/test/list", app.Handler(test.TestList))
 	r.Handle("/test/{name:.+}", app.Handler(test.Main))
 
-	log.Printf("Started closurer server on http://localhost%s/\n", config.Port)
+	fmt.Printf("Started closurer server on http://localhost%s/\n", config.Port)
 	log.Fatal(http.ListenAndServe(config.Port, nil))
 }
 

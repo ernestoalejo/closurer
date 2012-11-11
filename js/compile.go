@@ -100,7 +100,7 @@ func Compile() error {
 		args = append(args, "--externs", extern.File)
 	}
 
-	log.Println("Compiling JS...")
+	log.Println("Compiling JS:", target.Name)
 
 	// Prepare the command
 	cmd := exec.Command("java", args...)

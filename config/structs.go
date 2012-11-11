@@ -25,7 +25,7 @@ type JsNode struct {
 
 func (n *JsNode) CurTarget() *JsTargetNode {
 	for _, t := range n.Targets {
-		if t.Name == Target {
+		if t.Name == SelectedTarget {
 			return t
 		}
 	}
@@ -81,7 +81,7 @@ func (t *JsTargetNode) ApplyInherits() error {
 
 		for _, d := range parent.Defines {
 			if !t.HasDefine(d.Name) {
-				t.Defines = append(t.Defines, d)
+				t.Defines = append(t.Defines, d.Clone())
 			}
 		}
 
@@ -103,6 +103,13 @@ func (t *JsTargetNode) HasDefine(name string) bool {
 type DefineNode struct {
 	Name  string `xml:"name,attr"`
 	Value string `xml:"value,attr"`
+}
+
+func (d *DefineNode) Clone() *DefineNode {
+	return &DefineNode{
+		Name:  d.Name,
+		Value: d.Value,
+	}
 }
 
 type InputNode struct {
@@ -127,7 +134,7 @@ func (n *GssNode) CurTarget() *GssTargetNode {
 	}
 
 	for _, t := range n.Targets {
-		if t.Name == Target {
+		if t.Name == SelectedTarget {
 			return t
 		}
 	}
@@ -169,7 +176,7 @@ func (t *GssTargetNode) ApplyInherits() error {
 
 		for _, d := range parent.Defines {
 			if !t.HasDefine(d.Name) {
-				t.Defines = append(t.Defines, d)
+				t.Defines = append(t.Defines, d.Clone())
 			}
 		}
 
