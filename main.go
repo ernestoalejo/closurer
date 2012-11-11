@@ -22,7 +22,7 @@ func main() {
 
 	if config.Build {
 		if err := build(); err != nil {
-			log.Fatal(err)
+			err.(*app.AppError).Log()
 		}
 	} else {
 		serve()
