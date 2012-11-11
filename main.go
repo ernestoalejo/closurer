@@ -33,6 +33,7 @@ func main() {
 
 			if err := build(); err != nil {
 				err.(*app.AppError).Log()
+				break
 			}
 		}
 	} else {
