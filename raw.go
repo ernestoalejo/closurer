@@ -60,7 +60,7 @@ func RawOutput(r *app.Request) error {
 	}
 
 	css := make([]byte, 0)
-	if conf.Gss.Root != "" {
+	if conf.Gss != nil {
 		css, err = ioutil.ReadFile(filepath.Join(conf.Build, config.CSS_NAME))
 		if err != nil {
 			return app.Error(err)
