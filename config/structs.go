@@ -26,7 +26,10 @@ type JsNode struct {
 }
 
 func (n *JsNode) CurTarget() *JsTargetNode {
-	return &n.Targets[0]
+	if len(n.Targets) > 0 {
+		return &n.Targets[0]
+	}
+	return nil
 }
 
 type ChecksNode struct {
@@ -69,7 +72,10 @@ type GssNode struct {
 }
 
 func (n *GssNode) CurTarget() *GssTargetNode {
-	return &n.Targets[0]
+	if len(n.Targets) > 0 {
+		return &n.Targets[0]
+	}
+	return nil
 }
 
 type GssTargetNode struct {

@@ -2,10 +2,11 @@ package config
 
 import (
 	"encoding/xml"
-	"fmt"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/ernestokarim/closurer/app"
 )
 
 var globalConf *Config
@@ -13,13 +14,13 @@ var globalConf *Config
 func Load(filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
-		return fmt.Errorf("cannot open the config file: %s", err)
+		return app.Error(err)
 	}
 	defer f.Close()
 
 	conf := new(Config)
 	if err := xml.NewDecoder(f).Decode(&conf); err != nil {
-		return fmt.Errorf("cannot decode the config: %s", err)
+		return app.Error(err)
 	}
 
 	if err := conf.validate(); err != nil {
@@ -37,41 +38,41 @@ func Current() *Config {
 
 func (c *Config) validate() error {
 	if c.Js.Root == "" {
-		return fmt.Errorf("The JS root folder is required")
+		return app.Errorf("The JS root folder is required")
 	}
 	if c.Build == "" {
-		return fmt.Errorf("The build folder is required")
+		return app.Errorf("The build folder is required")
 	}
 	if c.Library.Root == "" {
-		return fmt.Errorf("The Closure Library path is required")
+		return app.Errorf("The Closure Library path is required")
 	}
 	if c.Js.Compiler == "" {
-		return fmt.Errorf("The Closure Compiler path is required")
+		return app.Errorf("The Closure Compiler path is required")
 	}
 	if len(c.Js.Targets) == 0 {
-		return fmt.Errorf("No target provided for JS code")
+		return app.Errorf("No target provided for JS code")
 	}
 	if c.Gss.Root != "" {
 		if c.Gss.Compiler == "" {
-			return fmt.Errorf("The Closure Stylesheets path is required")
+			return app.Errorf("The Closure Stylesheets path is required")
 		}
 		if len(c.Gss.Targets) == 0 {
-			return fmt.Errorf("No target provided for GSS code")
+			return app.Errorf("No target provided for GSS code")
 		}
 		if len(c.Js.Targets) != len(c.Gss.Targets) {
-			return fmt.Errorf("Different number of targets provided for GSS & JS")
+			return app.Errorf("Different number of targets provided for GSS & JS")
 		}
 
 		for i, tjs := range c.Js.Targets {
 			tgss := c.Gss.Targets[i]
 			if tjs.Name != tgss.Name {
-				return fmt.Errorf("Targets with different name or order: %s != %s",
+				return app.Errorf("Targets with different name or order: %s != %s",
 					tjs.Name, tgss.Name)
 			}
 		}
 	}
 	if c.Soy.Root != "" && c.Soy.Compiler == "" {
-		return fmt.Errorf("The Closure Templates path is required")
+		return app.Errorf("The Closure Templates path is required")
 	}
 
 	for _, t := range c.Js.Targets {
@@ -82,7 +83,7 @@ func (c *Config) validate() error {
 			"RAW":        true,
 		}
 		if _, ok := modes[t.Mode]; !ok {
-			return fmt.Errorf("Illegal compilation mode in target %s: %s", t.Name, t.Mode)
+			return app.Errorf("Illegal compilation mode in target %s: %s", t.Name, t.Mode)
 		}
 
 		levels := map[string]bool{
@@ -91,17 +92,17 @@ func (c *Config) validate() error {
 			"VERBOSE": true,
 		}
 		if _, ok := levels[t.Level]; !ok {
-			return fmt.Errorf("Illegal warning level in target %s: %s", t.Name, t.Level)
+			return app.Errorf("Illegal warning level in target %s: %s", t.Name, t.Level)
 		}
 	}
 
 	if len(c.Js.Inputs) == 0 {
-		return fmt.Errorf("Input files required in target")
+		return app.Errorf("Input files required in target")
 	}
 
 	for _, t := range c.Gss.Targets {
 		if t.Rename != "true" && t.Rename != "false" && t.Rename != "" {
-			return fmt.Errorf("Illegal renaming policy value")
+			return app.Errorf("Illegal renaming policy value")
 		}
 	}
 
@@ -158,7 +159,7 @@ func validChecks(lst []CheckNode) error {
 			"duplicateMessage":       true,
 		}
 		if _, ok := checks[check.Name]; !ok {
-			return fmt.Errorf("Illegal check: %s", check.Name)
+			return app.Errorf("Illegal check: %s", check.Name)
 		}
 	}
 

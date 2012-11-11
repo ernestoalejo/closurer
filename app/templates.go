@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/ernestokarim/closurer/config"
 )
 
 const (
@@ -38,7 +36,7 @@ func RawExecuteTemplate(w io.Writer, names []string, data interface{}) error {
 
 	// Parse the templates
 	t, ok := templatesCache[cname]
-	if !ok || config.NoCache {
+	if !ok {
 		var err error
 		t, err = template.New(cname).Funcs(templatesFuncs).ParseFiles(names...)
 		if err != nil {

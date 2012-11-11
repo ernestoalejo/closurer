@@ -91,7 +91,7 @@ func Compile() error {
 	} else if target.Mode == "WHITESPACE" {
 		args = append(args, "--compilation_level", "WHITESPACE_ONLY")
 	} else {
-		return fmt.Errorf("RAW mode not allowed while compiling")
+		return app.Errorf("RAW mode not allowed while compiling")
 	}
 
 	args = append(args, "--warning_level", target.Level)
