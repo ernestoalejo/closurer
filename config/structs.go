@@ -7,11 +7,14 @@ import (
 type Config struct {
 	Build string `xml:"build,attr"`
 
+	Map     *MapNode     `xml:"map"`
 	Js      *JsNode      `xml:"js"`
 	Gss     *GssNode     `xml:"gss"`
 	Soy     *SoyNode     `xml:"soy"`
 	Library *LibraryNode `xml:"library"`
 }
+
+// ==================================================================
 
 type JsNode struct {
 	Root     string `xml:"root,attr"`
@@ -32,15 +35,21 @@ func (n *JsNode) CurTarget() *JsTargetNode {
 	return nil
 }
 
+// ==================================================================
+
 type ChecksNode struct {
 	Errors   []*CheckNode `xml:"error"`
 	Warnings []*CheckNode `xml:"warning"`
 	Offs     []*CheckNode `xml:"off"`
 }
 
+// ==================================================================
+
 type CheckNode struct {
 	Name string `xml:"name,attr"`
 }
+
+// ==================================================================
 
 type JsTargetNode struct {
 	Name     string `xml:"name,attr"`
@@ -100,6 +109,8 @@ func (t *JsTargetNode) HasDefine(name string) bool {
 	return false
 }
 
+// ==================================================================
+
 type DefineNode struct {
 	Name  string `xml:"name,attr"`
 	Value string `xml:"value,attr"`
@@ -112,13 +123,25 @@ func (d *DefineNode) Clone() *DefineNode {
 	}
 }
 
+// ==================================================================
+
+type MapNode struct {
+	File string `xml:"file,attr"`
+}
+
+// ==================================================================
+
 type InputNode struct {
 	File string `xml:"file,attr"`
 }
 
+// ==================================================================
+
 type ExternNode struct {
 	File string `xml:"file,attr"`
 }
+
+// ==================================================================
 
 type GssNode struct {
 	Root     string `xml:"root,attr"`
@@ -140,6 +163,8 @@ func (n *GssNode) CurTarget() *GssTargetNode {
 	}
 	return nil
 }
+
+// ==================================================================
 
 type GssTargetNode struct {
 	Name     string `xml:"name,attr"`
@@ -195,14 +220,20 @@ func (t *GssTargetNode) HasDefine(name string) bool {
 	return false
 }
 
+// ==================================================================
+
 type SoyNode struct {
 	Root     string `xml:"root,attr"`
 	Compiler string `xml:"compiler,attr"`
 }
 
+// ==================================================================
+
 type LibraryNode struct {
 	Root string `xml:"root,attr"`
 }
+
+// ==================================================================
 
 type FuncNode struct {
 	Name string `xml:"name,attr"`

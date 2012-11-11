@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -10,6 +12,10 @@ import (
 	"github.com/ernestokarim/closurer/app"
 	"github.com/ernestokarim/closurer/config"
 	"github.com/ernestokarim/closurer/js"
+)
+
+var (
+	mapping = map[string]string{}
 )
 
 func build() error {
@@ -22,6 +28,10 @@ func build() error {
 	}
 
 	if err := copyJsFile(); err != nil {
+		return err
+	}
+
+	if err := outputMap(); err != nil {
 		return err
 	}
 
@@ -51,6 +61,8 @@ func copyCssFile() error {
 		}
 		filename = strings.Replace(filename, "{sha1}", sha1, -1)
 	}
+
+	mapping[config.SelectedTarget+"-css"] = filename
 
 	dest, err := os.Create(filename)
 	if err != nil {
@@ -85,6 +97,8 @@ func copyJsFile() error {
 		filename = strings.Replace(filename, "{sha1}", sha1, -1)
 	}
 
+	mapping[config.SelectedTarget+"-js"] = filename
+
 	dest, err := os.Create(filename)
 	if err != nil {
 		return app.Error(err)
@@ -106,4 +120,24 @@ func calcFileSha1(filename string) (string, error) {
 	}
 
 	return strings.Split(string(output), " ")[0], nil
+}
+
+func outputMap() error {
+	conf := config.Current()
+	if conf.Map == nil {
+		return nil
+	}
+
+	f, err := os.Create(conf.Map.File)
+	if err != nil {
+		return app.Error(err)
+	}
+	defer f.Close()
+
+	fmt.Fprintf(f, "var mapping = ")
+	if err := json.NewEncoder(f).Encode(&mapping); err != nil {
+		return app.Error(err)
+	}
+
+	return nil
 }
