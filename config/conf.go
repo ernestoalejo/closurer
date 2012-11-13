@@ -146,6 +146,11 @@ func (c *Config) validate() error {
 
 		tjs := c.Js.CurTarget()
 		tgss := c.Gss.CurTarget()
+
+		if tjs == nil || tgss == nil {
+			return app.Errorf("Target not found in the config: %s", t)
+		}
+
 		if Build && IsTarget(tjs.Name) {
 			if tjs.Output == "" {
 				return app.Errorf("Target to build JS without an output file: %s",
