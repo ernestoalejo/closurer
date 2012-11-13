@@ -1,73 +1,53 @@
 
 <application build="build">
 
-	<output js="static/js" css="static/css">
+  <map file="build/map.js"/>
 
-	<js root="client/js" compiler="~/projects/closure/closure-compiler">
-		<checks>
-			<error name="ambiguousFunctionDecl"/>
-			<error name="checkRegExp"/>
-			<error name="checkTypes"/>
-			<error name="checkVars"/>
-			<error name="constantProperty"/>
-			<error name="deprecated"/>
-			<error name="duplicateMessage"/>
-			<error name="fileoverviewTags"/>
-			<error name="globalThis"/>
-			<error name="internetExplorerChecks"/>
-			<error name="invalidCasts"/>
-			<error name="missingProperties"/>
-			<error name="nonStandardJsDocs"/>
-			<error name="undefinedVars"/>
-			<error name="unknownDefines"/>
-			<error name="uselessCode"/>
-			<error name="strictModuleDepCheck"/>
-			<error name="typeInvalidation"/>
-			<error name="undefinedNames"/>
-		</checks>
+  <js root="client/js" compiler="~/projects/closure/closure-compiler">
+    <checks>
+      <error name="ambiguousFunctionDecl"/>
+      <error name="checkRegExp"/>
+      <error name="checkTypes"/>
+      <error name="checkVars"/>
+      <error name="constantProperty"/>
+      <error name="deprecated"/>
+      <error name="duplicateMessage"/>
+      <error name="fileoverviewTags"/>
+      <error name="globalThis"/>
+      <error name="internetExplorerChecks"/>
+      <error name="invalidCasts"/>
+      <error name="missingProperties"/>
+      <error name="nonStandardJsDocs"/>
+      <error name="undefinedVars"/>
+      <error name="unknownDefines"/>
+      <error name="uselessCode"/>
+      <error name="strictModuleDepCheck"/>
+      <error name="typeInvalidation"/>
+      <error name="undefinedNames"/>
+    </checks>
 
-		<target name="dev" mode="RAW" level="VERBOSE">
-			<define>
-				<item name="goog.LOCALE" value="es"/>
-				<item name="goog.DEBUG" value="true"/>
-				<item name="goog.dom.ASSUME_STANDARDS_MODE" value="true"/>
-			</define>
-		</target>
+    <target name="dev" mode="RAW" level="VERBOSE">
+      <define name="goog.LOCALE" value="es"/>
+      <define name="goog.DEBUG" value="true"/>
+      <define name="goog.dom.ASSUME_STANDARDS_MODE" value="true"/>
+    </target>
 
-		<target name="production" mode="ADVANCED" inherits="dev">
-			<define>
-				<item name="goog.DEBUG" value="false"/>
-			</define>
-		</target>
+    <target name="production" mode="ADVANCED" inherits="dev" output="static/js/compiled.js">
+      <define name="goog.DEBUG" value="false"/>
+    </target>
 
-		<target name="ie" inherits="production">
-			<define>
-				<item name="goog.ASSUME_IE" value="false"/>
-			</define>
-		</target>
+    <input file="client/js/main.js"/>
+  </js>
 
-		<inputs>
-			<file path="client/js/main.js"/>
-		</input>
-	</js>
+  <gss root="client/gss" compiler="~/projects/closure/closure-stylesheets">
+    <target name="dev" rename="false"/>
+    <target name="production" rename="true" output="static/css/compiled.css"/>
 
-	<gss root="client/gss" compiler="~/projects/closure/closure-stylesheets">
-		<target name="dev" rename="false"/>
+    <input file="client/gss/page.gss"/>
+    <input file="client/gss/tricks.gss"/>
+  </gss>
 
-		<target name="production" rename="true">
-			<vendor kind="webkit"/>
-			<define>
-				<item name="BROWSER_IE"/>
-			</define>
-		</target>
-	</gss>
-
-	<soy root="client/soy" compiler="~/projects/closure/closure-templates">
-		<define>
-			<item name="BROWSER_IE"/>
-		</define>
-	</soy>
-
-	<library root="~/projects/closure/closure-library"/>
+  <soy root="client/soy" compiler="~/projects/closure/closure-templates" />
+  <library root="~/projects/closure/closure-library"/>
 
 </application>
