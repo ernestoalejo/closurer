@@ -2,14 +2,15 @@
 To Do:
 ~~~~~~
 
+ * Memory allocation errors. Perhaps caching the deps tree (or its struct
+   in memory can help). Measure and fix it.
+ * Don't call the CSS compiler every single build.
+
  *  Add the vendor option to the Gss compiler.
 
  * config.Current() it's silly; use global or something like that.
  * The compiling errors should be show in the webpage if possible (not a build).
- * Templates are recompiled everytime in production mode.
 
- * Memory allocation errors. Perhaps caching the deps tree (or it's struct
-   in memory can help). Measure and fix it.
  * Deal with the occasional cache reading errors (bad format) that appears sometimes.
  * Errors in the compilation should be reported to the page, not only the console.
  * List of files that will be compiled.
