@@ -38,7 +38,7 @@ func Compile() error {
 		}
 	}
 
-	if !modified && !config.Build {
+	if !modified {
 		return nil
 	}
 
