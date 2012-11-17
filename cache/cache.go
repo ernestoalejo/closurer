@@ -39,6 +39,8 @@ func Load() error {
 		return app.Error(err)
 	}
 
+	log.Println("Read", len(modificationCache), "modifications and", len(dataCache), "datas!")
+
 	return nil
 }
 
@@ -51,6 +53,8 @@ func Dump() error {
 		return app.Error(err)
 	}
 	defer f.Close()
+
+	log.Println("Write", len(modificationCache), "modifications and", len(dataCache), "datas!")
 
 	e := gob.NewEncoder(f)
 	if err := e.Encode(&modificationCache); err != nil {
