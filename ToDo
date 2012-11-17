@@ -2,9 +2,6 @@
 To Do:
 ~~~~~~
 
- * Memory allocation errors. Perhaps caching the deps tree (or its struct
-   in memory can help). Measure and fix it.
-
  *  Add the vendor option to the Gss compiler.
 
  * config.Current() it's silly; use global or something like that.
