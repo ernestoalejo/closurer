@@ -18,11 +18,11 @@ import (
 func Input(r *app.Request) error {
 	name := mux.Vars(r.Req)["name"]
 
-	if err := hooks.PreCompile(); err != nil {
-		return err
-	}
-
 	if name == config.DEPS_NAME {
+		if err := hooks.PreCompile(); err != nil {
+			return err
+		}
+
 		if err := soy.Compile(); err != nil {
 			return err
 		}
@@ -43,7 +43,7 @@ func Input(r *app.Request) error {
 			return app.Error(err)
 		}
 
-		if err := hooks.PreCompile(); err != nil {
+		if err := hooks.PostCompile(); err != nil {
 			return err
 		}
 
@@ -61,11 +61,6 @@ func Input(r *app.Request) error {
 
 			r.W.Header().Set("Content-Type", "text/javascript")
 			io.Copy(r.W, f)
-
-			// Execute the post-compile actions
-			if err := hooks.PostCompile(); err != nil {
-				return err
-			}
 
 			return nil
 		}

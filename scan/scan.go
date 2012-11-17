@@ -6,6 +6,11 @@ import (
 	"strings"
 
 	"github.com/ernestokarim/closurer/app"
+	"github.com/ernestokarim/closurer/config"
+)
+
+var (
+	libraryCache = map[string][]string{}
 )
 
 type visitor struct {
@@ -43,9 +48,23 @@ func (v *visitor) validDir(name string) bool {
 // Scans folder recursively search for files with the ext
 // extension and returns the whole list.
 func Do(folder string, ext string) ([]string, error) {
+	conf := config.Current()
+	library := strings.Contains(folder, conf.Library.Root)
+
+	if library {
+		r, ok := libraryCache[folder]
+		if ok {
+			return r, nil
+		}
+	}
+
 	v := &visitor{[]string{}}
 	if err := v.scan(folder, ext); err != nil {
 		return nil, err
+	}
+
+	if library {
+		libraryCache[folder] = v.results
 	}
 
 	return v.results, nil

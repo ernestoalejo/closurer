@@ -14,6 +14,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var exitServer = make(chan bool)
+
 func main() {
 	flag.Parse()
 
@@ -56,13 +58,20 @@ func serve() {
 	r.Handle("/test/all", app.Handler(test.TestAll))
 	r.Handle("/test/list", app.Handler(test.TestList))
 	r.Handle("/test/{name:.+}", app.Handler(test.Main))
+	r.Handle("/exit", app.Handler(exit))
 
 	log.Printf("Started closurer server on http://localhost%s/\n", config.Port)
-	log.Fatal(http.ListenAndServe(config.Port, nil))
+	go http.ListenAndServe(config.Port, nil)
+	<-exitServer
 }
 
 func home(r *app.Request) error {
 	return r.ExecuteTemplate([]string{"home"}, nil)
+}
+
+func exit(r *app.Request) error {
+	exitServer <- true
+	return nil
 }
 
 func compile(r *app.Request) error {
