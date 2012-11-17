@@ -2,7 +2,7 @@ package scan
 
 import (
 	"io/ioutil"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/ernestokarim/closurer/app"
@@ -12,14 +12,14 @@ type visitor struct {
 	results []string
 }
 
-func (v *visitor) scan(filepath string, ext string) error {
-	ls, err := ioutil.ReadDir(filepath)
+func (v *visitor) scan(file string, ext string) error {
+	ls, err := ioutil.ReadDir(file)
 	if err != nil {
 		return app.Error(err)
 	}
 
 	for _, entry := range ls {
-		fullpath := path.Join(filepath, entry.Name())
+		fullpath := filepath.Join(file, entry.Name())
 
 		if entry.IsDir() {
 			if v.validDir(entry.Name()) {
