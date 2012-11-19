@@ -33,8 +33,11 @@ func NewDepsTree(dest string) (*DepsTree, error) {
 	depstree := &DepsTree{
 		sources:  map[string]*domain.Source{},
 		provides: map[string]*domain.Source{},
-		basePath: path.Join(conf.Library.Root, "closure", "goog", "base.js"),
 		dest:     dest,
+	}
+
+	if conf.Library != nil {
+		depstree.basePath = path.Join(conf.Library.Root, "closure", "goog", "base.js")
 	}
 
 	// Build the deps tree scanning each root directory recursively
@@ -235,10 +238,15 @@ func WriteDeps(f io.Writer, deps []*domain.Source) error {
 func BaseJSPaths() []string {
 	conf := config.Current()
 
-	p := []string{
-		path.Join(conf.Library.Root, "closure", "goog"),
-		conf.Library.Root,
-		conf.Js.Root,
+	p := []string{}
+
+	if conf.Library != nil {
+		p = append(p, path.Join(conf.Library.Root, "closure", "goog"))
+		p = append(p, conf.Library.Root)
+	}
+
+	if conf.Js != nil {
+		p = append(p, conf.Js.Root)
 	}
 
 	if conf.Soy != nil {

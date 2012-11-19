@@ -23,16 +23,18 @@ func GenerateDeps(dest string) ([]*domain.Source, []string, error) {
 	}
 
 	namespaces := []string{}
-	for _, input := range conf.Js.Inputs {
-		if dest != "input" && strings.Contains(input.File, "_test") {
-			continue
-		}
+	if conf.Js != nil {
+		for _, input := range conf.Js.Inputs {
+			if dest != "input" && strings.Contains(input.File, "_test") {
+				continue
+			}
 
-		ns, err := depstree.GetProvides(input.File)
-		if err != nil {
-			return nil, nil, err
+			ns, err := depstree.GetProvides(input.File)
+			if err != nil {
+				return nil, nil, err
+			}
+			namespaces = append(namespaces, ns...)
 		}
-		namespaces = append(namespaces, ns...)
 	}
 
 	if dest == "input" {

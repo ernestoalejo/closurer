@@ -78,7 +78,7 @@ func compile(r *app.Request) error {
 	conf := config.Current()
 	target := conf.Js.CurTarget()
 
-	if target.Mode == "RAW" {
+	if target == nil || target.Mode == "RAW" {
 		return RawOutput(r)
 	}
 
