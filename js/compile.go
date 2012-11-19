@@ -43,6 +43,14 @@ func Compile() error {
 	conf := config.Current()
 	target := conf.Js.CurTarget()
 
+	if conf.Js == nil {
+		return nil
+	}
+
+	if len(conf.Js.Inputs) == 0 {
+		return nil
+	}
+
 	deps, _, err := GenerateDeps("compile")
 	if err != nil {
 		return err

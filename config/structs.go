@@ -27,6 +27,10 @@ type JsNode struct {
 }
 
 func (n *JsNode) CurTarget() *JsTargetNode {
+	if n == nil {
+		return nil
+	}
+
 	for _, t := range n.Targets {
 		if t.Name == SelectedTarget {
 			return t

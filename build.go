@@ -81,6 +81,10 @@ func copyJsFile() error {
 	conf := config.Current()
 	target := conf.Js.CurTarget()
 
+	if conf.Js == nil {
+		return nil
+	}
+
 	srcName := filepath.Join(conf.Build, config.JS_NAME)
 	src, err := os.Open(srcName)
 	if err != nil {

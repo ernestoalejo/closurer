@@ -61,32 +61,71 @@ func Current() *Config {
 
 func (c *Config) validate() error {
 	// Library & compiler paths
-	if c.Js.Root == "" {
-		return app.Errorf("The JS root folder is required")
+	if c.Js != nil {
+		if c.Js.Root == "" {
+			return app.Errorf("The JS root folder is required")
+		}
+
+		// JS targets and inheritation
+		if len(c.Js.Targets) == 0 {
+			return app.Errorf("No target provided for JS code")
+		}
+		for _, t := range c.Js.Targets {
+			if err := t.ApplyInherits(); err != nil {
+				return err
+			}
+		}
+
+		// Check compilation mode and warnings level
+		for _, t := range c.Js.Targets {
+			modes := map[string]bool{
+				"SIMPLE":     true,
+				"ADVANCED":   true,
+				"WHITESPACE": true,
+				"RAW":        true,
+			}
+			if _, ok := modes[t.Mode]; !ok {
+				return app.Errorf("Illegal compilation mode in target %s: %s", t.Name, t.Mode)
+			}
+
+			levels := map[string]bool{
+				"QUIET":   true,
+				"DEFAULT": true,
+				"VERBOSE": true,
+			}
+			if _, ok := levels[t.Level]; !ok {
+				return app.Errorf("Illegal warning level in target %s: %s", t.Name, t.Level)
+			}
+		}
+
+		// Check that the command line target is in the config file
+		found := false
+		for _, name := range TargetList() {
+			for _, t := range c.Js.Targets {
+				if t.Name == name {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return app.Errorf("Target %s not found in the config file", name)
+			}
+		}
+
+		// Validate the compilation checks
+		validChecks(c.Js.Checks.Errors)
+		validChecks(c.Js.Checks.Warnings)
+		validChecks(c.Js.Checks.Offs)
 	}
+
 	if c.Build == "" {
 		return app.Errorf("The build folder is required")
 	}
-	if c.Library.Root == "" {
+	if c.Library != nil && c.Library.Root == "" {
 		return app.Errorf("The Closure Library path is required")
 	}
-	if c.Js.Compiler == "" {
+	if c.Js != nil && c.Js.Compiler == "" {
 		return app.Errorf("The Closure Compiler path is required")
-	}
-
-	// JS targets and inheritation
-	if len(c.Js.Targets) == 0 {
-		return app.Errorf("No target provided for JS code")
-	}
-	for _, t := range c.Js.Targets {
-		if err := t.ApplyInherits(); err != nil {
-			return err
-		}
-	}
-
-	// At least one input file should be provided
-	if len(c.Js.Inputs) == 0 {
-		return app.Errorf("No inputs provided for JS code")
 	}
 
 	if c.Gss != nil {
@@ -106,118 +145,80 @@ func (c *Config) validate() error {
 		}
 
 		// Compare JS targets and GSS targets
-		if len(c.Js.Targets) != len(c.Gss.Targets) {
-			return app.Errorf("Different number of targets provided for GSS & JS")
-		}
-		for i, tjs := range c.Js.Targets {
-			tgss := c.Gss.Targets[i]
-			if tjs.Name != tgss.Name {
-				return app.Errorf("Targets with different name or order: %s != %s",
-					tjs.Name, tgss.Name)
+		if c.Js != nil {
+			if len(c.Js.Targets) != len(c.Gss.Targets) {
+				return app.Errorf("Different number of targets provided for GSS & JS")
 			}
+			for i, tjs := range c.Js.Targets {
+				tgss := c.Gss.Targets[i]
+				if tjs.Name != tgss.Name {
+					return app.Errorf("Targets with different name or order: %s != %s",
+						tjs.Name, tgss.Name)
+				}
 
-			// Rename property of the GSS target
-			if tgss.Rename != "true" && tgss.Rename != "false" && tgss.Rename != "" {
-				return app.Errorf("Illegal renaming policy value")
-			}
+				// Rename property of the GSS target
+				if tgss.Rename != "true" && tgss.Rename != "false" && tgss.Rename != "" {
+					return app.Errorf("Illegal renaming policy value")
+				}
 
-			// Apply the inherits option
-			if err := tgss.ApplyInherits(); err != nil {
-				return err
-			}
+				// Apply the inherits option
+				if err := tgss.ApplyInherits(); err != nil {
+					return err
+				}
 
-			// Check that the GSS defines don't have a value
-			for _, d := range tgss.Defines {
-				if d.Value != "" {
-					return app.Errorf("Define values in GSS should be empty")
+				// Check that the GSS defines don't have a value
+				for _, d := range tgss.Defines {
+					if d.Value != "" {
+						return app.Errorf("Define values in GSS should be empty")
+					}
 				}
 			}
 		}
 	}
 
 	// Soy compiler
-	if c.Soy.Root != "" && c.Soy.Compiler == "" {
+	if c.Soy != nil && c.Soy.Root != "" && c.Soy.Compiler == "" {
 		return app.Errorf("The Closure Templates path is required")
 	}
 
 	// Current targets in build mode
-	for _, t := range TargetList() {
-		SelectTarget(t)
+	if c.Js != nil && c.Gss != nil {
+		for _, t := range TargetList() {
+			SelectTarget(t)
 
-		tjs := c.Js.CurTarget()
-		tgss := c.Gss.CurTarget()
+			tjs := c.Js.CurTarget()
+			tgss := c.Gss.CurTarget()
 
-		if tjs == nil || tgss == nil {
-			return app.Errorf("Target not found in the config: %s", t)
-		}
-
-		if Build && IsTarget(tjs.Name) {
-			if tjs.Output == "" {
-				return app.Errorf("Target to build JS without an output file: %s",
-					tjs.Name)
+			if tjs == nil || tgss == nil {
+				return app.Errorf("Target not found in the config: %s", t)
 			}
-			if tgss != nil && tgss.Output == "" {
-				return app.Errorf("Target to build GSS without an output file: %s",
-					tjs.Name)
-			}
-		}
-	}
 
-	// Check compilation mode and warnings level
-	for _, t := range c.Js.Targets {
-		modes := map[string]bool{
-			"SIMPLE":     true,
-			"ADVANCED":   true,
-			"WHITESPACE": true,
-			"RAW":        true,
-		}
-		if _, ok := modes[t.Mode]; !ok {
-			return app.Errorf("Illegal compilation mode in target %s: %s", t.Name, t.Mode)
-		}
-
-		levels := map[string]bool{
-			"QUIET":   true,
-			"DEFAULT": true,
-			"VERBOSE": true,
-		}
-		if _, ok := levels[t.Level]; !ok {
-			return app.Errorf("Illegal warning level in target %s: %s", t.Name, t.Level)
-		}
-	}
-
-	// Check for at least one input file
-	if len(c.Js.Inputs) == 0 {
-		return app.Errorf("Input files required in target")
-	}
-
-	// Check that the command line target is in the config file
-	found := false
-	for _, name := range TargetList() {
-		for _, t := range c.Js.Targets {
-			if t.Name == name {
-				found = true
-				break
+			if Build && IsTarget(tjs.Name) {
+				if tjs.Output == "" {
+					return app.Errorf("Target to build JS without an output file: %s",
+						tjs.Name)
+				}
+				if tgss != nil && tgss.Output == "" {
+					return app.Errorf("Target to build GSS without an output file: %s",
+						tjs.Name)
+				}
 			}
 		}
-		if !found {
-			return app.Errorf("Target %s not found in the config file", name)
-		}
 	}
-
-	// Validate the compilation checks
-	validChecks(c.Js.Checks.Errors)
-	validChecks(c.Js.Checks.Warnings)
-	validChecks(c.Js.Checks.Offs)
 
 	// Fix the compilers paths
-	c.Js.Compiler = fixPath(c.Js.Compiler)
+	if c.Js != nil {
+		c.Js.Compiler = fixPath(c.Js.Compiler)
+	}
 	if c.Gss != nil {
 		c.Gss.Compiler = fixPath(c.Gss.Compiler)
 	}
 	if c.Soy != nil {
 		c.Soy.Compiler = fixPath(c.Soy.Compiler)
 	}
-	c.Library.Root = fixPath(c.Library.Root)
+	if c.Library != nil {
+		c.Library.Root = fixPath(c.Library.Root)
+	}
 
 	return nil
 }

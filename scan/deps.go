@@ -239,11 +239,13 @@ func BaseJSPaths() []string {
 		path.Join(conf.Library.Root, "closure", "goog"),
 		conf.Library.Root,
 		conf.Js.Root,
-		path.Join(conf.Soy.Compiler, "javascript"),
 	}
 
-	if conf.Soy.Root != "" {
-		p = append(p, path.Join(conf.Build, "templates"))
+	if conf.Soy != nil {
+		path.Join(conf.Soy.Compiler, "javascript")
+		if conf.Soy.Root != "" {
+			p = append(p, path.Join(conf.Build, "templates"))
+		}
 	}
 
 	return p

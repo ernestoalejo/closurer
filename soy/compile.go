@@ -17,7 +17,7 @@ import (
 func Compile() error {
 	conf := config.Current()
 
-	if conf.Soy.Root == "" {
+	if conf.Soy == nil || conf.Soy.Root == "" {
 		return nil
 	}
 
