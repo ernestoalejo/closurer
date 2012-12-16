@@ -66,6 +66,17 @@ func (c *Config) validate() error {
 			return app.Errorf("The JS root folder is required")
 		}
 
+		if c.Js.Language != "" {
+			modes := map[string]bool{
+				"ECMASCRIPT3":        true,
+				"ECMASCRIPT5":        true,
+				"ECMASCRIPT5_STRICT": true,
+			}
+			if _, ok := modes[c.Js.Language]; !ok {
+				return app.Errorf("language mode not allowed: %s", c.Js.Language)
+			}
+		}
+
 		// JS targets and inheritation
 		if len(c.Js.Targets) == 0 {
 			return app.Errorf("No target provided for JS code")

@@ -118,6 +118,10 @@ func Compile() error {
 		args = append(args, "--externs", extern.File)
 	}
 
+	if conf.Js.Language != "" {
+		args = append(args, "--language_in", conf.Js.Language)
+	}
+
 	log.Println("Compiling JS:", target.Name)
 
 	// Prepare the command
