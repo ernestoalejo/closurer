@@ -113,9 +113,11 @@ func (c *Config) validate() error {
 		}
 
 		// Validate the compilation checks
-		validChecks(c.Js.Checks.Errors)
-		validChecks(c.Js.Checks.Warnings)
-		validChecks(c.Js.Checks.Offs)
+		if c.Js.Checks != nil {
+			validChecks(c.Js.Checks.Errors)
+			validChecks(c.Js.Checks.Warnings)
+			validChecks(c.Js.Checks.Offs)
+		}
 	}
 
 	if c.Build == "" {
