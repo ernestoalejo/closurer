@@ -122,6 +122,10 @@ func Compile() error {
 		args = append(args, "--language_in", conf.Js.Language)
 	}
 
+	if conf.Js.Formatting != "" {
+		args = append(args, "--formatting", conf.Js.Formatting)
+	}
+
 	log.Println("Compiling JS:", target.Name)
 
 	// Prepare the command

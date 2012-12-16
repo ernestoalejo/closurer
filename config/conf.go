@@ -66,6 +66,10 @@ func (c *Config) validate() error {
 			return app.Errorf("The JS root folder is required")
 		}
 
+		if c.Js.Formatting != "" && c.Js.Formatting != "PRETTY_PRINT" {
+			return app.Errorf("formatting mode not allowed: %s", c.Js.Formatting)
+		}
+
 		if c.Js.Language != "" {
 			modes := map[string]bool{
 				"ECMASCRIPT3":        true,
