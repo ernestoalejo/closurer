@@ -18,10 +18,11 @@ type Config struct {
 // ==================================================================
 
 type JsNode struct {
-	Root       string `xml:"root,attr"`
-	Compiler   string `xml:"compiler,attr"`
-	Language   string `xml:"language,attr"`
-	Formatting string `xml:"formatting,attr"`
+	Root        string `xml:"root,attr"`
+	Compiler    string `xml:"compiler,attr"`
+	Language    string `xml:"language,attr"`
+	Formatting  string `xml:"formatting,attr"`
+	SideEffects string `xml:"side-effects,attr"`
 
 	Checks  *ChecksNode     `xml:"checks"`
 	Targets []*JsTargetNode `xml:"target"`

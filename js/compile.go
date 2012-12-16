@@ -71,8 +71,11 @@ func Compile() error {
 	args = append(args,
 		"--js", filepath.Join(conf.Build, config.DEPS_NAME),
 		"--js", filepath.Join(conf.Build, config.RENAMING_MAP_NAME),
-		"--output_wrapper", `(function(){%output%})();`,
 	)
+
+	if conf.Js.SideEffects == "" {
+		args = append(args, "--output_wrapper", `(function(){%output%})();`)
+	}
 
 	for _, dep := range deps {
 		if !strings.Contains(dep.Filename, "_test.js") {
@@ -124,6 +127,7 @@ func Compile() error {
 
 	if conf.Js.Formatting != "" {
 		args = append(args, "--formatting", conf.Js.Formatting)
+		args = append(args, "--debug", "true")
 	}
 
 	log.Println("Compiling JS:", target.Name)

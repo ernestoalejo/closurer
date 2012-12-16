@@ -70,6 +70,10 @@ func (c *Config) validate() error {
 			return app.Errorf("formatting mode not allowed: %s", c.Js.Formatting)
 		}
 
+		if c.Js.SideEffects != "" && c.Js.SideEffects != "true" {
+			return app.Errorf("boolean value not allowed: %s", c.Js.SideEffects)
+		}
+
 		if c.Js.Language != "" {
 			modes := map[string]bool{
 				"ECMASCRIPT3":        true,
