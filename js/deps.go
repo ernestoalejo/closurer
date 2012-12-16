@@ -37,6 +37,10 @@ func GenerateDeps(dest string) ([]*domain.Source, []string, error) {
 		}
 	}
 
+	if len(namespaces) == 0 {
+		return nil, nil, app.Errorf("no namespaces provided in the input files")
+	}
+
 	if dest == "input" {
 		// Add the necesary namespaces for the multi-test runner
 		namespaces = append(namespaces, "goog.style")

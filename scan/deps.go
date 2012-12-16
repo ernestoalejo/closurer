@@ -93,6 +93,17 @@ func (tree *DepsTree) AddSource(filename string) error {
 		}
 	}
 
+	// Files without the goog.provide directive
+	// use a trick to provide its own name. It fullfills the need
+	// to compile things apart from the Closure style (Angular, ...).
+	if len(src.Provides) == 0 {
+		if len(src.Requires) != 0 {
+			return app.Errorf("requires files without providing anything: %s", filename)
+		}
+
+		src.Provides = []string{filename}
+	}
+
 	// Add all the provides to the map
 	for _, provide := range src.Provides {
 		tree.provides[provide] = src
