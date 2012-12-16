@@ -90,18 +90,6 @@ func Compile() error {
 		}
 	}
 
-	if conf.Js.Checks != nil {
-		for _, check := range conf.Js.Checks.Errors {
-			args = append(args, "--jscomp_error", check.Name)
-		}
-		for _, check := range conf.Js.Checks.Warnings {
-			args = append(args, "--jscomp_warning", check.Name)
-		}
-		for _, check := range conf.Js.Checks.Offs {
-			args = append(args, "--jscomp_off", check.Name)
-		}
-	}
-
 	if target.Mode == "ADVANCED" {
 		args = append(args, "--compilation_level", "ADVANCED_OPTIMIZATIONS")
 	} else if target.Mode == "SIMPLE" {
@@ -113,6 +101,18 @@ func Compile() error {
 	}
 
 	args = append(args, "--warning_level", target.Level)
+
+	if conf.Js.Checks != nil {
+		for _, check := range conf.Js.Checks.Errors {
+			args = append(args, "--jscomp_error", check.Name)
+		}
+		for _, check := range conf.Js.Checks.Warnings {
+			args = append(args, "--jscomp_warning", check.Name)
+		}
+		for _, check := range conf.Js.Checks.Offs {
+			args = append(args, "--jscomp_off", check.Name)
+		}
+	}
 
 	for _, extern := range conf.Js.Externs {
 		args = append(args, "--externs", extern.File)
