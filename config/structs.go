@@ -7,11 +7,12 @@ import (
 type Config struct {
 	Build string `xml:"build,attr"`
 
-	Map     *MapNode     `xml:"map"`
-	Js      *JsNode      `xml:"js"`
-	Gss     *GssNode     `xml:"gss"`
-	Soy     *SoyNode     `xml:"soy"`
-	Library *LibraryNode `xml:"library"`
+	Ignores []*IgnoreNode `xml:"ignore"`
+	Map     *MapNode      `xml:"map"`
+	Js      *JsNode       `xml:"js"`
+	Gss     *GssNode      `xml:"gss"`
+	Soy     *SoyNode      `xml:"soy"`
+	Library *LibraryNode  `xml:"library"`
 }
 
 // ==================================================================
@@ -37,6 +38,12 @@ func (n *JsNode) CurTarget() *JsTargetNode {
 		}
 	}
 	return nil
+}
+
+// ==================================================================
+
+type IgnoreNode struct {
+	Path string `xml:"path,attr"`
 }
 
 // ==================================================================

@@ -27,7 +27,7 @@ func (v *visitor) scan(file string, ext string) error {
 		fullpath := filepath.Join(file, entry.Name())
 
 		if entry.IsDir() {
-			if v.validDir(entry.Name()) {
+			if v.validDir(fullpath, entry.Name()) {
 				if err := v.scan(fullpath, ext); err != nil {
 					return err
 				}
@@ -41,7 +41,17 @@ func (v *visitor) scan(file string, ext string) error {
 }
 
 // Returns true if the directory name is worth scanning.
-func (v *visitor) validDir(name string) bool {
+// It checks too the list of ignored files.
+func (v *visitor) validDir(path, name string) bool {
+	conf := config.Current()
+	if conf.Ignores != nil && path != "" {
+		for _, ignore := range conf.Ignores {
+			if strings.HasPrefix(path, ignore.Path) {
+				return false
+			}
+		}
+	}
+
 	return name != ".svn" && name != ".hg" && name != ".git"
 }
 
@@ -49,7 +59,11 @@ func (v *visitor) validDir(name string) bool {
 // extension and returns the whole list.
 func Do(folder string, ext string) ([]string, error) {
 	conf := config.Current()
-	library := strings.Contains(folder, conf.Library.Root)
+
+	var library bool
+	if conf.Library != nil {
+		library = strings.Contains(folder, conf.Library.Root)
+	}
 
 	if library {
 		r, ok := libraryCache[folder]

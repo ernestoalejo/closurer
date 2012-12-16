@@ -59,12 +59,20 @@ func Compile() error {
 	args := []string{
 		"-jar", path.Join(conf.Js.Compiler, "build", "compiler.jar"),
 		"--js_output_file", path.Join(conf.Build, config.JS_NAME),
-		"--js", path.Join(conf.Library.Root, "closure", "goog", "base.js"),
-		"--js", path.Join(conf.Library.Root, "closure", "goog", "deps.js"),
+	}
+
+	if conf.Library != nil {
+		args = append(args,
+			"--js", path.Join(conf.Library.Root, "closure", "goog", "base.js"),
+			"--js", path.Join(conf.Library.Root, "closure", "goog", "deps.js"),
+		)
+	}
+
+	args = append(args,
 		"--js", filepath.Join(conf.Build, config.DEPS_NAME),
 		"--js", filepath.Join(conf.Build, config.RENAMING_MAP_NAME),
 		"--output_wrapper", `(function(){%output%})();`,
-	}
+	)
 
 	for _, dep := range deps {
 		if !strings.Contains(dep.Filename, "_test.js") {

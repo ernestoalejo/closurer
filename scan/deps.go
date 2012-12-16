@@ -83,7 +83,7 @@ func (tree *DepsTree) AddSource(filename string) error {
 	// Scan all the previous sources searching for repeated
 	// namespaces. We ignore closure library files because they're
 	// supposed to be correct and tested by other methods
-	if !strings.HasPrefix(filename, conf.Library.Root) {
+	if conf.Library == nil || !strings.HasPrefix(filename, conf.Library.Root) {
 		for k, source := range tree.sources {
 			for _, provide := range source.Provides {
 				if In(src.Provides, provide) {
