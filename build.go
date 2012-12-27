@@ -92,7 +92,7 @@ func copyJsFile() error {
 	}
 	defer src.Close()
 
-	filename := target.Output
+	filename := filepath.Join(conf.Js.Root, target.Output)
 	if strings.Contains(filename, "{sha1}") {
 		sha1, err := calcFileSha1(srcName)
 		if err != nil {

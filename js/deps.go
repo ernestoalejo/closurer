@@ -29,7 +29,8 @@ func GenerateDeps(dest string) ([]*domain.Source, []string, error) {
 				continue
 			}
 
-			ns, err := depstree.GetProvides(input.File)
+			file := filepath.Join(conf.Js.Root, input.File)
+			ns, err := depstree.GetProvides(file)
 			if err != nil {
 				return nil, nil, err
 			}
