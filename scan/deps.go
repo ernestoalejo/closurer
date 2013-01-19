@@ -97,10 +97,6 @@ func (tree *DepsTree) AddSource(filename string) error {
 	// use a trick to provide its own name. It fullfills the need
 	// to compile things apart from the Closure style (Angular, ...).
 	if len(src.Provides) == 0 {
-		if len(src.Requires) != 0 {
-			return app.Errorf("requires files without providing anything: %s", filename)
-		}
-
 		src.Provides = []string{filename}
 	}
 
