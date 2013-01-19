@@ -137,6 +137,15 @@ func (c *Config) validate() error {
 			validChecks(c.Js.Checks.Warnings)
 			validChecks(c.Js.Checks.Offs)
 		}
+
+		// Check the prepend files
+		if c.Js.Prepends != nil {
+			for _, prepend := range c.Js.Prepends {
+				if prepend.File == "" {
+					return app.Errorf("prepend file empty")
+				}
+			}
+		}
 	}
 
 	if c.Build == "" {

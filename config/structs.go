@@ -24,10 +24,11 @@ type JsNode struct {
 	Formatting  string `xml:"formatting,attr"`
 	SideEffects string `xml:"side-effects,attr"`
 
-	Checks  *ChecksNode     `xml:"checks"`
-	Targets []*JsTargetNode `xml:"target"`
-	Inputs  []*InputNode    `xml:"input"`
-	Externs []*ExternNode   `xml:"extern"`
+	Checks   *ChecksNode     `xml:"checks"`
+	Targets  []*JsTargetNode `xml:"target"`
+	Inputs   []*InputNode    `xml:"input"`
+	Externs  []*ExternNode   `xml:"extern"`
+	Prepends []*PrependNode  `xml:"prepend"`
 }
 
 func (n *JsNode) CurTarget() *JsTargetNode {
@@ -251,4 +252,10 @@ type LibraryNode struct {
 
 type FuncNode struct {
 	Name string `xml:"name,attr"`
+}
+
+// ==================================================================
+
+type PrependNode struct {
+	File string `xml:"file,attr"`
 }

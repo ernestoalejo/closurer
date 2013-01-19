@@ -47,12 +47,6 @@ func copyCssFile() error {
 	}
 
 	srcName := filepath.Join(conf.Build, config.CSS_NAME)
-	src, err := os.Open(srcName)
-	if err != nil {
-		return app.Error(err)
-	}
-	defer src.Close()
-
 	filename := target.Output
 	if strings.Contains(filename, "{sha1}") {
 		sha1, err := calcFileSha1(srcName)
@@ -64,14 +58,8 @@ func copyCssFile() error {
 
 	mapping[config.SelectedTarget+"-css"] = filename
 
-	dest, err := os.Create(filename)
-	if err != nil {
-		return app.Error(err)
-	}
-	defer dest.Close()
-
-	if _, err = io.Copy(dest, src); err != nil {
-		return app.Error(err)
+	if err := copyFile(srcName, filename); err != nil {
+		return err
 	}
 
 	return nil
@@ -86,11 +74,6 @@ func copyJsFile() error {
 	}
 
 	srcName := filepath.Join(conf.Build, config.JS_NAME)
-	src, err := os.Open(srcName)
-	if err != nil {
-		return app.Error(err)
-	}
-	defer src.Close()
 
 	filename := filepath.Join(conf.Js.Root, target.Output)
 	if strings.Contains(filename, "{sha1}") {
@@ -103,14 +86,14 @@ func copyJsFile() error {
 
 	mapping[config.SelectedTarget+"-js"] = filename
 
-	dest, err := os.Create(filename)
-	if err != nil {
-		return app.Error(err)
+	files := []string{}
+	for _, n := range conf.Js.Prepends {
+		files = append(files, filepath.Join(conf.Js.Root, n.File))
 	}
-	defer dest.Close()
+	files = append(files, srcName)
 
-	if _, err = io.Copy(dest, src); err != nil {
-		return app.Error(err)
+	if err := copyFiles(files, filename); err != nil {
+		return err
 	}
 
 	return nil
@@ -140,6 +123,53 @@ func outputMap() error {
 
 	fmt.Fprintf(f, "var mapping = ")
 	if err := json.NewEncoder(f).Encode(&mapping); err != nil {
+		return app.Error(err)
+	}
+
+	return nil
+}
+
+func copyFile(from, to string) error {
+	src, err := os.Open(from)
+	if err != nil {
+		return app.Error(err)
+	}
+	defer src.Close()
+
+	dest, err := os.Create(to)
+	if err != nil {
+		return app.Error(err)
+	}
+	defer dest.Close()
+
+	if _, err = io.Copy(dest, src); err != nil {
+		return app.Error(err)
+	}
+
+	return nil
+}
+
+func copyFiles(from []string, to string) error {
+	srcs := []io.Reader{}
+	for _, f := range from {
+		src, err := os.Open(f)
+		if err != nil {
+			return app.Error(err)
+		}
+		defer src.Close()
+
+		srcs = append(srcs, src)
+	}
+
+	src := io.MultiReader(srcs...)
+
+	dest, err := os.Create(to)
+	if err != nil {
+		return app.Error(err)
+	}
+	defer dest.Close()
+
+	if _, err = io.Copy(dest, src); err != nil {
 		return app.Error(err)
 	}
 
